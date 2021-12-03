@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+                        <!-- Sequences for Inquiry -->
+        <record id="Inquiry_sale_order_ext" model="ir.sequence">
+            <field name="name">Inquiry</field>
+            <field name="code">cyb.inquiry</field>
+            <field name="prefix">Inq</field>
+            <field name="padding">4</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <!-- Sequences for Quotation -->
+        <record id="quotation_sale_order_ext" model="ir.sequence">
+            <field name="name">Quotation</field>
+            <field name="code">cyb.quotation</field>
+            <field name="prefix">Qu</field>
+            <field name="padding">4</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+
+
+    </data>
+</odoo>

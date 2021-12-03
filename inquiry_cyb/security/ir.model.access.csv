@@ -1,0 +1,16 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_cyb_inquiry_access,cyb.inquiry,model_cyb_inquiry,base.group_user,1,1,1,1,
+access_cyb_product_access,cyb.product.inquiry,model_cyb_product_inquiry,base.group_user,1,1,1,1,
+access_inquiry_invoice_access,create.saleorder,model_create_saleorder,base.group_user,1,1,1,1,
+access_quotation_invoice_access,getsale.orderdata,model_getsale_orderdata,base.group_user,1,1,1,1,
+access_create_quotation_access,cyb.quotation,model_cyb_quotation,base.group_user,1,1,1,1,
+access_create_quotation_friend_access,create.quotation.friend,model_create_quotation_friend,base.group_user,1,1,1,1,
+access_create_quotation_wizard_access,quotation.wizard,model_quotation_wizard,base.group_user,1,1,1,1,
+access_create_quotation_wizard_line_access,getsale.quotation,model_getsale_quotation,base.group_user,1,1,1,1,
+
+
+
+
+
+
+

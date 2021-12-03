@@ -1,0 +1,68 @@
+<odoo>
+    <record id="quotation_so_wizard_form" model="ir.ui.view">
+        <field name="name">quotation.so.wizard</field>
+        <field name="model">quotation.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Create Invoice">
+                <p class="oe_grey"></p>
+                <group>
+                    <group>
+                        <field name="so_id" readonly="1"/>
+                        <field name="partner_id"/>
+                        <field name="quotation_reference"/>
+                        <field name="crm_lead_id"/>
+                    </group>
+                    <group>
+                        <field name="quotation_Expiration"/>
+                    </group>
+                </group>
+
+                <group>
+                    <field name="new_order_line_ids" nolabel="1">
+                        <tree editable="bottom" create="0">
+                            <field name="product_id" force_save="1"/>
+                            <field name="name" force_save="1"/>
+                            <field name="product_uom_qty"/>
+<!--                            <field name="product_uom" groups="uom.group_uom" class="oe_inline"/>-->
+                            <field name="qty_delivered"/>
+                            <field name="qty_invoiced"/>
+                            <field name="price_unit"/>
+                            <field name="tax_id" widget="many2many_tags" options="{'no_create': True}" optional="show"/>
+<!--                            <field name="remarks"/>-->
+                            <field name="price_subtotal"/>
+                            <field name="price_total"/>
+                            <!--                            <control>-->
+                            <!--                                <create name="add_section_control" string="Add a section"-->
+                            <!--                                        context="{'default_display_type': 'line_section'}"/>-->
+                            <!--                            </control>-->
+                            <!--                            <field name="display_type" invisible="1"/>-->
+
+
+                            <!--                            <field name="discount"/>-->
+                        </tree>
+                    </field>
+                </group>
+
+                <group>
+<!--                    <field name="notes"/>-->
+                </group>
+
+                <footer>
+                    <button name="action_create_quotation_order" string="Create Sale Order" type="object"
+                            class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="inquiry_invoice_wizard" model="ir.actions.act_window">
+        <field name="name">Create Sale Order</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">quotation.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="quotation_so_wizard_form"/>
+        <field name="target">new</field>
+    </record>
+
+</odoo>
