@@ -13,37 +13,45 @@ class InquiryInvoice(models.TransientModel):
     _name = 'quotation.wizard'
 
     new_order_line_ids = fields.One2many('getsale.quotation', 'new_order_line_id', string="Order Line")
-    partner_id = fields.Many2one('res.partner', string='Customer',readonly=True,store=True)
+    partner_id = fields.Many2one('res.partner', string='Customer', readonly=True, store=True)
     date_order = fields.Datetime(string='Order Date',  readonly=True, index=True,
                                  states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}, copy=False,
                                  default=fields.Datetime.now,
                                  help="Creation date of draft/sent orders,\nConfirmation date of confirmed orders.")
     quotation_Expiration = fields.Date(string="Expiration", related="so_id.quotation_Expiration")
-    so_id = fields.Many2one('cyb.quotation', string="Quotation ID", default="")
+    so_id = fields.Many2one('cyb.quotation', string="Quotation ID",)
     crm_lead_id = fields.Many2one('crm.lead', string="CRM Lead", related="so_id.crm_lead_id")
     quotation_reference = fields.Char(string="Reference", related="so_id.quotation_reference")
+    quotation_sale_many_ids = fields.Many2many('cyb.quotation', 'quotation__many_list_rel', string="Quotation ID", store=True)
+
 
     @api.model
     def default_get(self, default_fields):
         res = super(InquiryInvoice, self).default_get(default_fields)
         data = self.env['cyb.quotation'].browse(self._context.get('active_ids', []))
         update = []
-        for record in data.order_line:
-            if record.product_id:
-                update.append((0, 0, {
-                    'product_id': record.product_id.id,
-                    # 'product_uom': record.product_uom.id,
-                    'order_id': record.order_id.id,
-                    'name': record.name,
-                    'product_uom_qty': record.product_uom_qty,
-                    'price_unit': record.price_unit,
-                    'price_subtotal': record.price_subtotal,
-                    'price_total': record.price_total,
-                    'qty_delivered': record.qty_delivered,
-                    'qty_invoiced': record.qty_invoiced,
-                    'tax_id': record.tax_id.ids,
-                }))
-        res.update({'new_order_line_ids': update, 'so_id': self._context.get('active_id'),'partner_id':data.partner_id[0].id})
+        quotation_ids = []
+        for rec in data:
+            quotation_ids.append(rec.id)
+            for record in rec.order_line:
+                if record.product_id:
+                    update.append((0, 0, {
+                        'product_id': record.product_id.id,
+                        # 'product_uom': record.product_uom.id,
+                        'order_id': record.order_id.id,
+                        'name': record.name,
+                        'product_uom_qty': record.product_uom_qty,
+                        'price_unit': record.price_unit,
+                        'price_subtotal': record.price_subtotal,
+                        'price_total': record.price_total,
+                        'qty_delivered': record.qty_delivered,
+                        'qty_invoiced': record.qty_invoiced,
+                        'tax_id': record.tax_id.ids,
+                    }))
+        res.update({'new_order_line_ids': update,
+                    'quotation_sale_many_ids': quotation_ids,
+                    'so_id': self._context.get('active_id'),
+                    'partner_id': data.partner_id[0].id})
         return res
 
     def action_create_quotation_order(self):
@@ -73,10 +81,16 @@ class InquiryInvoice(models.TransientModel):
             # 'notes': self.notes,
             # 'so_id': self.so_id.id,
             'order_line': value,
+            'quotation_sale_many_ids': self.quotation_sale_many_ids.ids
+
             # 'state': 'draft',
         }
         so = self.env['sale.order'].create(sale_order)
-        so.state='sale'
+        so.state = 'sale'
+        for i in self.quotation_sale_many_ids:
+            a = i.sale_quotation_ids.ids
+            a.append(so.id)
+            i.update({'sale_quotation_ids': a})
         return {
             "type": "ir.actions.act_window",
             "res_model": "sale.order",

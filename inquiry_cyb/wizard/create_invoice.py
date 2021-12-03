@@ -21,10 +21,10 @@ class createsaleorder(models.TransientModel):
                                  default=fields.Datetime.now,
                                  help="Creation date of draft/sent orders,\nConfirmation date of confirmed orders.")
     so_id = fields.Many2one('cyb.inquiry', string="Inquiry ID", default="", store=True)
+    inquirymany_id = fields.Many2many('cyb.inquiry', 'inquiry_list_rel', string="Inquiry ID", default="", store=True)
     crm_lead_id = fields.Many2one('crm.lead', string="CRM Lead", related="so_id.crm_lead_id", store=True)
     date_inquiry = fields.Datetime(string="Inquiry Date", related="so_id.date_inquiry", store=True)
     ref_id = fields.Char(string="Reference", related="so_id.ref_id", store=True)
-    # date_inquiry = fields.Datetime(string="Inquiry Date", related="so_id.date_inquiry")
     inquiry_type = fields.Selection([
         ('STOCKIEST', 'STOCKIEST'),
         ('INDENTING', 'INDENTING')
@@ -35,12 +35,16 @@ class createsaleorder(models.TransientModel):
     def default_get(self, default_fields):
         res = super(createsaleorder, self).default_get(default_fields)
         data = self.env['cyb.inquiry'].browse(self._context.get('active_ids', []))
+        # customers = data.mapped('partner_id')
+        # if customers.__len__()>0:
+        #     raise ValidationError('You can not create quotation of multiple inquiries if the customer is not same.')
         update = []
+        inquiry_ids = []
         for rec in data:
+            inquiry_ids.append(rec.id)
             for record in rec.order_line:
                 if record.product_id:
                     update.append((0, 0, {
-                        # 'display_type': False,
                         'product_id': record.product_id.id,
                         'product_uom': record.product_uom.id,
                         'order_id': record.order_id.id,
@@ -53,9 +57,11 @@ class createsaleorder(models.TransientModel):
                         'qty_invoiced': record.qty_invoiced,
                         'remarks': record.remarks,
                         'tax_id': record.tax_id.ids,
-                        # 'discount': record.discount,
                     }))
-        res.update({'new_order_line_ids': update, 'partner_id': data.partner_id[0].id, 'so_id': self._context.get('active_id')})
+        res.update({'new_order_line_ids': update,
+                    'partner_id': data.partner_id[0].id,
+                    'inquirymany_id': inquiry_ids,
+                    'so_id': self._context.get('active_id')})
         return res
 
     def action_create_sale_order(self):
@@ -87,8 +93,13 @@ class createsaleorder(models.TransientModel):
             # 'so_id': self.so_id.id,
             'order_line': value,
             'state': 'draft',
+            'inquirymany_id': self.inquirymany_id.ids
         }
         quotation = self.env['cyb.quotation'].create(sale_order)
+        for i in self.inquirymany_id:
+            a = i.quotation_many_ids.ids
+            a.append(quotation.id)
+            i.update({'quotation_many_ids': a})
         return {
             "type": "ir.actions.act_window",
             "res_model": "cyb.quotation",

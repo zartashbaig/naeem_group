@@ -1,6 +1,22 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
 
+    <!-- SALE ORDER INHERITED VIEW    -->
+
+    <record model="ir.ui.view" id="sale_order_template_form_view_inherit">
+        <field name="name">sale.order.form.inherit</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook/page[@name='order_lines']" position="after">
+                <page string="Quotation Lines">
+                    <field name="quotation_sale_many_ids"/>
+
+                </page>
+            </xpath>
+        </field>
+    </record>
+
     <record id="cyb_quotation_form" model="ir.ui.view">
         <field name="name">cyb.quotation.form</field>
         <field name="model">cyb.quotation</field>
@@ -64,17 +80,43 @@
                                     <field name="price_total"/>
                                 </tree>
                             </field>
-                        </page>
-                        <page string="Inquiry Details">
-                            <group>
-                                <group>
-                                    <field name="ref_id"/>
-                                    <field name="inquiry_type"/>
-                                    <field name="notes"/>
+                            <group name="note_group" col="6" class="mt-2 mt-md-0">
+                                <group colspan="4">
+                                    <field name="notes" class="oe_inline"
+                                           placeholder="Define your terms and conditions ..."/>
                                 </group>
+                                <group class="oe_subtotal_footer oe_right" colspan="2" name="sale_total">
+                                    <field name="amount_untaxed" widget="monetary"
+                                           options="{'currency_field': 'currency_id'}"/>
+                                    <field name="amount_tax" widget="monetary"
+                                           options="{'currency_field': 'currency_id'}"/>
+                                    <div class="oe_subtotal_footer_separator oe_inline o_td_label">
+                                        <label for="amount_total"/>
+                                    </div>
+                                    <field name="amount_total" nolabel="1" class="oe_subtotal_footer_separator"
+                                           widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                </group>
+                                <div class="oe_clear"/>
                             </group>
 
+                        </page>
 
+                        <!--                        <page string="Inquiry Details">-->
+                        <!--                            <group>-->
+                        <!--                                <group>-->
+                        <!--                                    <field name="ref_id"/>-->
+                        <!--                                    <field name="inquiry_type"/>-->
+                        <!--                                    <field name="notes"/>-->
+                        <!--                                </group>-->
+                        <!--                            </group>-->
+                        <!--                        </page>-->
+
+                        <page string="Inquiries">
+                            <field name="inquirymany_id"/>
+                        </page>
+
+                        <page string="Sales">
+                            <field name="sale_quotation_ids"/>
                         </page>
 
                         <page string="other info">
@@ -92,23 +134,7 @@
                         <!--                        <page string="customer signature">-->
                         <!--                        </page>-->
                     </notebook>
-                    <group name="note_group" col="6" class="mt-2 mt-md-0">
-                        <group colspan="4">
-                            <field name="notes" class="oe_inline"
-                                   placeholder="Define your terms and conditions ..."/>
-                        </group>
-                        <group class="oe_subtotal_footer oe_right" colspan="2" name="sale_total">
-                            <field name="amount_untaxed" widget="monetary"
-                                   options="{'currency_field': 'currency_id'}"/>
-                            <field name="amount_tax" widget="monetary" options="{'currency_field': 'currency_id'}"/>
-                            <div class="oe_subtotal_footer_separator oe_inline o_td_label">
-                                <label for="amount_total"/>
-                            </div>
-                            <field name="amount_total" nolabel="1" class="oe_subtotal_footer_separator"
-                                   widget="monetary" options="{'currency_field': 'currency_id'}"/>
-                        </group>
-                        <div class="oe_clear"/>
-                    </group>
+
                 </sheet>
                 <div class="oe_chatter">
                     <field name="message_follower_ids"/>
@@ -161,8 +187,8 @@
 
     </record>
 
-     <menuitem id="sale.menu_sale_quotations"
-                action="sale.action_quotations_with_onboarding"
-                parent="sale.menu_sale_config"
-                sequence="1" groups="sales_team.group_sale_salesman"/>
+    <menuitem id="sale.menu_sale_quotations"
+              action="sale.action_quotations_with_onboarding"
+              parent="sale.menu_sale_config"
+              sequence="1" groups="sales_team.group_sale_salesman"/>
 </odoo>

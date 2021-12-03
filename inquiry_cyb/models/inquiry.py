@@ -12,6 +12,10 @@ from odoo.osv import expression
 from odoo.tools import float_is_zero, float_compare
 
 
+
+
+
+
 class CybInquiry(models.Model):
     _name = 'cyb.inquiry'
     _inherit = ['portal.mixin', 'mail.thread', 'mail.activity.mixin', 'utm.mixin']
@@ -52,6 +56,8 @@ class CybInquiry(models.Model):
         domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]", tracking=1,
         help="If you change the pricelist, only newly added lines will be affected.")
     currency_id = fields.Many2one(related='pricelist_id.currency_id', depends=["pricelist_id"], store=True, readonly=False)
+    quotation_many_ids = fields.Many2many('cyb.quotation', 'quotation_list_rel', string="Inquiry ID", default="", store=True)
+
 
 
     state = fields.Selection(
@@ -127,7 +133,6 @@ class CybSpecialist(models.Model):
     _description = 'product inquiry information'
 
     name = fields.Text(string="Description", compute='_compute_product_description')
-    # name = fields.Text(string='Description')
     product_id = fields.Many2one('product.product', string='Product')
     product_uom_qty = fields.Float(string='Quantity', digits='Product Unit of Measure', required=True, default=1.0)
     product_uom = fields.Many2one('uom.uom', string='Product Unit of Measure')

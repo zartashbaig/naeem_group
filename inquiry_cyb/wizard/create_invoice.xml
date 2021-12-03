@@ -12,7 +12,8 @@
                 <p class="oe_grey"></p>
                 <group>
                     <group>
-                        <field name="so_id" readonly="1"/>
+                        <field name="so_id" invisible="1"/>
+                        <field name="inquirymany_id" widget="many2many_tags"/>
                         <field name="partner_id"/>
                         <field name="ref_id"/>
                         <field name="crm_lead_id"/>

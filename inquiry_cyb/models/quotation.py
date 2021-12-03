@@ -9,6 +9,12 @@ _logger = logging.getLogger(__name__)
 from odoo import api, fields, models, _
 
 
+class SaleOrderExt(models.Model):
+    _inherit = "sale.order"
+
+    quotation_sale_many_ids = fields.Many2many('cyb.quotation', 'cyb_quotation_rel', string='Quotation Lines')
+
+
 class CybQuotation(models.Model):
     _name = 'cyb.quotation'
     _inherit = ['portal.mixin', 'mail.thread', 'mail.activity.mixin', 'utm.mixin']
@@ -33,7 +39,6 @@ class CybQuotation(models.Model):
                                  default=fields.Datetime.now,
                                  help="Creation date of draft/sent orders,\nConfirmation date of confirmed orders.")
     crm_lead_id = fields.Many2one('crm.lead', string="CRM Lead")
-    # so_id = fields.Many2one('cyb.inquiry', string="Inquiry No", default="")
     inquiry_type = fields.Selection([
         ('STOCKIEST', 'STOCKIEST'),
         ('INDENTING', 'INDENTING')
@@ -51,10 +56,9 @@ class CybQuotation(models.Model):
         [('draft', 'Draft'),
          ('confirm', 'Confirmed'),
          ('Cancelled', 'Cancelled')], default='draft', string="Status")
-    # currency_id = fields.Many2one('res.currency', string="Currency Name")
     notes_qut = fields.Text('Remarks')
-    # new_quotation_line_ids = fields.One2many('cyb.inquiry', 'new_quotation_line_id', string="Inquiry Line")
-
+    inquirymany_id = fields.Many2many('cyb.inquiry','inquiry_rel', string='Inquiry List')
+    sale_quotation_ids = fields.Many2many('sale.order', string='Sale List')
 
     def action_quotation_cancel(self):
         self.state = 'Cancelled'
@@ -122,6 +126,7 @@ class CybQuotation(models.Model):
                         'tax_id': record.tax_id.ids,
                         # 'discount': record.discount,
                     }))
+
         # Force the values of the move line in the context to avoid issues
         ctx = dict(self.env.context)
         ctx.pop('active_id', None)
@@ -129,6 +134,8 @@ class CybQuotation(models.Model):
         ctx['active_model'] = 'getsale.quotation'
         action['context'] = ctx
         return action
+
+
 class QuotationFriends(models.Model):
     _name = 'create.quotation.friend'
     _description = 'quotation'
