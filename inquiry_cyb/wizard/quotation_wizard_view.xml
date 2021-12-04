@@ -7,7 +7,8 @@
                 <p class="oe_grey"></p>
                 <group>
                     <group>
-                        <field name="so_id" readonly="1"/>
+                        <field name="quotation_sale_many_ids" widget="many2many_tags"/>
+                        <field name="so_id" readonly="1" invisible="1"/>
                         <field name="partner_id"/>
                         <field name="quotation_reference"/>
                         <field name="crm_lead_id"/>

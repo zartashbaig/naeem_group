@@ -2,6 +2,8 @@
 <odoo>
 
 
+
+
     <record id="cyb_inquiry_form" model="ir.ui.view">
         <field name="name">cyb.inquiry.form</field>
         <field name="model">cyb.inquiry</field>
@@ -42,7 +44,7 @@
                             <field name="user_id"/>
                             <field name="crm_lead_id"/>
                             <field name="company_id" invisible="1"/>
-                            <field name="pricelist_id" />
+                            <field name="pricelist_id"/>
                         </group>
                     </group>
 
@@ -65,6 +67,10 @@
                                     <!--                                    <field name="product_inquiry_id" invisible="1"/>-->
                                 </tree>
                             </field>
+                        </page>
+
+                        <page string="Quotations">
+                            <field name="quotation_many_ids"/>
                         </page>
                     </notebook>
                     <group name="note_group" col="6" class="mt-2 mt-md-0">
