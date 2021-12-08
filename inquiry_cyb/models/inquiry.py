@@ -12,10 +12,6 @@ from odoo.osv import expression
 from odoo.tools import float_is_zero, float_compare
 
 
-
-
-
-
 class CybInquiry(models.Model):
     _name = 'cyb.inquiry'
     _inherit = ['portal.mixin', 'mail.thread', 'mail.activity.mixin', 'utm.mixin']
@@ -82,6 +78,7 @@ class CybInquiry(models.Model):
                                      tracking=5)
     amount_tax = fields.Monetary(string='Taxes', store=True, readonly=True, compute='_amount_all')
     amount_total = fields.Monetary(string='Total', store=True, readonly=True, compute='_amount_all', tracking=4)
+    total_qty = fields.Float(string='Total QTY', store=True, readonly=True, compute='_amount_all_qty', tracking=4)
 
     @api.depends('order_line.price_total')
     def _amount_all(self):
@@ -99,6 +96,19 @@ class CybInquiry(models.Model):
                 'amount_total': amount_untaxed + amount_tax,
             })
 
+    @api.depends('order_line.product_uom_qty')
+    def _amount_all_qty(self):
+        """
+        Compute the total Quantity of the SO.
+        """
+        for order in self:
+            total_qty = 0
+            for line in order.order_line:
+                total_qty += line.product_uom_qty
+            order.update({
+                'total_qty': total_qty,
+            })
+
     def action_automatic_entry(self):
         action = self.env['ir.actions.act_window']._for_xml_id('inquiry_cyb.action_transientmodel_wizard')
         update = []
@@ -106,6 +116,7 @@ class CybInquiry(models.Model):
             for record in order.order_line:
                 if record.product_id:
                     update.append((0, 0, {
+                        'brand_id': record.brand_id.id,
                         'product_id': record.product_id.id,
                         'product_uom': record.product_uom.id,
                         'order_id': record.order_id.id,
@@ -141,6 +152,7 @@ class CybSpecialist(models.Model):
     qty_delivered = fields.Float(string='Delivered')
     qty_invoiced = fields.Float(string='Invoiced')
     tax_id = fields.Many2many('account.tax', string='Taxes', domain=['|', ('active', '=', False), ('active', '=', True)])
+    brand_id = fields.Many2one(string="Brand", related='product_id.brand_id')
 
     remarks = fields.Text(string="Remarks")
     currency_id = fields.Many2one(related='order_id.currency_id', depends=['order_id.currency_id'], store=True, string='Currency', readonly=True)

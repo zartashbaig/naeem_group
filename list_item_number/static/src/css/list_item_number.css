@@ -1,0 +1,46 @@
+
+
+.f_item_number {
+	min-width: 30px;
+	max-width: 50px;
+	text-align: center;
+	width: 40px;
+}
+
+.o_list_view.table.table-sm.table-hover.table-striped.o_list_view_ungrouped .f_item_blank {
+	
+	width: 0px;
+}
+
+thead th:first-child {
+	width: 40px;
+}
+
+
+/*.table-responsive.o_ir_module_module .f_item_number,.table-responsive.o_product_template .f_item_number {
+    display:none ;
+}
+*/
+
+
+.o_list_view.table.table-sm.table-hover.table-striped.o_list_view_ungrouped.o_section_and_note_list_view  .f_item_blank {
+	display: none;
+}
+
+.o_list_view.table.table-sm.table-hover.table-striped.o_list_view_ungrouped .f_item_blank {
+	display: none;
+}
+
+.o_list_view .o_column_sortable::after {
+
+    opacity: 1;
+}
+
+/*定义不显示列表序号的对象 ;*/
+
+.o_list_view.o_stock_rule .table-responsive table thead .f_item_number {
+    display:none ;
+}
+.o_list_view.o_stock_rule .table-responsive table tbody .f_item_number {
+    display:none ;
+}

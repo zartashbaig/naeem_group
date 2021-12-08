@@ -13,6 +13,28 @@ class SaleOrderExt(models.Model):
     _inherit = "sale.order"
 
     quotation_sale_many_ids = fields.Many2many('cyb.quotation', 'cyb_quotation_rel', string='Quotation Lines')
+    total_qty = fields.Float(string='Total QTY', store=True, readonly=True, compute='_amount_all_qty', tracking=4)
+
+    @api.depends('order_line.product_uom_qty')
+    def _amount_all_qty(self):
+        """
+        Compute the total Quantity of the SO.
+        """
+        for order in self:
+            total_qty = 0
+            for line in order.order_line:
+                total_qty += line.product_uom_qty
+            order.update({
+                'total_qty': total_qty,
+            })
+
+
+class SaleOrderLineExt(models.Model):
+    _inherit = "sale.order.line"
+
+    brand_id = fields.Many2one(string="Brand", related='product_id.brand_id')
+    remarks = fields.Text(string="Remarks")
+    bonus_quantity = fields.Float(string='Bonus Qty',   default=1.0)
 
 
 class CybQuotation(models.Model):
@@ -89,6 +111,7 @@ class CybQuotation(models.Model):
                                      tracking=5)
     amount_tax = fields.Monetary(string='Taxes', store=True, readonly=True, compute='_amount_all')
     amount_total = fields.Monetary(string='Total', store=True, readonly=True, compute='_amount_all', tracking=4)
+    total_qty = fields.Float(string='Total QTY', store=True, readonly=True, compute='_amount_all_qty', tracking=4)
 
     @api.depends('order_line.price_total')
     def _amount_all(self):
@@ -106,6 +129,19 @@ class CybQuotation(models.Model):
                 'amount_total': amount_untaxed + amount_tax,
             })
 
+    @api.depends('order_line.product_uom_qty')
+    def _amount_all_qty(self):
+        """
+        Compute the total Quantity of the SO.
+        """
+        for order in self:
+            total_qty = 0
+            for line in order.order_line:
+                total_qty += line.product_uom_qty
+            order.update({
+                'total_qty': total_qty,
+            })
+
     def action_create_so(self):
         action = self.env['ir.actions.act_window']._for_xml_id('inquiry_cyb.inquiry_invoice_wizard')
         update = []
@@ -113,6 +149,7 @@ class CybQuotation(models.Model):
             for record in order.order_line:
                 if record.product_id:
                     update.append((0, 0, {
+                        'brand_id': record.brand_id.id,
                         'product_id': record.product_id.id,
                         'product_uom': record.product_uom.id,
                         'order_id': record.order_id.id,
@@ -142,7 +179,9 @@ class QuotationFriends(models.Model):
 
     name = fields.Char(string="Description")
     product_id = fields.Many2one('product.product', string='Product')
+    brand_id = fields.Many2one(string="Brand", related='product_id.brand_id')
     product_uom_qty = fields.Float(string='Quantity', digits='Product Unit of Measure',  default=1.0)
+    bonus_quantity = fields.Float(string='Bonus Qty',   default=1.0)
     qty_delivered = fields.Float(string='Delivered')
     qty_invoiced = fields.Float(string='Invoiced')
     price_unit = fields.Float(string='Unit price')

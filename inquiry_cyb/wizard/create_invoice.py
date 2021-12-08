@@ -45,6 +45,7 @@ class createsaleorder(models.TransientModel):
             for record in rec.order_line:
                 if record.product_id:
                     update.append((0, 0, {
+                        'brand_id': record.brand_id.id,
                         'product_id': record.product_id.id,
                         'product_uom': record.product_uom.id,
                         'order_id': record.order_id.id,
@@ -71,6 +72,7 @@ class createsaleorder(models.TransientModel):
             if data.product_id:
                 value.append([0, 0, {
                     # 'display_type': False,
+                    'brand_id': data.brand_id.id,
                     'product_id': data.product_id.id,
                     'product_uom': data.product_uom.id,
                     'order_id': data.order_id.id,
@@ -116,6 +118,7 @@ class Getsaleorderdata(models.TransientModel):
     new_order_line_id = fields.Many2one('create.saleorder')
     name = fields.Text(string="Description", compute='_compute_product_description', store=True)
     product_id = fields.Many2one('product.product', string="Product")
+    brand_id = fields.Many2one(string="Brand", related='product_id.brand_id')
     product_uom_qty = fields.Float(string='Quantity', digits='Product Unit of Measure', required=True, default=1.0)
     # date_planned = fields.Datetime(string='Scheduled Date', default=datetime.today())
     product_uom = fields.Many2one('uom.uom', string='Product Unit of Measure')
