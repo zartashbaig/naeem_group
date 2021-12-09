@@ -17,11 +17,11 @@
             <xpath expr="//field[@name='order_line']/tree/field[@name='price_subtotal']" position="after">
                 <field name="remarks"/>
             </xpath>
-             <xpath expr="//notebook/page[@name='order_lines']/group[@name='note_group']" position="before">
-                 <group>
-                                     <field name="total_qty"/>
+            <xpath expr="//notebook/page[@name='order_lines']/group[@name='note_group']" position="before">
+                <group>
+                    <field name="total_qty"/>
 
-                 </group>
+                </group>
             </xpath>
             <xpath expr="//notebook/page[@name='order_lines']" position="after">
                 <page string="Quotation Lines">
@@ -95,47 +95,73 @@
                                     <field name="price_unit"/>
                                     <field name="tax_id" widget="many2many_tags" options="{'no_create': True}"
                                            optional="show"/>
+                                    <field name="discount" string="Disc.%" groups="product.group_discount_per_so_line"
+                                           optional="show" widget="product_discount"/>
+                                    <field name = "prod_total_discount"/>
                                     <field name="price_subtotal"/>
                                     <field name="price_total"/>
                                     <field name="remarks"/>
                                 </tree>
                             </field>
-                                   <group>
-                                    <field name="total_qty"/>
-                                </group>
-
-                            <group name="note_group" col="6" class="mt-2 mt-md-0">
-
-                                <group colspan="4">
-
-                                    <field name="notes" class="oe_inline"
-                                           placeholder="Define your terms and conditions ..."/>
-                                </group>
-                                <group class="oe_subtotal_footer oe_right" colspan="2" name="sale_total">
-                                    <field name="amount_untaxed" widget="monetary"
-                                           options="{'currency_field': 'currency_id'}"/>
-                                    <field name="amount_tax" widget="monetary"
-                                           options="{'currency_field': 'currency_id'}"/>
-                                    <div class="oe_subtotal_footer_separator oe_inline o_td_label">
-                                        <label for="amount_total"/>
+                            <div class="row" style="border: 2px solid #875a7b;">
+                                <div class="col-1">
+                                    <div class="o_td_label">
+                                        <label for="count"/>
+                                        <br/>
+                                        <field name="count"/>
                                     </div>
-                                    <field name="amount_total" nolabel="1" class="oe_subtotal_footer_separator"
-                                           widget="monetary" options="{'currency_field': 'currency_id'}"/>
-                                </group>
-                                <div class="oe_clear"/>
+                                </div>
+                                <div class="col-2">
+                                    <div class="o_td_label">
+                                        <label for="total_qty"/>
+                                        <br/>
+                                        <field name="total_qty"/>
+                                    </div>
+                                </div>
+                                <div class="col-2">
+                                    <div class="o_td_label">
+                                        <label for="amount_untaxed"/>
+                                        <field name="amount_untaxed" widget="monetary"
+                                               options="{'currency_field': 'currency_id'}"/>
+                                    </div>
+                                </div>
+                                <div class="col-2">
+                                    <div class="o_td_label">
+                                        <label for="amount_tax"/>
+                                        <field name="amount_tax" widget="monetary"
+                                               options="{'currency_field': 'currency_id'}"/>
+                                    </div>
+                                </div>
+                                <div class="col-2">
+                                    <div class="o_td_label">
+                                        <label for="amount_total"/>
+                                        <field name="amount_total"
+                                               widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                    </div>
+                                </div>
+                                <div class="col-1">
+                                    <div class=" o_td_label">
+                                        <label for="discount_total"/>
+                                        <field name="discount_total"/>
+                                    </div>
+                                </div>
+                                <div class="col-2">
+                                    <div class="o_td_label">
+                                        <label for="net_amount"/>
+                                        <br/>
+                                        <field name="net_amount"/>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <group>
+                                <field name="notes" class="oe_inline"
+                                       placeholder="Define your terms and conditions ..."/>
                             </group>
 
                         </page>
 
-                        <!--                        <page string="Inquiry Details">-->
-                        <!--                            <group>-->
-                        <!--                                <group>-->
-                        <!--                                    <field name="ref_id"/>-->
-                        <!--                                    <field name="inquiry_type"/>-->
-                        <!--                                    <field name="notes"/>-->
-                        <!--                                </group>-->
-                        <!--                            </group>-->
-                        <!--                        </page>-->
 
                         <page string="Inquiries">
                             <field name="inquirymany_id"/>

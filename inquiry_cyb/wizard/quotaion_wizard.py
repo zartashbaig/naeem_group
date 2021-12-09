@@ -42,6 +42,7 @@ class InquiryInvoice(models.TransientModel):
                         'order_id': record.order_id.id,
                         'name': record.name,
                         'product_uom_qty': record.product_uom_qty,
+                        'bonus_quantity': record.bonus_quantity,
                         'price_unit': record.price_unit,
                         'price_subtotal': record.price_subtotal,
                         'price_total': record.price_total,
@@ -70,6 +71,7 @@ class InquiryInvoice(models.TransientModel):
                     'order_id': data.order_id.id,
                     'name': data.name,
                     'product_uom_qty': data.product_uom_qty,
+                    'bonus_quantity': data.bonus_quantity,
                     'price_unit': data.price_unit,
                     'tax_id': data.tax_id.ids,
                     'price_subtotal': data.price_subtotal,
@@ -114,6 +116,7 @@ class GetQuotationorderdata(models.TransientModel):
     brand_id = fields.Many2one(string="Brand", related='product_id.brand_id')
     product_uom_qty = fields.Float(string='Quantity', digits='Product Unit of Measure', required=True, default=1.0)
     product_uom = fields.Many2one('uom.uom', string='Product Unit of Measure')
+    bonus_quantity = fields.Float(string='Bonus Qty',   default=1.0)
     order_id = fields.Many2one('cyb.quotation', string='Order Reference', ondelete='cascade', index=True)
     price_unit = fields.Float(string='Unit Price', digits='Product Price')
     price_subtotal = fields.Float(string="Sub Total", compute='_compute_total')
