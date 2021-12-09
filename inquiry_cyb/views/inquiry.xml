@@ -80,7 +80,6 @@
                                     <field name="price_total"/>
                                     <field name="price_subtotal"/>
                                     <field name="remarks"/>
-
                                     <!--                                    <field name="product_inquiry_id" invisible="1"/>-->
                                 </tree>
                             </field>

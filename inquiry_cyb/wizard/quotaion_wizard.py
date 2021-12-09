@@ -50,6 +50,8 @@ class InquiryInvoice(models.TransientModel):
                         'qty_invoiced': record.qty_invoiced,
                         'tax_id': record.tax_id.ids,
                         'remarks': record.remarks,
+                        'discount': record.discount,
+                        'prod_total_discount': record.prod_total_discount,
 
                     }))
         res.update({'new_order_line_ids': update,
@@ -79,6 +81,8 @@ class InquiryInvoice(models.TransientModel):
                     'remarks': data.remarks,
                     'qty_delivered': data.qty_delivered,
                     'qty_invoiced': data.qty_invoiced,
+                    'discount': data.discount,
+                    'prod_total_discount': data.prod_total_discount,
                 }])
         sale_order = {
             'partner_id': self.partner_id.id,
@@ -127,6 +131,8 @@ class GetQuotationorderdata(models.TransientModel):
     price_total = fields.Monetary(string='Total', readonly=True, store=True)
     currency_id = fields.Many2one(related='order_id.currency_id', depends=['order_id.currency_id'], store=True,
                                   string='Currency', readonly=True)
+    discount = fields.Float(string='Discount %', digits='Discount', default=0.0)
+    prod_total_discount = fields.Float('Disc. Amount', readonly=True, store=True)
 
     # display_type = fields.Selection([
     #     ('line_section', "Section"),

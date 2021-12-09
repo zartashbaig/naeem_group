@@ -13,7 +13,15 @@ class SaleOrderExt(models.Model):
     _inherit = "sale.order"
 
     quotation_sale_many_ids = fields.Many2many('cyb.quotation', 'cyb_quotation_rel', string='Quotation Lines')
+    count = fields.Integer(compute="_compute_discount_total", string='SN (Total)', store=True, readonly=1)
     total_qty = fields.Float(string='Total QTY', store=True, readonly=True, compute='_amount_all_qty', tracking=4)
+    discount_total = fields.Monetary(
+        compute="_compute_discount_total",
+        string="Discount %",
+        currency_field="currency_id",
+        store=True,
+    )
+    net_amount = fields.Float(string='Net Amount', readonly=True, store=True)
 
     @api.depends('order_line.product_uom_qty')
     def _amount_all_qty(self):
@@ -28,6 +36,21 @@ class SaleOrderExt(models.Model):
                 'total_qty': total_qty,
             })
 
+    @api.depends("order_line.prod_total_discount")
+    def _compute_discount_total(self):
+        for order in self:
+            count = 0
+            for lines in order.order_line:
+                count += 1
+            discount_total = sum(order.order_line.mapped('prod_total_discount'))
+
+            order.update(
+                {
+                    "count": count,
+                    "discount_total": discount_total,
+                }
+            )
+
 
 class SaleOrderLineExt(models.Model):
     _inherit = "sale.order.line"
@@ -35,6 +58,29 @@ class SaleOrderLineExt(models.Model):
     brand_id = fields.Many2one(string="Brand", related='product_id.brand_id')
     remarks = fields.Text(string="Remarks")
     bonus_quantity = fields.Float(string='Bonus Qty', default=1.0)
+    prod_total_discount = fields.Float('Disc. Amount', readonly=True, store=True)
+
+    @api.depends('product_uom_qty', 'discount', 'price_unit', 'tax_id')
+    def _compute_amount(self):
+        """
+        Compute the amounts of the SO line.
+        """
+        for line in self:
+            if line.product_uom_qty > 0:
+                price = line.price_unit * (1 - (line.discount or 0.0) / 100.0)
+                taxes = line.tax_id.compute_all(price, line.order_id.currency_id, line.product_uom_qty,
+                                                product=line.product_id)
+                total_prod_price = line.product_uom_qty * line.price_unit
+                prod_total_discount = total_prod_price*(line.discount / 100)
+            line.update({
+                'price_tax': sum(t.get('amount', 0.0) for t in taxes.get('taxes', [])),
+                'price_total': taxes['total_included'],
+                'price_subtotal': taxes['total_excluded'],
+                'prod_total_discount': prod_total_discount,
+            })
+            if self.env.context.get('import_file', False) and not self.env.user.user_has_groups(
+                    'account.group_account_manager'):
+                line.tax_id.invalidate_cache(['invoice_repartition_line_ids'], [line.tax_id.id])
 
 
 class CybQuotation(models.Model):
@@ -113,7 +159,6 @@ class CybQuotation(models.Model):
     amount_total = fields.Monetary(string='Total Incl ST Amount', store=True, readonly=True, compute='_amount_all',
                                    tracking=4)
     count = fields.Integer(compute="_compute_discount_total", string='SN (Total)', store=True, readonly=1)
-    net_amount = fields.Float(string='Net Amount', readonly=True, store=True)
     total_qty = fields.Float(string='Total QTY', store=True, readonly=True, compute='_amount_all_qty', tracking=4)
     discount_total = fields.Monetary(
         compute="_compute_discount_total",
@@ -121,6 +166,7 @@ class CybQuotation(models.Model):
         currency_field="currency_id",
         store=True,
     )
+    net_amount = fields.Float(string='Net Amount', readonly=True, store=True)
 
     @api.depends("order_line.prod_total_discount")
     def _compute_discount_total(self):
@@ -186,7 +232,8 @@ class CybQuotation(models.Model):
                         'qty_invoiced': record.qty_invoiced,
                         'remarks': record.remarks,
                         'tax_id': record.tax_id.ids,
-                        # 'discount': record.discount,
+                        'discount': record.discount,
+                        'prod_total_discount': record.prod_total_discount,
                     }))
 
         # Force the values of the move line in the context to avoid issues
@@ -202,7 +249,7 @@ class QuotationFriends(models.Model):
     _name = 'create.quotation.friend'
     _description = 'quotation'
 
-    name = fields.Char(string="Description")
+    name = fields.Text(string="Description", compute='_compute_product_description')
     product_id = fields.Many2one('product.product', string='Product')
     brand_id = fields.Many2one(string="Brand", related='product_id.brand_id')
     product_uom_qty = fields.Float(string='Quantity', digits='Product Unit of Measure', default=1.0)
@@ -225,26 +272,8 @@ class QuotationFriends(models.Model):
     price_tax = fields.Float(compute='_compute_amount', string='Total Tax', readonly=True, store=True)
     price_total = fields.Monetary(compute='_compute_amount', string='Total', readonly=True, store=True)
     discount = fields.Float(string='Discount %', digits='Discount', default=0.0)
-    prod_total_discount = fields.Float('Disc. Amount')
+    prod_total_discount = fields.Float('Disc. Amount', readonly=True, store=True)
 
-    @api.depends('product_uom_qty', 'price_unit', 'tax_id')
-    def _compute_amount(self):
-        """
-        Compute the amounts of the SO line.
-        """
-        for line in self:
-            if line.product_uom_qty > 0:
-                taxes = line.tax_id.compute_all(line.price_unit, line.order_id.currency_id, line.product_uom_qty,
-                                                product=line.product_id)
-            line.update({
-                'price_tax': sum(t.get('amount', 0.0) for t in taxes.get('taxes', [])),
-                'price_total': taxes['total_included'],
-                'price_subtotal': taxes['total_excluded'],
-            })
-
-            if self.env.context.get('import_file', False) and not self.env.user.user_has_groups(
-                    'account.group_account_manager'):
-                line.tax_id.invalidate_cache(['invoice_repartition_line_ids'], [line.tax_id.id])
 
     @api.onchange('price_unit', 'product_uom_qty')
     def onchange_inquiry(self):
@@ -255,6 +284,11 @@ class QuotationFriends(models.Model):
         if self.product_id:
             if self.product_id.list_price:
                 self.price_unit = self.product_id.list_price
+
+    def _compute_product_description(self):
+        for rec in self:
+            if rec.product_id:
+                rec.name = str([rec.product_id.default_code]) + ' ' + str(rec.product_id.name) + str(rec.product_id.description_sale)
 
     @api.depends('product_uom_qty', 'discount', 'price_unit', 'tax_id')
     def _compute_amount(self):
