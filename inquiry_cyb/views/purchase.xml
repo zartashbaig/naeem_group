@@ -1,0 +1,77 @@
+<?xml version="1.0" ?>
+<odoo>
+    <data>
+
+        <record model="ir.ui.view" id="purchase_order_template_form_view_inherit">
+            <field name="name">purchase.order.form.inherit</field>
+            <field name="model">purchase.order</field>
+            <field name="inherit_id" ref="purchase.purchase_order_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='order_line']/tree/field[@name='product_qty']" position="after">
+                    <field name="bonus_quantity"/>
+                </xpath>
+                <xpath expr="//field[@name='order_line']/tree/field[@name='taxes_id']" position="after">
+                    <field name="discount"/>
+                </xpath>
+                <xpath expr="//field[@name='order_line']/tree/field[@name='discount']" position="after">
+                    <field name="prod_total_discount"/>
+                </xpath>
+                <xpath expr="//group[hasclass('oe_subtotal_footer')]" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                <xpath expr="//group[hasclass('oe_subtotal_footer')]" position="before">
+                    <div class="row" style="border: 2px solid #875a7b; margin-bottom:25px">
+                        <div class="col-1">
+                            <div class="o_td_label">
+                                <label for="count"/>
+                                <br/>
+                                <field name="count"/>
+                            </div>
+                        </div>
+                        <div class="col-2">
+                            <div class="o_td_label">
+                                <label for="total_qty"/>
+                                <br/>
+                                <field name="total_qty"/>
+                            </div>
+                        </div>
+                        <div class="col-2">
+                            <div class="o_td_label">
+                                <label string="Total Excl ST Amount" for="amount_untaxed"/>
+                                <field name="amount_untaxed" widget="monetary"
+                                       options="{'currency_field': 'currency_id'}"/>
+                            </div>
+                        </div>
+                        <div class="col-2">
+                            <div class="o_td_label">
+                                <label string="Total Taxation Amount" for="amount_tax"/>
+                                <field name="amount_tax" widget="monetary"
+                                       options="{'currency_field': 'currency_id'}"/>
+                            </div>
+                        </div>
+                        <div class="col-2">
+                            <div class="o_td_label">
+                                <label string="Total Incl ST Amount" for="amount_total"/>
+                                <field name="amount_total"
+                                       widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                            </div>
+                        </div>
+                        <div class="col-1">
+                            <div class=" o_td_label">
+                                <label for="discount_total"/>
+                                <field name="discount_total"/>
+                            </div>
+                        </div>
+                        <div class="col-2">
+                            <div class="o_td_label">
+                                <label for="net_amount"/>
+                                <br/>
+                                <field name="net_amount"/>
+                            </div>
+                        </div>
+                    </div>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

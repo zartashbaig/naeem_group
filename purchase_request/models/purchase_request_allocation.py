@@ -49,7 +49,7 @@ class PurchaseRequestAllocation(models.Model):
         comodel_name="uom.uom",
         related="purchase_request_line_id.product_uom_id",
         readonly=True,
-        required=True,
+        # required=True,
     )
     requested_product_uom_qty = fields.Float(
         string="Requested Quantity",

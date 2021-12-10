@@ -27,7 +27,13 @@
                 </page>
             </xpath>
 
-            <xpath expr="//notebook/page[@name='order_lines']/group[@name='note_group']" position="replace">
+
+            <xpath expr="//group[@name='note_group']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+
+            <xpath expr="//notebook/page[@name='order_lines']/group[@name='note_group']" position="before">
                 <div class="row" style="border: 2px solid #875a7b;">
                     <div class="col-1">
                         <div class="o_td_label">

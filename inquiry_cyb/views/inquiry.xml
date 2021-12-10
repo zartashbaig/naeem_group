@@ -83,13 +83,7 @@
                                     <!--                                    <field name="product_inquiry_id" invisible="1"/>-->
                                 </tree>
                             </field>
-                        </page>
-
-                        <page string="Quotations">
-                            <field name="quotation_many_ids"/>
-                        </page>
-                    </notebook>
-                    <group>
+                                   <group>
                         <field name="total_qty"/>
                     </group>
                     <group name="note_group" col="6" class="mt-2 mt-md-0">
@@ -110,6 +104,13 @@
                         </group>
                         <div class="oe_clear"/>
                     </group>
+                        </page>
+
+                        <page string="Quotations">
+                            <field name="quotation_many_ids"/>
+                        </page>
+                    </notebook>
+
                 </sheet>
                 <div class="oe_chatter">
                     <field name="message_follower_ids"/>

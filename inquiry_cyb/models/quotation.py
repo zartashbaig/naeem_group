@@ -31,7 +31,8 @@ class SaleOrderExt(models.Model):
         for order in self:
             total_qty = 0
             for line in order.order_line:
-                total_qty += line.product_uom_qty
+                if line.product_id:
+                    total_qty += line.product_uom_qty
             order.update({
                 'total_qty': total_qty,
             })
@@ -41,7 +42,8 @@ class SaleOrderExt(models.Model):
         for order in self:
             count = 0
             for lines in order.order_line:
-                count += 1
+                if lines.product_id:
+                    count += 1
             discount_total = sum(order.order_line.mapped('prod_total_discount'))
 
             order.update(
@@ -72,12 +74,12 @@ class SaleOrderLineExt(models.Model):
                                                 product=line.product_id)
                 total_prod_price = line.product_uom_qty * line.price_unit
                 prod_total_discount = total_prod_price*(line.discount / 100)
-            line.update({
-                'price_tax': sum(t.get('amount', 0.0) for t in taxes.get('taxes', [])),
-                'price_total': taxes['total_included'],
-                'price_subtotal': taxes['total_excluded'],
-                'prod_total_discount': prod_total_discount,
-            })
+                line.update({
+                    'price_tax': sum(t.get('amount', 0.0) for t in taxes.get('taxes', [])),
+                    'price_total': taxes['total_included'],
+                    'price_subtotal': taxes['total_excluded'],
+                    'prod_total_discount': prod_total_discount,
+                })
             if self.env.context.get('import_file', False) and not self.env.user.user_has_groups(
                     'account.group_account_manager'):
                 line.tax_id.invalidate_cache(['invoice_repartition_line_ids'], [line.tax_id.id])
@@ -173,7 +175,8 @@ class CybQuotation(models.Model):
         for order in self:
             count = 0
             for lines in order.order_line:
-                count += 1
+                if lines.product_id:
+                    count += 1
             discount_total = sum(order.order_line.mapped('prod_total_discount'))
 
             order.update(
@@ -302,12 +305,12 @@ class QuotationFriends(models.Model):
                                                 product=line.product_id)
                 total_prod_price = line.product_uom_qty*line.price_unit
                 prod_total_discount = total_prod_price*(line.discount / 100)
-            line.update({
-                'price_tax': sum(t.get('amount', 0.0) for t in taxes.get('taxes', [])),
-                'price_total': taxes['total_included'],
-                'price_subtotal': taxes['total_excluded'],
-                'prod_total_discount': prod_total_discount,
-            })
+                line.update({
+                    'price_tax': sum(t.get('amount', 0.0) for t in taxes.get('taxes', [])),
+                    'price_total': taxes['total_included'],
+                    'price_subtotal': taxes['total_excluded'],
+                    'prod_total_discount': prod_total_discount,
+                })
             if self.env.context.get('import_file', False) and not self.env.user.user_has_groups(
                     'account.group_account_manager'):
                 line.tax_id.invalidate_cache(['invoice_repartition_line_ids'], [line.tax_id.id])

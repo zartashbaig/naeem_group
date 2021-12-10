@@ -104,7 +104,8 @@ class CybInquiry(models.Model):
         for order in self:
             total_qty = 0
             for line in order.order_line:
-                total_qty += line.product_uom_qty
+                if line.product_id:
+                    total_qty += line.product_uom_qty
             order.update({
                 'total_qty': total_qty,
             })
