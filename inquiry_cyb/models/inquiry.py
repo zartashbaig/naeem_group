@@ -52,7 +52,7 @@ class CybInquiry(models.Model):
         domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]", tracking=1,
         help="If you change the pricelist, only newly added lines will be affected.")
     currency_id = fields.Many2one(related='pricelist_id.currency_id', depends=["pricelist_id"], store=True, readonly=False)
-    quotation_many_ids = fields.Many2many('cyb.quotation', 'quotation_list_rel', string="Inquiry ID", default="", store=True)
+    quotation_many_ids = fields.Many2many('cyb.quotation', string="Inquiry ID", default="", store=True)
 
 
 
@@ -170,11 +170,11 @@ class CybSpecialist(models.Model):
             if line.product_uom_qty > 0:
                 taxes = line.tax_id.compute_all(line.price_unit, line.order_id.currency_id, line.product_uom_qty,
                                                 product=line.product_id)
-            line.update({
-                'price_tax': sum(t.get('amount', 0.0) for t in taxes.get('taxes', [])),
-                'price_total': taxes['total_included'],
-                'price_subtotal': taxes['total_excluded'],
-            })
+                line.update({
+                    'price_tax': sum(t.get('amount', 0.0) for t in taxes.get('taxes', [])),
+                    'price_total': taxes['total_included'],
+                    'price_subtotal': taxes['total_excluded'],
+                })
 
             if self.env.context.get('import_file', False) and not self.env.user.user_has_groups(
                     'account.group_account_manager'):

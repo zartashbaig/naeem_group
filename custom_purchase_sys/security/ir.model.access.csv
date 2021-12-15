@@ -1,0 +1,9 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_cyb__purchase_inquiry_access,cyb.purchase,model_cyb_purchase,base.group_user,1,1,1,1,
+access_cyb_purchase_product_access,cyb.product.purchase,model_cyb_product_purchase,base.group_user,1,1,1,1,
+access_purchase_inquiry_invoice_access,create.inquiry.order,model_create_inquiry_order,base.group_user,1,1,1,1,
+access_purchase_quotation_invoice_access,getpurchase.orderdata,model_getpurchase_orderdata,base.group_user,1,1,1,1,
+access_cyb_quotation_purchase_quot_access,cyb.quotation.purchase,model_cyb_quotation_purchase,base.group_user,1,1,1,1,
+access_create_quotation_purchase_quot_access,create.quotation.purchase,model_create_quotation_purchase,base.group_user,1,1,1,1,
+access_create_quotation_wizard_access,purchase.quotation.wizard,model_purchase_quotation_wizard,base.group_user,1,1,1,1,
+access_create_quotation_wizard_line_access,purchase.wizard.line,model_purchase_wizard_line,base.group_user,1,1,1,1,

@@ -20,7 +20,6 @@
         'views/inquiry.xml',
         'views/quotation.xml',
         'views/invoice.xml',
-        'views/purchase.xml',
     ],
     'demo': [],
 

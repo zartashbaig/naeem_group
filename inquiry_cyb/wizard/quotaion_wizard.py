@@ -22,7 +22,7 @@ class InquiryInvoice(models.TransientModel):
     so_id = fields.Many2one('cyb.quotation', string="Quotation ID", )
     crm_lead_id = fields.Many2one('crm.lead', string="CRM Lead", related="so_id.crm_lead_id")
     quotation_reference = fields.Char(string="Reference", related="so_id.quotation_reference")
-    quotation_sale_many_ids = fields.Many2many('cyb.quotation', 'quotation__many_list_rel', string="Quotation ID",
+    quotation_sale_many_ids = fields.Many2many('cyb.quotation', string="Quotation ID",
                                                store=True)
 
     @api.model

@@ -21,7 +21,7 @@ class createsaleorder(models.TransientModel):
                                  default=fields.Datetime.now,
                                  help="Creation date of draft/sent orders,\nConfirmation date of confirmed orders.")
     so_id = fields.Many2one('cyb.inquiry', string="Inquiry ID", default="", store=True)
-    inquirymany_id = fields.Many2many('cyb.inquiry', 'inquiry_list_rel', string="Inquiry ID", default="", store=True)
+    inquirymany_id = fields.Many2many('cyb.inquiry', string="Inquiry ID", default="", store=True)
     crm_lead_id = fields.Many2one('crm.lead', string="CRM Lead", related="so_id.crm_lead_id", store=True)
     date_inquiry = fields.Datetime(string="Inquiry Date", related="so_id.date_inquiry", store=True)
     ref_id = fields.Char(string="Reference", related="so_id.ref_id", store=True)

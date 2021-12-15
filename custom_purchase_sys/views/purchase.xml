@@ -7,6 +7,9 @@
             <field name="model">purchase.order</field>
             <field name="inherit_id" ref="purchase.purchase_order_form"/>
             <field name="arch" type="xml">
+                <xpath expr="//field[@name='order_line']/tree/field[@name='product_id']" position="before">
+                    <field name="brand_id"/>
+                </xpath>
                 <xpath expr="//field[@name='order_line']/tree/field[@name='product_qty']" position="after">
                     <field name="bonus_quantity"/>
                 </xpath>
@@ -16,9 +19,20 @@
                 <xpath expr="//field[@name='order_line']/tree/field[@name='discount']" position="after">
                     <field name="prod_total_discount"/>
                 </xpath>
+
+                <!--                <xpath expr="//field[@name='order_line']/tree/field[@name='price_subtotal']" position="after">-->
+                <!--                    <field name="remarks"/>-->
+                <!--                </xpath>-->
                 <xpath expr="//group[hasclass('oe_subtotal_footer')]" position="attributes">
                     <attribute name="invisible">1</attribute>
                 </xpath>
+
+                <xpath expr="//notebook/page[@name='products']" position="after">
+                    <page string="Purchase Quotation Lines">
+                        <field name="quotation_sale_many_ids"/>
+                    </page>
+                </xpath>
+
                 <xpath expr="//group[hasclass('oe_subtotal_footer')]" position="before">
                     <div class="row" style="border: 2px solid #875a7b; margin-bottom:25px">
                         <div class="col-1">
@@ -73,5 +87,11 @@
                 </xpath>
             </field>
         </record>
+
+        <menuitem action="purchase.purchase_rfq" id="purchase.menu_purchase_rfq"
+                  parent="purchase.menu_procurement_management"
+                  sequence="0" groups="custom_purchase_sys.group_show_req_for_quotation"/>
+
+
     </data>
 </odoo>

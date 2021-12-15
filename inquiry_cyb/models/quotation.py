@@ -127,7 +127,7 @@ class CybQuotation(models.Model):
          ('confirm', 'Confirmed'),
          ('Cancelled', 'Cancelled')], default='draft', string="Status")
     notes_qut = fields.Text('Remarks')
-    inquirymany_id = fields.Many2many('cyb.inquiry', 'inquiry_rel', string='Inquiry List')
+    inquirymany_id = fields.Many2many('cyb.inquiry', string='Inquiry List')
     sale_quotation_ids = fields.Many2many('sale.order', string='Sale List')
 
     def action_quotation_cancel(self):

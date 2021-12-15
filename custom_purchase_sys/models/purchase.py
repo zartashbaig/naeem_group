@@ -7,6 +7,7 @@ from odoo import api, fields, models
 class PurchaseDiscount(models.Model):
     _inherit = "purchase.order"
 
+    quotation_sale_many_ids = fields.Many2many('cyb.quotation.purchase', string='Quotation Lines')
     net_amount = fields.Float(string='Net Amount', readonly=True, store=True)
     count = fields.Integer(compute="_compute_discount_total", string='SN (Total)', store=True, readonly=1)
     total_qty = fields.Float(string='Total QTY', store=True, readonly=True, compute='_amount_all_qty', tracking=4)
@@ -53,6 +54,10 @@ class PurchaseLineDiscount(models.Model):
     discount = fields.Float('Discount%')
     bonus_quantity = fields.Float(string='Bonus Qty', default=1.0)
     prod_total_discount = fields.Float('Disc. Amount', readonly=True, store=True)
+    brand_id = fields.Many2one(string="Brand", related='product_id.brand_id')
+    remarks = fields.Text(string="Remarks")
+
+
 
     @api.depends('product_qty', 'price_unit', 'taxes_id','discount')
     def _compute_amount(self):
