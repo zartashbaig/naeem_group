@@ -1,6 +1,28 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
 
+            <record id="custom_view_picking_form_inherit" model="ir.ui.view">
+            <field name="name">stock.move.line.form</field>
+            <field name="model">stock.move.line</field>
+            <field name="inherit_id" ref="stock.view_stock_move_line_detailed_operation_tree"/>
+            <field name="arch" type="xml">
+
+                <xpath expr="//field[@name='qty_done']" position="before">
+                    <field name="bonus_quantity" force_save="1"/>
+                </xpath>
+
+
+                <xpath expr="//field[@name='product_uom_qty']" position="attributes">
+                <attribute name="string">Ordered Qty</attribute>
+            </xpath>
+
+
+
+            </field>
+        </record>
+
+
+
     <!-- SALE ORDER INHERITED VIEW    -->
 
     <record model="ir.ui.view" id="sale_order_template_form_view_inherit">

@@ -9,6 +9,38 @@ _logger = logging.getLogger(__name__)
 from odoo import api, fields, models, _
 
 
+class DOExt(models.Model):
+    _inherit = "stock.move.line"
+
+    bonus_quantity = fields.Float(string='Bonus Qty', compute='_gets_data')
+    qty_done = fields.Float('Done', default=0.0, digits='Product Unit of Measure', copy=False)
+    product_uom_qty = fields.Float('Reserved', default=0.0, digits='Product Unit of Measure', required=True)
+
+    @api.model
+    def _gets_data(self):
+        self.bonus_quantity = 0.0
+        for move in self:
+            # if not move.move_lines and not move.move_line_ids:
+            if not (move.picking_id and move.picking_id.group_id):
+                continue
+            picking = move.picking_id
+            sale_order = self.env['sale.order'].sudo().search([
+                ('procurement_group_id', '=', picking.group_id.id)], limit=1)
+            if sale_order:
+                for line in sale_order.order_line:
+                    if line.product_id.id != move.product_id.id:
+                        continue
+                    move.update({
+                        'bonus_quantity': line.bonus_quantity,
+                    })
+            else:
+                move.bonus_quantity = False
+
+    @api.onchange('bonus_quantity', 'product_uom_qty', 'qty_done')
+    def onchange_packings(self):
+        self.qty_done = self.bonus_quantity + self.product_uom_qty
+
+
 class SaleOrderExt(models.Model):
     _inherit = "sale.order"
 
@@ -73,7 +105,7 @@ class SaleOrderLineExt(models.Model):
                 taxes = line.tax_id.compute_all(price, line.order_id.currency_id, line.product_uom_qty,
                                                 product=line.product_id)
                 total_prod_price = line.product_uom_qty * line.price_unit
-                prod_total_discount = total_prod_price*(line.discount / 100)
+                prod_total_discount = total_prod_price * (line.discount / 100)
                 line.update({
                     'price_tax': sum(t.get('amount', 0.0) for t in taxes.get('taxes', [])),
                     'price_total': taxes['total_included'],
@@ -277,7 +309,6 @@ class QuotationFriends(models.Model):
     discount = fields.Float(string='Discount %', digits='Discount', default=0.0)
     prod_total_discount = fields.Float('Disc. Amount', readonly=True, store=True)
 
-
     @api.onchange('price_unit', 'product_uom_qty')
     def onchange_inquiry(self):
         self.price_subtotal = self.product_uom_qty * self.price_unit
@@ -291,7 +322,8 @@ class QuotationFriends(models.Model):
     def _compute_product_description(self):
         for rec in self:
             if rec.product_id:
-                rec.name = str([rec.product_id.default_code]) + ' ' + str(rec.product_id.name) + str(rec.product_id.description_sale)
+                rec.name = str([rec.product_id.default_code]) + ' ' + str(rec.product_id.name) + str(
+                    rec.product_id.description_sale)
 
     @api.depends('product_uom_qty', 'discount', 'price_unit', 'tax_id')
     def _compute_amount(self):
@@ -303,8 +335,8 @@ class QuotationFriends(models.Model):
                 price = line.price_unit * (1 - (line.discount or 0.0) / 100.0)
                 taxes = line.tax_id.compute_all(price, line.order_id.currency_id, line.product_uom_qty,
                                                 product=line.product_id)
-                total_prod_price = line.product_uom_qty*line.price_unit
-                prod_total_discount = total_prod_price*(line.discount / 100)
+                total_prod_price = line.product_uom_qty * line.price_unit
+                prod_total_discount = total_prod_price * (line.discount / 100)
                 line.update({
                     'price_tax': sum(t.get('amount', 0.0) for t in taxes.get('taxes', [])),
                     'price_total': taxes['total_included'],
