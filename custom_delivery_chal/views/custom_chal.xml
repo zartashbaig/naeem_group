@@ -9,8 +9,8 @@
         <field name="view_mode">tree,form</field>
 
     </record>
-    <menuitem id="product_manufacturer_roots" name="product_manufacturer" sequence="8"
-              action="action_product_manufacturer"/>
+<!--    <menuitem id="product_manufacturer_roots" name="product_manufacturer" sequence="8"-->
+<!--              action="action_product_manufacturer"/>-->
 
 
 </odoo>
