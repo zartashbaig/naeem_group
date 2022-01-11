@@ -10,6 +10,7 @@ class CustomPayment(models.Model):
     price_code = fields.Char(string='Price Code')
     brand_id = fields.Many2one('product.brand', string='Brand')
     custom_remark = fields.Text(string='Remarks')
+    currency_id = fields.Many2one('res.currency',string="Currency")
 
     # reference_num = fields.Char(string='Ref. Number')
     # narration_text = fields.Text(string='Narration')

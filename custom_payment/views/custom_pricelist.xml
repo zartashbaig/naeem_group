@@ -8,11 +8,10 @@
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='company_id']" position="before">
                     <field name="price_code"/>
-                </xpath>
-                <xpath expr="//field[@name='company_id']" position="after">
                     <field name="brand_id"/>
                 </xpath>
                 <xpath expr="//field[@name='brand_id']" position="after">
+                    <field name="currency_id"/>
                     <field name="custom_remark"/>
                 </xpath>
             </field>
