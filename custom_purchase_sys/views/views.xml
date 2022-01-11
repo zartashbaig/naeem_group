@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <!--    inquiry tree view model-->
+    <record id="purchase_inquiry_tree" model="ir.ui.view">
+        <field name="name">purchase.inquiry.tree</field>
+        <field name="model">cyb.purchase</field>
+        <field name="arch" type="xml">
+            <tree string="purchase tree view">
+                <field name="name"/>
+                <field name="partner_id"/>
+<!--                <field name="cyb_quotation_id"/>-->
+<!--                <field name="cyb_payment_id"/>-->
+                <!--                <field name="cyb_order_lines">-->
+                <!--                        <field name="inquiry_subtotal"/>-->
+                <!--                        <field name="product_inquiry_id" invisible="1"/>-->
+                <!--                </field>-->
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="cyb_purchase_inquiry_form" model="ir.ui.view">
+        <field name="name">cyb.purchase.form</field>
+        <field name="model">cyb.purchase</field>
+        <field name="arch" type="xml">
+
+            <form string="cyb purchase">
+                <header>
+                    <field name='state' widget='statusbar'
+                           statusbar_visible="draft,confirm,Cancelled"/>
+                    <button type="object" string="Cancel"
+                            name="action_inquiry_cancel"/>
+                    <button type="object" string="Confirm"
+                            name="action_inquiry_confirm"/>
+                    <button type="action" string="Create Quotation"
+                            name="%(action_quotation_main_transientmodel_wizard)d"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="partner_id" widget="res_partner_many2one"
+                                   context="{'res_partner_search_mode': 'customer', 'show_address': 1, 'show_vat': True}"
+                                   options='{"always_reload": True}'/>
+                            <field name="ref_id"/>
+                            <field name="supplier_name"/>
+                            <field name="currency_id"/>
+                            <field name="notes"/>
+                            <field name="cancel"/>
+<!--                            <field name="cyb_quotation_id"/>-->
+                        </group>
+                        <group>
+                            <field name="inquiry_type"/>
+                            <field name="date_inquiry"/>
+                            <field name="date_Expiration"/>
+                            <field name="cyb_payment_id"/>
+                            <field name="user_id"/>
+                            <field name="crm_lead_id"/>
+                            <field name="company_id" invisible="1"/>
+                            <field name="pricelist_id"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Inquiry Lines">
+                            <field name="order_line">
+                                <tree editable="bottom">
+                                    <field name="brand_id"/>
+                                    <field name="product_id"/>
+                                    <field name="name" widget="section_and_note_text"/>
+                                    <field name="product_qty"/>
+                                    <field name="product_uom"/>
+                                    <field name="qty_received" invisible="1"/>
+                                    <field name="qty_invoiced" invisible="1"/>
+                                    <field name="price_unit"/>
+                                    <field name="taxes_id" widget="many2many_tags" options="{'no_create': True}"
+                                           optional="show"/>
+                                    <field name="price_total"/>
+                                    <field name="price_subtotal"/>
+                                    <field name="remarks"/>
+                                    <!--                                    <field name="product_inquiry_id" invisible="1"/>-->
+                                </tree>
+                            </field>
+                                   <group>
+                        <field name="total_qty"/>
+                    </group>
+                    <group name="note_group" col="6" class="mt-2 mt-md-0">
+
+                        <group colspan="4">
+                            <field name="notes" class="oe_inline"
+                                   placeholder="Define your terms and conditions ..."/>
+                        </group>
+                        <group class="oe_subtotal_footer oe_right" colspan="2" name="sale_total">
+                            <field name="amount_untaxed" widget="monetary"
+                                   options="{'currency_field': 'currency_id'}"/>
+                            <field name="amount_tax" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                            <div class="oe_subtotal_footer_separator oe_inline o_td_label">
+                                <label for="amount_total"/>
+                            </div>
+                            <field name="amount_total" nolabel="1" class="oe_subtotal_footer_separator"
+                                   widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                        </group>
+                        <div class="oe_clear"/>
+                    </group>
+                        </page>
+
+                        <page string="Quotations">
+                            <field name="purchase_inquiry_many_ids"/>
+                        </page>
+                    </notebook>
+
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!--action of repair menu-->
+    <record id="action_cyb_purchase_inquiry" model="ir.actions.act_window">
+        <field name="name">Purchase Inquiry</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">cyb.purchase</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="purchase_inquiry_roots" parent="purchase.menu_procurement_management" name="Purchase Inquiry" sequence="0" action="action_cyb_purchase_inquiry"/>
+
+    <record id="post_data_to_Purchase_Quotation_action" model="ir.actions.server">
+        <field name="name">Make Quotation</field>
+        <field name="type">ir.actions.server</field>
+        <field name="state">code</field>
+        <field name="model_id" ref="custom_purchase_sys.model_cyb_purchase"/>
+        <field name="binding_model_id" ref="custom_purchase_sys.model_cyb_purchase"/>
+        <field name="binding_view_types">form,list</field>
+        <field name="state">code</field>
+        <!--        <field name="code">-->
+        <!--            records.action_create_quotation()-->
+        <!--        </field>-->
+        <!--        <field name="code">action = records.action_create_quotation()</field>-->
+        <field name="code">action = records.action_automatic_entry()</field>
+
+    </record>
+
+
+</odoo>

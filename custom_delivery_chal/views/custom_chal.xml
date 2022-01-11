@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+
+    <record id="action_product_manufacturer" model="ir.actions.act_window">
+        <field name="name">product_manufacturer</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">product_manufacturer</field>
+        <field name="view_mode">tree,form</field>
+
+    </record>
+    <menuitem id="product_manufacturer_roots" name="product_manufacturer" sequence="8"
+              action="action_product_manufacturer"/>
+
+
+</odoo>
+<!--   <xpath expr="//label[@for='partner_id']" position="replace">-->
+<!--                    <label for='partner_id' string="Hello"/>-->
+<!--                </xpath>-->

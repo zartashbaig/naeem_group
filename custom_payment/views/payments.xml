@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="account_payment_form_view_inherit">
+            <field name="name">account.payment.inherit</field>
+            <field name="model">account.payment</field>
+            <field name="inherit_id" ref="account.view_account_payment_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='partner_type']" position="after">
+                    <field name="pv_num"/>
+                </xpath>
+                <xpath expr="//field[@name='partner_bank_id']" position="after">
+                    <field name="reference_num"/>
+                </xpath>
+                <xpath expr="//field[@name='reference_num']" position="after">
+                    <field name="narration_text"/>
+                </xpath>
+                <xpath expr="//field[@name='narration_text']" position="after">
+                    <field name="post_date"/>
+                </xpath>
+                <xpath expr="//field[@name='post_date']" position="after">
+                    <field name="pv_selection"/>
+                </xpath>
+                <xpath expr="//field[@name='pv_selection']" position="after">
+                    <field name="bal_amount"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>
+        <!--<xpath expr="//label[@for='categ_id']" position="replace">-->
+        <!--                    <label for='categ_id' string="Product Code"/>-->
+        <!--                </xpath>-->

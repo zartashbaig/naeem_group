@@ -27,4 +27,16 @@
         <field name="default" eval="True" />
         <field name="description">Purchase Request is done</field>
     </record>
+
+        <record id="post_data_to_purchase_action" model="ir.actions.server">
+        <field name="name">Make Purchase Order</field>
+        <field name="type">ir.actions.server</field>
+        <field name="state">code</field>
+        <field name="model_id" ref="purchase_request.model_purchase_request"/>
+        <field name="binding_model_id" ref="purchase_request.model_purchase_request"/>
+        <field name="binding_view_types">form,list</field>
+        <field name="state">code</field>
+        <field name="code">action = records.action_automatic_entry()</field>
+    </record>
+
 </odoo>

@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+
+    <record id="cyb_quotation_purchase_form" model="ir.ui.view">
+        <field name="name">cyb.quotation.purchase.form</field>
+        <field name="model">cyb.quotation.purchase</field>
+        <field name="arch" type="xml">
+
+            <form string="Quotation">
+                <header>
+                    <field name='state' widget='statusbar'
+                           statusbar_visible="Draft,Confirmed,Cancelled"/>
+
+                    <button type="object" string="Confirm"
+                            name="action_quotation_confirm"/>
+                    <button type="object" string="Cancel"
+                            name="action_quotation_cancel"/>
+                    <button type="action" string="Create Purchase Order"
+                            name="%(purchase_order_data_wizard)d"/>
+
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="partner_id" widget="res_partner_many2one"
+                                   context="{'res_partner_search_mode': 'customer', 'show_address': 1, 'show_vat': True}"
+                                   options='{"always_reload": True}'/>
+<!--                            <field name="quotation_new_id"/>-->
+                            <field name="currency_id"/>
+                            <field name="quotation_reference"/>
+                            <field name="remarks"/>
+                            <field name="cancel"/>
+                        </group>
+                        <group>
+                            <field name="quotation_Expiration"/>
+                            <field name="date_quotation"/>
+                            <field name="quotation_payment_id"/>
+                            <field name="crm_lead_id"/>
+                            <field name="company_id" invisible="1"/>
+                            <field name="pricelist_id"/>
+                        </group>
+
+
+                    </group>
+
+                    <notebook>
+                        <page string="Quotation line">
+                            <field name="order_line">
+                                <tree editable="bottom">
+                                    <field name="brand_id"/>
+                                    <field name="product_id"/>
+                                    <field name="name" widget="section_and_note_text"/>
+                                    <field name="product_qty"/>
+                                    <field name="bonus_quantity"/>
+                                    <field name="product_uom" groups="uom.group_uom" class="oe_inline"/>
+                                    <field name="qty_received" invisible="1"/>
+                                    <field name="qty_invoiced" invisible="1"/>
+                                    <field name="price_unit"/>
+                                    <field name="taxes_id" widget="many2many_tags" options="{'no_create': True}"
+                                           optional="show"/>
+                                    <field name="discount" string="Disc.%"
+                                           optional="show" widget="product_discount"/>
+                                    <field name="prod_total_discount"
+                                           optional="show"/>
+                                    <field name="price_subtotal"/>
+                                    <field name="price_total"/>
+                                    <field name="remarks"/>
+                                </tree>
+                            </field>
+                            <div class="row" style="border: 2px solid #875a7b;">
+                                <div class="col-1">
+                                    <div class="o_td_label">
+                                        <label for="count"/>
+                                        <br/>
+                                        <field name="count"/>
+                                    </div>
+                                </div>
+                                <div class="col-2">
+                                    <div class="o_td_label">
+                                        <label for="total_qty"/>
+                                        <br/>
+                                        <field name="total_qty"/>
+                                    </div>
+                                </div>
+                                <div class="col-2">
+                                    <div class="o_td_label">
+                                        <label for="amount_untaxed"/>
+                                        <field name="amount_untaxed" widget="monetary"
+                                               options="{'currency_field': 'currency_id'}"/>
+                                    </div>
+                                </div>
+                                <div class="col-2">
+                                    <div class="o_td_label">
+                                        <label for="amount_tax"/>
+                                        <field name="amount_tax" widget="monetary"
+                                               options="{'currency_field': 'currency_id'}"/>
+                                    </div>
+                                </div>
+                                <div class="col-2">
+                                    <div class="o_td_label">
+                                        <label for="amount_total"/>
+                                        <field name="amount_total"
+                                               widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                    </div>
+                                </div>
+                                <div class="col-1">
+                                    <div class=" o_td_label">
+                                        <label for="discount_total"/>
+                                        <field name="discount_total"/>
+                                    </div>
+                                </div>
+                                <div class="col-2">
+                                    <div class="o_td_label">
+                                        <label for="net_amount"/>
+                                        <br/>
+                                        <field name="net_amount"/>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <group>
+                                <field name="notes" class="oe_inline"
+                                       placeholder="Define your terms and conditions ..."/>
+                            </group>
+
+                        </page>
+
+
+                        <page string="Purchase Inquiries">
+                            <field name="purchase_inquirymany_id"/>
+                        </page>
+
+                        <page string="Purchases">
+                            <field name="sale_quotation_ids"/>
+                        </page>
+
+                        <page string="other info">
+                            <group>
+                                <group>
+                                    <field name="user_id" domain="[('share', '=', False)]"
+                                           widget="many2one_avatar_user"/>
+                                    <field name="team_id" kanban_view_ref="%(sales_team.crm_team_view_kanban)s"
+                                           options="{'no_create': True}"/>
+                                    <field name="company_id" options="{'no_create': True}"
+                                           groups="base.group_multi_company"/>
+                                </group>
+                            </group>
+                        </page>
+                        <!--                        <page string="customer signature">-->
+                        <!--                        </page>-->
+                    </notebook>
+
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    <!--    inquiry tree view model-->
+    <record id="quotation_purchase_tree" model="ir.ui.view">
+        <field name="name">quotation.purchase.tree</field>
+        <field name="model">cyb.quotation.purchase</field>
+        <field name="arch" type="xml">
+            <tree string="inquiry tree view">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="quotation_Expiration"/>
+                <field name="date_quotation"/>
+                <field name="quotation_payment_id"/>
+                <field name="crm_lead_id"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+    <!--action of repair menu-->
+    <record id="action_cyb_quotation_purchase" model="ir.actions.act_window">
+        <field name="name">Purchase Quotation</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">cyb.quotation.purchase</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="purchase.menu_purchase_quotations" parent="purchase.menu_procurement_management" name="Quotations" sequence="1"
+              action="action_cyb_quotation_purchase"/>
+
+    <record id="post_data_to_sale_order_action" model="ir.actions.server">
+        <field name="name">Make Purchase Order</field>
+        <field name="type">ir.actions.server</field>
+        <field name="state">code</field>
+        <field name="model_id" ref="custom_purchase_sys.model_cyb_quotation_purchase"/>
+        <field name="binding_model_id" ref="custom_purchase_sys.model_cyb_quotation_purchase"/>
+        <field name="binding_view_types">form,list</field>
+        <field name="state">code</field>
+        <!--        <field name="code">-->
+        <!--            records.action_create_quotation()-->
+        <!--        </field>-->
+        <!--        <field name="code">action = records.action_create_quotation()</field>-->
+        <field name="code">action = records.action_create_so()</field>
+
+    </record>
+
+<!--    <menuitem id="purchase.menu_purchase_quotations"-->
+<!--              action="sale.action_quotations_with_onboarding"-->
+<!--              name="Purchase Quotation"-->
+<!--              parent="purchase.menu_procurement_management"-->
+<!--              sequence="1" groups="sales_team.group_sale_salesman"/>-->
+</odoo>

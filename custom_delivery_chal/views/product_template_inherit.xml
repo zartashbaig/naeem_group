@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="product_template_form_view_inherit">
+            <field name="name">product.template.inherit</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="product.product_template_only_form_view"/>
+            <field name="arch" type="xml">
+<!--                <xpath expr="//label[@for='default_code']" position="replace">-->
+<!--                    <label for='default_code' string="Product Code"/>-->
+<!--                </xpath>-->
+                <xpath expr="//field[@name='barcode']" position="before">
+                    <field name="manufacturer_id"/>
+                </xpath>
+                <xpath expr="//field[@name='barcode']" position="after">
+                    <field name="system_num"/>
+                </xpath>
+                <xpath expr="//field[@name='company_id']" position="after">
+                    <field name="port_num"/>
+                </xpath>
+                <xpath expr="//field[@name='port_num']" position="after">
+                    <field name="serial_num"/>
+                </xpath>
+                <xpath expr="//field[@name='serial_num']" position="after">
+                    <field name="origin_num"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>
+        <!--<xpath expr="//label[@for='categ_id']" position="replace">-->
+        <!--                    <label for='categ_id' string="Product Code"/>-->
+        <!--                </xpath>-->

@@ -12,17 +12,13 @@ from odoo.osv import expression
 from odoo.tools import float_is_zero, float_compare
 
 
-
-
-
-
 class CybInquiry(models.Model):
     _name = 'cyb.inquiry'
     _inherit = ['portal.mixin', 'mail.thread', 'mail.activity.mixin', 'utm.mixin']
     _description = 'customer inquiry'
 
     name = fields.Char(string='Inquiry Reference', store=True, required=True, readonly=True,
-                        default='Inq')
+                       default='Inq')
 
     partner_id = fields.Many2one(
         'res.partner', string='Customer Name', readonly=True,
@@ -30,9 +26,12 @@ class CybInquiry(models.Model):
         required=True, change_default=True, index=True)
     supplier_name = fields.Many2one('res.partner', string="Supplier Name")
     ref_id = fields.Char(string="Reference")
+    pi_num = fields.Char(string="Purchase Inquiry No.")
     cyb_quotation_id = fields.Many2one('sale.order.template', string='Quotation')
     cyb_payment_id = fields.Many2one('account.payment.term', string='Payment term')
     date_Expiration = fields.Date(string="Expiration")
+    remarks = fields.Text(string="Remarks")
+    # manager_id = fields.Many2one('res.user', string='Purchase Manager')
     date_inquiry = fields.Datetime(string="Inquiry Date")
     date_order = fields.Datetime(string='Order Date', readonly=True, index=True,
                                  states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}, copy=False,
@@ -42,7 +41,7 @@ class CybInquiry(models.Model):
     inquiry_type = fields.Selection([
         ('STOCKIEST', 'STOCKIEST'),
         ('INDENTING', 'INDENTING')
-    ], string="Inquiry Type")
+    ], string="S.O Type", default='STOCKIEST')
     notes = fields.Text(string="Remarks")
     user_id = fields.Many2one(
         'res.users', string='Sales Manager', index=True, tracking=2, default=lambda self: self.env.user)
@@ -52,11 +51,11 @@ class CybInquiry(models.Model):
     # new_quotation_line_id = fields.Many2one('cyb.quotation')
     pricelist_id = fields.Many2one(
         'product.pricelist', string='Pricelist', check_company=True,  # Unrequired company
-         readonly=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]},
+        readonly=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]},
         domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]", tracking=1,
         help="If you change the pricelist, only newly added lines will be affected.")
     currency_id = fields.Many2one(related='pricelist_id.currency_id', depends=["pricelist_id"], store=True, readonly=False)
-    quotation_many_ids = fields.Many2many('cyb.quotation', 'quotation_list_rel', string="Inquiry ID", default="", store=True)
+    quotation_many_ids = fields.Many2many('cyb.quotation', string="Inquiry ID", default="", store=True)
 
 
 
@@ -82,6 +81,7 @@ class CybInquiry(models.Model):
                                      tracking=5)
     amount_tax = fields.Monetary(string='Taxes', store=True, readonly=True, compute='_amount_all')
     amount_total = fields.Monetary(string='Total', store=True, readonly=True, compute='_amount_all', tracking=4)
+    total_qty = fields.Float(string='Total QTY', store=True, readonly=True, compute='_amount_all_qty', tracking=4)
 
     @api.depends('order_line.price_total')
     def _amount_all(self):
@@ -99,6 +99,20 @@ class CybInquiry(models.Model):
                 'amount_total': amount_untaxed + amount_tax,
             })
 
+    @api.depends('order_line.product_uom_qty')
+    def _amount_all_qty(self):
+        """
+        Compute the total Quantity of the SO.
+        """
+        for order in self:
+            total_qty = 0
+            for line in order.order_line:
+                if line.product_id:
+                    total_qty += line.product_uom_qty
+            order.update({
+                'total_qty': total_qty,
+            })
+
     def action_automatic_entry(self):
         action = self.env['ir.actions.act_window']._for_xml_id('inquiry_cyb.action_transientmodel_wizard')
         update = []
@@ -106,6 +120,7 @@ class CybInquiry(models.Model):
             for record in order.order_line:
                 if record.product_id:
                     update.append((0, 0, {
+                        'brand_id': record.brand_id.id,
                         'product_id': record.product_id.id,
                         'product_uom': record.product_uom.id,
                         'order_id': record.order_id.id,
@@ -141,6 +156,7 @@ class CybSpecialist(models.Model):
     qty_delivered = fields.Float(string='Delivered')
     qty_invoiced = fields.Float(string='Invoiced')
     tax_id = fields.Many2many('account.tax', string='Taxes', domain=['|', ('active', '=', False), ('active', '=', True)])
+    brand_id = fields.Many2one(string="Brand", related='product_id.brand_id')
 
     remarks = fields.Text(string="Remarks")
     currency_id = fields.Many2one(related='order_id.currency_id', depends=['order_id.currency_id'], store=True, string='Currency', readonly=True)
@@ -157,11 +173,11 @@ class CybSpecialist(models.Model):
             if line.product_uom_qty > 0:
                 taxes = line.tax_id.compute_all(line.price_unit, line.order_id.currency_id, line.product_uom_qty,
                                                 product=line.product_id)
-            line.update({
-                'price_tax': sum(t.get('amount', 0.0) for t in taxes.get('taxes', [])),
-                'price_total': taxes['total_included'],
-                'price_subtotal': taxes['total_excluded'],
-            })
+                line.update({
+                    'price_tax': sum(t.get('amount', 0.0) for t in taxes.get('taxes', [])),
+                    'price_total': taxes['total_included'],
+                    'price_subtotal': taxes['total_excluded'],
+                })
 
             if self.env.context.get('import_file', False) and not self.env.user.user_has_groups(
                     'account.group_account_manager'):

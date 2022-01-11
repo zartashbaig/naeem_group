@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="stock_picking_form_view_inherit">
+            <field name="name">stock.picking.inherit</field>
+            <field name="model">stock.picking</field>
+            <field name="inherit_id" ref="stock.view_picking_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//label[@for='partner_id']" position="replace">
+                    <label for='partner_id' string="Customer"/>
+                </xpath>
+                <xpath expr="//field[@name='partner_id']" position="after">
+                    <field name="currency_inherit_id"/>
+                </xpath>
+                <xpath expr="//field[@name='currency_inherit_id']" position="before">
+                    <field name="dc_type"/>
+                </xpath>
+<!--                <xpath expr="//label[@string='GRN type']" position="attribute">-->
+<!--                    <field name="dc_type"/>-->
+<!--                </xpath>-->
+                <xpath expr="//field[@name='currency_inherit_id']" position="after">
+                    <field name="auto_type"/>
+                </xpath>
+                <xpath expr="//field[@name='auto_type']" position="after">
+                    <field name="manager_inherit_id"/>
+                </xpath>
+                <xpath expr="//field[@name='manager_inherit_id']" position="after">
+                    <field name="account_num_inherit"/>
+                </xpath>
+                <xpath expr="//field[@name='account_num_inherit']" position="after">
+                    <field name="remarks_inherit"/>
+                </xpath>
+                <xpath expr="//field[@name='remarks_inherit']" position="after">
+                    <field name="doc_no_inherit"/>
+                </xpath>
+                <xpath expr="//field[@name='doc_no_inherit']" position="after">
+                    <field name="ref_no_inherit"/>
+                </xpath>
+                <xpath expr="//field[@name='origin']" position="after">
+                    <field name="delivery_by_inherit"/>
+                </xpath>
+                <xpath expr="//field[@name='delivery_by_inherit']" position="after">
+                    <field name="delivery_to_inherit"/>
+                </xpath>
+                <xpath expr="//field[@name='delivery_to_inherit']" position="after">
+                    <field name="bilty_inherit"/>
+                </xpath>
+                <xpath expr="//field[@name='bilty_inherit']" position="after">
+                    <field name="delivery_expt_inherit"/>
+                </xpath>
+                <xpath expr="//field[@name='delivery_expt_inherit']" position="after">
+                    <field name="cancel_inherit"/>
+                </xpath>
+                <xpath expr="//field[@name='move_ids_without_package']/tree/field[@name='product_id']" position="after">
+                    <field name="warehouse_inherit_id"/>
+                </xpath>
+                <xpath expr="//field[@name='move_ids_without_package']/tree/field[@name='warehouse_inherit_id']"
+                       position="after">
+                    <field name="brand_inherit_id"/>
+                </xpath>
+                <xpath expr="//field[@name='move_ids_without_package']/tree/field[@name='brand_inherit_id']" position="after">
+                    <field name="invoice_inherit"/>
+                </xpath>
+                <xpath expr="//field[@name='move_ids_without_package']/tree/field[@name='invoice_inherit']" position="after">
+                    <field name="balance_inherit"/>
+                </xpath>
+                <xpath expr="//field[@name='move_ids_without_package']/tree/field[@name='balance_inherit']" position="after">
+                    <field name="quantity_inherit"/>
+                </xpath>
+                <xpath expr="//field[@name='move_ids_without_package']/tree/field[@name='quantity_inherit']" position="after">
+                    <field name="bonus_qty_inherit"/>
+                </xpath>
+                <xpath expr="//field[@name='move_ids_without_package']/tree/field[@name='bonus_qty_inherit']" position="after">
+                    <field name="total_qty_inherit"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

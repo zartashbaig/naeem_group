@@ -155,6 +155,8 @@ class PurchaseRequest(models.Model):
         string="Total Estimated Cost",
         store=True,
     )
+    purchase_many_ids = fields.Many2many('purchase.order', 'purchase_order_list_rel', string="Purchase ID", default="", store=True)
+
 
     @api.depends("line_ids", "line_ids.estimated_cost")
     def _compute_estimated_cost(self):
@@ -301,3 +303,30 @@ class PurchaseRequest(models.Model):
                     )
                     % rec.name
                 )
+
+    def action_automatic_entry(self):
+        action = self.env['ir.actions.act_window']._for_xml_id('purchase_request.action_purchase_request_line_make_purchase_order')
+        update = []
+        for order in self:
+            for record in order.line_ids:
+                if record.product_id:
+                    update.append((0, 0, {
+                        'product_id': record.product_id.id,
+                        'product_qty': record.product_qty,
+                        'request_id': record.request_id.id,
+                        'name': record.name,
+                        "product_uom_id": record.product_uom_id.id,
+
+                        # 'date_required': record.date_required,
+                        # 'estimated_cost': record.estimated_cost,
+                        # 'company_id': record.company_id.id,
+                        # 'purchase_status': record.purchase_status,
+                        # 'purchased_qty': record.purchased_qty,
+                    }))
+        # Force the values of the move line in the context to avoid issues
+        ctx = dict(self.env.context)
+        ctx.pop('active_id', None)
+        ctx['active_ids'] = self.ids
+        ctx['active_model'] = 'purchase.request.line.make.purchase.order'
+        action['context'] = ctx
+        return action

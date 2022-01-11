@@ -11,6 +11,12 @@ class PurchaseRequestLineMakePurchaseOrder(models.TransientModel):
     _name = "purchase.request.line.make.purchase.order"
     _description = "Purchase Request Line Make Purchase Order"
 
+    company_id = fields.Many2one(
+        comodel_name="res.company",
+        string="Company",
+        store=True,
+    )
+
     supplier_id = fields.Many2one(
         comodel_name="res.partner",
         string="Supplier",
@@ -18,6 +24,8 @@ class PurchaseRequestLineMakePurchaseOrder(models.TransientModel):
         domain=[("is_company", "=", True)],
         context={"res_partner_search_mode": "supplier", "default_is_company": True},
     )
+    purchase_request_ids = fields.Many2many('purchase.request', 'purchase_list_rel', string="Purchase Request IDs", default="", store=True)
+
     item_ids = fields.One2many(
         comodel_name="purchase.request.line.make.purchase.order.item",
         inverse_name="wiz_id",
@@ -101,6 +109,27 @@ class PurchaseRequestLineMakePurchaseOrder(models.TransientModel):
         res = super().default_get(fields)
         active_model = self.env.context.get("active_model", False)
         request_line_ids = []
+        purchase_requests = self.env['purchase.request'].browse(self.env.context.get("active_ids", False))
+        inquiry_ids = []
+        update = []
+        for request in purchase_requests:
+            inquiry_ids.append(request.id)
+            for line in request.line_ids:
+                if line.product_id:
+                    update.append((0, 0, {
+                        'product_id': line.product_id.id,
+                        'product_qty': line.product_qty,
+                        'request_id': line.request_id.id,
+                        'name': line.name,
+                        "product_uom_id": line.product_uom_id.id,
+
+                    }))
+                res.update({'item_ids': update,
+                            'company_id': purchase_requests.company_id.id,
+                            'purchase_request_ids': inquiry_ids,
+                            'supplier_id': self._context.get('active_id')
+                            })
+
         if active_model == "purchase.request.line":
             request_line_ids += self.env.context.get("active_ids", [])
         elif active_model == "purchase.request":
@@ -183,10 +212,10 @@ class PurchaseRequestLineMakePurchaseOrder(models.TransientModel):
             "price_unit": 0.0,
             "product_qty": qty,
             "account_analytic_id": item.line_id.analytic_account_id.id,
-            "purchase_request_lines": [(4, item.line_id.id)],
-            "date_planned": datetime(
-                date_required.year, date_required.month, date_required.day
-            ),
+            # "purchase_request_lines": [(4, item.line_id.id)],
+            # "date_planned": datetime(
+            #     date_required.year, date_required.month, date_required.day
+            # ),
             "move_dest_ids": [(4, x.id) for x in item.line_id.move_dest_ids],
         }
         if item.line_id.analytic_tag_ids:
@@ -247,9 +276,9 @@ class PurchaseRequestLineMakePurchaseOrder(models.TransientModel):
                 purchase = self.purchase_order_id
             if not purchase:
                 po_data = self._prepare_purchase_order(
-                    line.request_id.picking_type_id,
+                    self.purchase_request_ids[0].picking_type_id,
                     line.request_id.group_id,
-                    line.company_id,
+                    self.company_id,
                     line.origin,
                 )
                 purchase = purchase_obj.create(po_data)
@@ -269,7 +298,7 @@ class PurchaseRequestLineMakePurchaseOrder(models.TransientModel):
             if available_po_lines and not item.keep_description:
                 new_pr_line = False
                 po_line = available_po_lines[0]
-                po_line.purchase_request_lines = [(4, line.id)]
+                # po_line.purchase_request_lines = [(4, line.id)]
                 po_line.move_dest_ids |= line.move_dest_ids
                 po_line_product_uom_qty = po_line.product_uom._compute_quantity(
                     po_line.product_uom_qty, alloc_uom
@@ -333,14 +362,12 @@ class PurchaseRequestLineMakePurchaseOrderItem(models.TransientModel):
     )
     request_id = fields.Many2one(
         comodel_name="purchase.request",
-        related="line_id.request_id",
         string="Purchase Request",
         readonly=False,
     )
     product_id = fields.Many2one(
         comodel_name="product.product",
         string="Product",
-        related="line_id.product_id",
         readonly=False,
     )
     name = fields.Char(string="Description", required=True)
@@ -348,7 +375,7 @@ class PurchaseRequestLineMakePurchaseOrderItem(models.TransientModel):
         string="Quantity to purchase", digits="Product Unit of Measure"
     )
     product_uom_id = fields.Many2one(
-        comodel_name="uom.uom", string="UoM", required=True
+        comodel_name="uom.uom", string="UoM",
     )
     keep_description = fields.Boolean(
         string="Copy descriptions to new PO",

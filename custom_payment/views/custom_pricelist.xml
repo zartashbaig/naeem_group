@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="product_pricelist_form_view_inherit">
+            <field name="name">product.pricelist.inherit</field>
+            <field name="model">product.pricelist</field>
+            <field name="inherit_id" ref="product.product_pricelist_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='company_id']" position="before">
+                    <field name="price_code"/>
+                </xpath>
+                <xpath expr="//field[@name='company_id']" position="after">
+                    <field name="brand_id"/>
+                </xpath>
+                <xpath expr="//field[@name='brand_id']" position="after">
+                    <field name="custom_remark"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>
+        <!--<xpath expr="//label[@for='categ_id']" position="replace">-->
+        <!--                    <label for='categ_id' string="Product Code"/>-->
+        <!--                </xpath>-->

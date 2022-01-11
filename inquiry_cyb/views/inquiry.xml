@@ -1,9 +1,24 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
 
-
-
-
+    <!--    inquiry tree view model-->
+    <record id="inquiry_tree" model="ir.ui.view">
+        <field name="name">inquiry.tree</field>
+        <field name="model">cyb.inquiry</field>
+        <field name="arch" type="xml">
+            <tree string="inquiry tree view">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="cyb_quotation_id"/>
+                <field name="cyb_payment_id"/>
+                <!--                <field name="cyb_order_lines">-->
+                <!--                        <field name="inquiry_subtotal"/>-->
+                <!--                        <field name="product_inquiry_id" invisible="1"/>-->
+                <!--                </field>-->
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
     <record id="cyb_inquiry_form" model="ir.ui.view">
         <field name="name">cyb.inquiry.form</field>
         <field name="model">cyb.inquiry</field>
@@ -35,8 +50,11 @@
                             <field name="supplier_name"/>
                             <field name="currency_id"/>
                             <field name="cyb_quotation_id"/>
+<!--                            <field name="manager_id"/>-->
+                            <field name="remarks"/>
                         </group>
                         <group>
+                            <field name="pi_num"/>
                             <field name="inquiry_type"/>
                             <field name="date_inquiry"/>
                             <field name="date_Expiration"/>
@@ -52,44 +70,50 @@
                         <page string="Inquiry Lines">
                             <field name="order_line">
                                 <tree editable="bottom">
+                                    <field name="brand_id"/>
                                     <field name="product_id"/>
                                     <field name="name" widget="section_and_note_text"/>
                                     <field name="product_uom_qty"/>
                                     <field name="product_uom"/>
-                                    <field name="qty_delivered"/>
-                                    <field name="qty_invoiced"/>
+                                    <field name="qty_delivered" invisible="1"/>
+                                    <field name="qty_invoiced" invisible="1"/>
                                     <field name="price_unit"/>
                                     <field name="tax_id" widget="many2many_tags" options="{'no_create': True}"
                                            optional="show"/>
-                                    <field name="remarks"/>
                                     <field name="price_total"/>
                                     <field name="price_subtotal"/>
+                                    <field name="remarks"/>
                                     <!--                                    <field name="product_inquiry_id" invisible="1"/>-->
                                 </tree>
                             </field>
+                            <group>
+                                <field name="total_qty"/>
+                            </group>
+                            <group name="note_group" col="6" class="mt-2 mt-md-0">
+
+                                <group colspan="4">
+                                    <field name="notes" class="oe_inline"
+                                           placeholder="Define your terms and conditions ..."/>
+                                </group>
+                                <group class="oe_subtotal_footer oe_right" colspan="2" name="sale_total">
+                                    <field name="amount_untaxed" widget="monetary"
+                                           options="{'currency_field': 'currency_id'}"/>
+                                    <field name="amount_tax" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                    <div class="oe_subtotal_footer_separator oe_inline o_td_label">
+                                        <label for="amount_total"/>
+                                    </div>
+                                    <field name="amount_total" nolabel="1" class="oe_subtotal_footer_separator"
+                                           widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                </group>
+                                <div class="oe_clear"/>
+                            </group>
                         </page>
 
                         <page string="Quotations">
                             <field name="quotation_many_ids"/>
                         </page>
                     </notebook>
-                    <group name="note_group" col="6" class="mt-2 mt-md-0">
-                        <group colspan="4">
-                            <field name="notes" class="oe_inline"
-                                   placeholder="Define your terms and conditions ..."/>
-                        </group>
-                        <group class="oe_subtotal_footer oe_right" colspan="2" name="sale_total">
-                            <field name="amount_untaxed" widget="monetary"
-                                   options="{'currency_field': 'currency_id'}"/>
-                            <field name="amount_tax" widget="monetary" options="{'currency_field': 'currency_id'}"/>
-                            <div class="oe_subtotal_footer_separator oe_inline o_td_label">
-                                <label for="amount_total"/>
-                            </div>
-                            <field name="amount_total" nolabel="1" class="oe_subtotal_footer_separator"
-                                   widget="monetary" options="{'currency_field': 'currency_id'}"/>
-                        </group>
-                        <div class="oe_clear"/>
-                    </group>
+
                 </sheet>
                 <div class="oe_chatter">
                     <field name="message_follower_ids"/>
@@ -99,24 +123,7 @@
             </form>
         </field>
     </record>
-    <!--    inquiry tree view model-->
-    <record id="inquiry_tree" model="ir.ui.view">
-        <field name="name">inquiry.tree</field>
-        <field name="model">cyb.inquiry</field>
-        <field name="arch" type="xml">
-            <tree string="inquiry tree view">
-                <field name="name"/>
-                <field name="partner_id"/>
-                <field name="cyb_quotation_id"/>
-                <field name="cyb_payment_id"/>
-                <!--                <field name="cyb_order_lines">-->
-                <!--                        <field name="inquiry_subtotal"/>-->
-                <!--                        <field name="product_inquiry_id" invisible="1"/>-->
-                <!--                </field>-->
-                <field name="state"/>
-            </tree>
-        </field>
-    </record>
+
     <!--action of repair menu-->
     <record id="action_cyb_inquiry" model="ir.actions.act_window">
         <field name="name">Sales Inquiry</field>

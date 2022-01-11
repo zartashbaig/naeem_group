@@ -308,6 +308,9 @@
                             </group>
 
                         </page>
+                            <page string="Purchase Orders">
+                            <field name="purchase_many_ids"/>
+                        </page>
                     </notebook>
                 </sheet>
                 <div class="oe_chatter">
