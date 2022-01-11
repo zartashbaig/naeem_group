@@ -14,7 +14,7 @@ class CustomDeliveryChal(models.Model):
     delivery_by_inherit = fields.Char(string='Delivery by')
     delivery_to_inherit = fields.Char(string='Delivery to')
     delivery_expt_inherit = fields.Char(string='Exp. Delivery request')
-    bilty_inherit = fields.Char(string='Bilty RefNo.')
+    bilty_inherit = fields.Char(string='Bilty Ref No.')
     doc_no_inherit = fields.Char(string='Doc No.')
     ref_no_inherit = fields.Char(string='Doc Ref. No.')
     cancel_inherit = fields.Boolean('Cancel')
@@ -26,6 +26,7 @@ class CustomDeliveryChal(models.Model):
         ('STOCKIEST', 'STOCKIEST'),
         ('INDENTING', 'INDENTING')
     ], string="DC Type")
+
 
 
 
