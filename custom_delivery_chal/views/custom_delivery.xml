@@ -36,9 +36,9 @@
                 <xpath expr="//field[@name='account_num_inherit']" position="after">
                     <field name="remarks_inherit"/>
                 </xpath>
-                <xpath expr="//field[@name='remarks_inherit']" position="after">
-                    <field name="doc_no_inherit"/>
-                </xpath>
+<!--                <xpath expr="//field[@name='remarks_inherit']" position="after">-->
+<!--                    <field name="doc_no_inherit"/>-->
+<!--                </xpath>-->
                 <xpath expr="//field[@name='doc_no_inherit']" position="after">
                     <field name="ref_no_inherit"/>
                 </xpath>

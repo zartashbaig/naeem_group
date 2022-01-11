@@ -16,7 +16,7 @@ class CustomDeliveryChal(models.Model):
     delivery_expt_inherit = fields.Char(string='Exp. Delivery request')
     bilty_inherit = fields.Char(string='Bilty Ref No.')
     doc_no_inherit = fields.Char(string='Doc No.')
-    ref_no_inherit = fields.Char(string='Doc Ref. No.')
+    ref_no_inherit = fields.Char(string='Ref No.')
     cancel_inherit = fields.Boolean('Cancel')
     auto_type = fields.Selection([
         ('manual', 'Manual'),
