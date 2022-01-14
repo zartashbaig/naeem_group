@@ -20,6 +20,7 @@
 ###################################################################################
 
 from odoo import models,fields,api
+from odoo.exceptions import ValidationError
 
 
 class ProductBrand(models.Model):
@@ -37,6 +38,12 @@ class BrandProduct(models.Model):
     member_ids = fields.One2many('product.template', 'brand_id')
     product_count = fields.Char(String='Product Count', compute='get_count_products', store=True)
 
+    @api.constrains('name')
+    def check_name(self):
+        brands = self.env['product.brand'].search([('name','=',self.name)])
+        if brands:
+            raise ValidationError('You can not make brand with the same name')
+
     @api.depends('member_ids')
     def get_count_products(self):
         self.product_count = len(self.member_ids)
@@ -49,3 +56,12 @@ class BrandReportStock(models.Model):
         string='Brand', store=True, readonly=True)
 
 
+class ProductCategory(models.Model):
+    _name = 'product.category'
+
+
+    @api.constrains('name')
+    def check_name(self):
+        category = self.env['product.category'].search([('name','=',self.name)])
+        if category:
+            raise ValidationError('You can not make category with the same name')
