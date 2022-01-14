@@ -56,12 +56,12 @@ class BrandReportStock(models.Model):
         string='Brand', store=True, readonly=True)
 
 #
-# class ProductCategory(models.Model):
-#     _name = 'product.category'
-#
-#
-#     @api.constrains('name')
-#     def check_name(self):
-#         category = self.env['product.category'].search([('name','=',self.name)])
-#         if category:
-#             raise ValidationError('You can not make category with the same name')
+class ProductCategory(models.Model):
+    _inherit = 'product.category'
+
+
+    @api.constrains('name')
+    def check_name(self):
+        category = self.env['product.category'].search([('name','=',self.name)])
+        if category.__len__()>1:
+            raise ValidationError('You can not make category with the same name')
