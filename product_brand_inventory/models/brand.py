@@ -41,7 +41,7 @@ class BrandProduct(models.Model):
     @api.constrains('name')
     def check_name(self):
         brands = self.env['product.brand'].search([('name','=',self.name)])
-        if brands:
+        if brands.__len__()>1:
             raise ValidationError('You can not make brand with the same name')
 
     @api.depends('member_ids')
