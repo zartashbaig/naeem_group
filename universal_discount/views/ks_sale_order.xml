@@ -39,5 +39,60 @@
             </field>
         </record>
 
+<!--        Cybat quotation-->
+
+        <record id="ks_discount_inquiry_cyb_form_inherited" model="ir.ui.view">
+            <field name="name">ks.discount.sale_order.form.inherited</field>
+            <field name="model">cyb.inquiry</field>
+            <field name="inherit_id" ref="inquiry_cyb.cyb_inquiry_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='order_line']" position="after">
+                    <div class="ks_container">
+                        <field name="ks_enable_discount" invisible="1"/>
+                        <field name="ks_amount_discount" invisible="1"/>
+                        <label for="ks_global_discount_type" string="Universal Discount Type:" attrs="{'invisible':[('ks_enable_discount','!=',True),('ks_amount_discount','=',0)]}"/>
+                        <field name="ks_global_discount_type" class="oe_inline" attrs="{'invisible':[('ks_enable_discount','!=',True),('ks_amount_discount','=',0)],
+                                                                                         'readonly':[('ks_enable_discount','!=',True),('ks_amount_discount','!=',0)]}"/>
+                    </div>
+                    <div class="ks_container">
+                        <label for="ks_global_discount_rate" string="Universal Discount:" attrs="{'invisible':[('ks_enable_discount','!=',True),('ks_amount_discount','=',0)]}"/>
+                        <field name="ks_global_discount_rate" class="oe_inline" attrs="{'invisible':[('ks_enable_discount','!=',True),('ks_amount_discount','=',0)],'readonly':[('ks_enable_discount','!=',True),('ks_amount_discount','!=',0)]}"/>
+                    </div>
+                </xpath>
+                <xpath expr="//field[@name='amount_tax']"  position="after">
+                        <div class="o_td_label">
+                            <label for="ks_amount_discount"/>
+                            <br/>
+                            <field name="ks_amount_discount"/>
+                        </div>
+                </xpath>
+            </field>
+        </record>
+
+<!--        Cybat quotation-->
+
+        <record id="ks_discount_cyb_quotation_form_inherited" model="ir.ui.view">
+            <field name="name">ks.discount.cyb.quotation.form.inherited</field>
+            <field name="model">cyb.quotation</field>
+            <field name="inherit_id" ref="sale.view_order_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='order_line']" position="after">
+                    <div class="ks_container">
+                        <field name="ks_enable_discount" invisible="1"/>
+                        <field name="ks_amount_discount" invisible="1"/>
+                        <label for="ks_global_discount_type" string="Universal Discount Type:" attrs="{'invisible':[('ks_enable_discount','!=',True),('ks_amount_discount','=',0)]}"/>
+                        <field name="ks_global_discount_type" class="oe_inline" attrs="{'invisible':[('ks_enable_discount','!=',True),('ks_amount_discount','=',0)],
+                                                                                         'readonly':[('ks_enable_discount','!=',True),('ks_amount_discount','!=',0)]}"/>
+                    </div>
+                    <div class="ks_container">
+                        <label for="ks_global_discount_rate" string="Universal Discount:" attrs="{'invisible':[('ks_enable_discount','!=',True),('ks_amount_discount','=',0)]}"/>
+                        <field name="ks_global_discount_rate" class="oe_inline" attrs="{'invisible':[('ks_enable_discount','!=',True),('ks_amount_discount','=',0)],'readonly':[('ks_enable_discount','!=',True),('ks_amount_discount','!=',0)]}"/>
+                    </div>
+                </xpath>
+            </field>
+        </record>
+
+
+
     </data>
 </odoo>
