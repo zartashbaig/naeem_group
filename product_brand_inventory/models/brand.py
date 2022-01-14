@@ -55,13 +55,13 @@ class BrandReportStock(models.Model):
     brand_id  = fields.Many2one(related='product_id.brand_id',
         string='Brand', store=True, readonly=True)
 
-
-class ProductCategory(models.Model):
-    _name = 'product.category'
-
-
-    @api.constrains('name')
-    def check_name(self):
-        category = self.env['product.category'].search([('name','=',self.name)])
-        if category:
-            raise ValidationError('You can not make category with the same name')
+#
+# class ProductCategory(models.Model):
+#     _name = 'product.category'
+#
+#
+#     @api.constrains('name')
+#     def check_name(self):
+#         category = self.env['product.category'].search([('name','=',self.name)])
+#         if category:
+#             raise ValidationError('You can not make category with the same name')
