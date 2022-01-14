@@ -19,7 +19,7 @@ class SaleOrderExt(models.Model):
         compute="_compute_discount_total",
         string="Discount %",
         currency_field="currency_id",
-        store=True,
+        store=True, digits=(16, 4)
     )
     inquiry_type = fields.Selection([
         ('STOCKIEST', 'STOCKIEST'),
@@ -31,13 +31,13 @@ class SaleOrderExt(models.Model):
     ], string="P.Price Apply", default='no')
     ref_id = fields.Char(string="Reference")
     account_num = fields.Char(string="Account No.")
-    credit_lim = fields.Float(string="Credit Limit")
+    credit_lim = fields.Float(string="Credit Limit", digits=(16, 4))
     d_date = fields.Date(string="Delivery Date",)
     currency_id = fields.Many2one('res.currency', string='Currency', readonly=False)
     manager_id = fields.Many2one('res.partner', string="Sales Manager")
     remarks = fields.Text(string="Remarks")
     cancel = fields.Boolean(string='Cancel')
-    net_amount = fields.Float(string='Net Amount', readonly=True, store=True)
+    net_amount = fields.Float(string='Net Amount', readonly=True, store=True, digits=(16, 4))
 
     @api.depends('order_line.product_uom_qty')
     def _amount_all_qty(self):
@@ -78,8 +78,8 @@ class SaleOrderLineExt(models.Model):
     hs_code = fields.Char(string="HS Code")
     wh_id = fields.Many2one('stock.warehouse', string="Ware House")
     bonus_quantity = fields.Float(string='Bonus Qty', default=1.0)
-    tax_amount = fields.Float(string="Tax Amount",compute="_tax_amount_compute")
-    prod_total_discount = fields.Float('Disc. Amount', readonly=True, store=True)
+    tax_amount = fields.Float(string="Tax Amount",compute="_tax_amount_compute", digits=(16, 4))
+    prod_total_discount = fields.Float('Disc. Amount', readonly=True, store=True, digits=(16, 4))
     pro_available = fields.Float(related='product_id.qty_available', string="Product Available")
 
     def product_qty_location_check(self):
@@ -197,19 +197,19 @@ class CybQuotation(models.Model):
                                   readonly=False)
 
     amount_untaxed = fields.Monetary(string='Total Excl ST Amount', store=True, readonly=True, compute='_amount_all',
-                                     tracking=5)
-    amount_tax = fields.Monetary(string='Total Taxation Amount', store=True, readonly=True, compute='_amount_all')
+                                     tracking=5, digits=(16, 4))
+    amount_tax = fields.Monetary(string='Total Taxation Amount', store=True, readonly=True, compute='_amount_all', digits=(16, 4))
     amount_total = fields.Monetary(string='Total Incl ST Amount', store=True, readonly=True, compute='_amount_all',
-                                   tracking=4)
+                                   tracking=4, digits=(16, 4))
     count = fields.Integer(compute="_compute_discount_total", string='SN (Total)', store=True, readonly=1)
     total_qty = fields.Float(string='Total QTY', store=True, readonly=True, compute='_amount_all_qty', tracking=4)
     discount_total = fields.Monetary(
         compute="_compute_discount_total",
         string="Discount %",
         currency_field="currency_id",
-        store=True,
+        store=True, digits=(16, 4)
     )
-    net_amount = fields.Float(string='Net Amount', readonly=True, store=True)
+    net_amount = fields.Float(string='Net Amount', readonly=True, store=True, digits=(16, 4))
 
     @api.depends("order_line.prod_total_discount")
     def _compute_discount_total(self):
@@ -300,7 +300,7 @@ class QuotationFriends(models.Model):
     bonus_quantity = fields.Float(string='Bonus Qty', default=1.0)
     qty_delivered = fields.Float(string='Delivered')
     qty_invoiced = fields.Float(string='Invoiced')
-    price_unit = fields.Float(string='Unit price')
+    price_unit = fields.Float(string='Unit price', digits=(16, 4))
     # price_subtotal = fields.Float(string="Subtotal")
     tax_id = fields.Many2many('account.tax', string='Taxes',
                               domain=['|', ('active', '=', False), ('active', '=', True)])
@@ -313,15 +313,15 @@ class QuotationFriends(models.Model):
     wh_id = fields.Many2one('stock.warehouse', string="Ware House")
     hs_code = fields.Char(string="HS code")
     pro_available = fields.Float(related='product_id.qty_available', string="Product Available")
-    tax_amount = fields.Float(string="Tax Amount",compute='_tax_amount_compute')
+    tax_amount = fields.Float(string="Tax Amount",compute='_tax_amount_compute', digits=(16, 4))
 
     currency_id = fields.Many2one(related='order_id.currency_id', depends=['order_id.currency_id'], store=True,
                                   string='Currency', readonly=True)
-    price_subtotal = fields.Monetary(compute='_compute_amount', string='Subtotal', readonly=True, store=True)
-    price_tax = fields.Float(compute='_compute_amount', string='Total Tax', readonly=True, store=True)
-    price_total = fields.Monetary(compute='_compute_amount', string='Total', readonly=True, store=True)
+    price_subtotal = fields.Monetary(compute='_compute_amount', string='Subtotal', readonly=True, store=True, digits=(16, 4))
+    price_tax = fields.Float(compute='_compute_amount', string='Total Tax', readonly=True, store=True, digits=(16, 4))
+    price_total = fields.Monetary(compute='_compute_amount', string='Total', readonly=True, store=True, digits=(16, 4))
     discount = fields.Float(string='Discount %', digits='Discount', default=0.0)
-    prod_total_discount = fields.Float('Disc. Amount', readonly=True, store=True)
+    prod_total_discount = fields.Float('Disc. Amount', readonly=True, store=True, digits=(16, 4))
 
     @api.onchange('price_unit', 'product_uom_qty', 'tax_id')
     def _tax_amount_compute(self):

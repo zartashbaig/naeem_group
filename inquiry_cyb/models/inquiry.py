@@ -78,9 +78,9 @@ class CybInquiry(models.Model):
         return result
 
     amount_untaxed = fields.Monetary(string='Untaxed Amount', store=True, readonly=True, compute='_amount_all',
-                                     tracking=5)
-    amount_tax = fields.Monetary(string='Taxes', store=True, readonly=True, compute='_amount_all')
-    amount_total = fields.Monetary(string='Total', store=True, readonly=True, compute='_amount_all', tracking=4)
+                                     tracking=5, digits=(16, 4))
+    amount_tax = fields.Monetary(string='Taxes', store=True, readonly=True, compute='_amount_all', digits=(16, 4))
+    amount_total = fields.Monetary(string='Total', store=True, readonly=True, compute='_amount_all', tracking=4, digits=(16, 4))
     total_qty = fields.Float(string='Total QTY', store=True, readonly=True, compute='_amount_all_qty', tracking=4)
 
     @api.depends('order_line.price_total')
@@ -162,12 +162,12 @@ class CybSpecialist(models.Model):
                           # new fields added by WaqasAli
     hs_code = fields.Char(string="HS code")
     wh_id = fields.Many2one('stock.warehouse', string="Ware House")
-    tax_amount = fields.Float(string="Tax Amount",compute="_tax_amount_compute")
+    tax_amount = fields.Float(string="Tax Amount",compute="_tax_amount_compute", digits=(16, 4))
     currency_id = fields.Many2one(related='order_id.currency_id', depends=['order_id.currency_id'], store=True, string='Currency', readonly=True)
-    price_subtotal = fields.Monetary(compute='_compute_amount', string='Subtotal', readonly=True, store=True)
-    price_tax = fields.Float(compute='_compute_amount', string='Total Tax', readonly=True, store=True)
+    price_subtotal = fields.Monetary(compute='_compute_amount', string='Subtotal', readonly=True, store=True, digits=(16, 4))
+    price_tax = fields.Float(compute='_compute_amount', string='Total Tax', readonly=True, store=True, digits=(16, 4))
     pro_available = fields.Float(related='product_id.qty_available', string="Product Available")
-    price_total = fields.Monetary(compute='_compute_amount', string='Total', readonly=True, store=True)
+    price_total = fields.Monetary(compute='_compute_amount', string='Total', readonly=True, store=True, digits=(16, 4))
 
     def product_qty_location_check(self):
         for rec in self:
