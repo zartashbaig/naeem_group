@@ -78,9 +78,9 @@ class SaleOrderLineExt(models.Model):
     hs_code = fields.Char(string="HS Code")
     wh_id = fields.Many2one('stock.warehouse', string="Ware House")
     bonus_quantity = fields.Float(string='Bonus Qty', default=1.0)
-    tax_amount = fields.Float(string="Tax Amount")
+    tax_amount = fields.Float(string="Tax Amount",compute="_tax_amount_compute")
     prod_total_discount = fields.Float('Disc. Amount', readonly=True, store=True)
-    pro_available = fields.Float(compute="product_qty_location_check", string="Product Available")
+    pro_available = fields.Float(related='product_id.qty_available', string="Product Available")
 
     def product_qty_location_check(self):
         for rec in self:
@@ -89,9 +89,12 @@ class SaleOrderLineExt(models.Model):
 
     @api.onchange('price_unit', 'product_uom_qty', 'tax_id')
     def _tax_amount_compute(self):
-        if self.price_unit:
-            self.tax_amount = self.price_unit * self.product_uom_qty * self.tax_id.amount / 100
-
+        for rec in self:
+            tax_amount = 0
+            if rec.price_unit:
+                for tax in rec.tax_id:
+                    tax_amount += rec.price_unit * rec.product_uom_qty * tax.amount / 100
+                rec.tax_amount = tax_amount
 
 
     @api.depends('product_uom_qty', 'discount', 'price_unit', 'tax_id')
@@ -309,7 +312,8 @@ class QuotationFriends(models.Model):
     # new fields added by WaqasAli
     wh_id = fields.Many2one('stock.warehouse', string="Ware House")
     hs_code = fields.Char(string="HS code")
-    tax_amount = fields.Float(string="Tax Amount")
+    pro_available = fields.Float(related='product_id.qty_available', string="Product Available")
+    tax_amount = fields.Float(string="Tax Amount",compute='_tax_amount_compute')
 
     currency_id = fields.Many2one(related='order_id.currency_id', depends=['order_id.currency_id'], store=True,
                                   string='Currency', readonly=True)
@@ -319,7 +323,14 @@ class QuotationFriends(models.Model):
     discount = fields.Float(string='Discount %', digits='Discount', default=0.0)
     prod_total_discount = fields.Float('Disc. Amount', readonly=True, store=True)
 
-
+    @api.onchange('price_unit', 'product_uom_qty', 'tax_id')
+    def _tax_amount_compute(self):
+        for rec in self:
+            tax_amount = 0
+            if rec.price_unit:
+                for tax in rec.tax_id:
+                    tax_amount += rec.price_unit * rec.product_uom_qty * tax.amount / 100
+                rec.tax_amount = tax_amount
     @api.onchange('price_unit', 'product_uom_qty')
     def onchange_inquiry(self):
         self.price_subtotal = self.product_uom_qty * self.price_unit

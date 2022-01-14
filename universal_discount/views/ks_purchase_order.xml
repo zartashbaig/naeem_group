@@ -1,0 +1,45 @@
+<odoo>
+    <data>
+
+        <record id="ks_global_discount_purchase_view_form" model="ir.ui.view">
+            <field name="name">ks.global.discount.purchase.form</field>
+            <field name="model">purchase.order</field>
+            <field name="inherit_id" ref="purchase.purchase_order_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//form/sheet/notebook/page[1]/div[hasclass('row')]" position="before">
+                    <div class="ks_container">
+                        <field name="ks_enable_discount" invisible="1"/>
+                        <label for="ks_global_discount_type" string="Universal Discount Type:" attrs="{'invisible':[('ks_enable_discount','!=',True),('ks_amount_discount','=',0)]}"/>
+                        <field name="ks_global_discount_type" class="oe_inline" attrs="{'invisible':[('ks_enable_discount','!=',True),('ks_amount_discount','=',0)],'readonly':[('ks_enable_discount','!=',True),('ks_amount_discount','!=',0)]}"/>
+                    </div>
+                    <div class="ks_container">
+                        <label for="ks_global_discount_rate" string="Universal Discount:" attrs="{'invisible':[('ks_enable_discount','!=',True),('ks_amount_discount','=',0)]}"/>
+                        <field name="ks_global_discount_rate" class="oe_inline" attrs="{'invisible':[('ks_enable_discount','!=',True),('ks_amount_discount','=',0)],'readonly':[('ks_enable_discount','!=',True),('ks_amount_discount','!=',0)]}"/>
+                    </div>
+                </xpath>
+                <xpath expr="//field[@name='amount_tax']" position="after">
+                    <field name="ks_amount_discount" />
+                </xpath>
+            </field>
+        </record>
+
+
+        <record id="ks_global_discount_purchase_view_form_ext" model="ir.ui.view">
+            <field name="name">purchase.form.ext</field>
+            <field name="model">purchase.order</field>
+            <field name="inherit_id" ref="custom_purchase_sys.purchase_order_template_form_view_inherit"/>
+            <field name="arch" type="xml">
+                <xpath expr="//notebook/page[@name='products']/div[hasclass('row')]/div[@id='amount_1']"  position="after">
+                    <div class="col-1">
+                        <div class="o_td_label">
+                            <label for="ks_amount_discount"/>
+                            <br/>
+                            <field name="ks_amount_discount"/>
+                        </div>
+                    </div>
+                </xpath>
+            </field>
+        </record>
+
+    </data>
+</odoo>

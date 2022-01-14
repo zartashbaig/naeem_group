@@ -158,7 +158,7 @@ class CybSpecialist(models.Model):
     remarks = fields.Text(string="Remarks")
                       # new fields added by WaqassAlii
     hs_code = fields.Char(string="HS code")
-    tax_amount = fields.Float(string="Tax Amount")
+    tax_amount = fields.Float(string="Tax Amount",compute="_tax_amount_compute")
     wh_id = fields.Many2one('stock.warehouse', string="Ware House")
     pro_available = fields.Float(compute="product_qty_location_check", string="Product Available")
     currency_id = fields.Many2one(related='order_id.currency_id', depends=['order_id.currency_id'], store=True, string='Currency', readonly=True)
@@ -172,11 +172,15 @@ class CybSpecialist(models.Model):
             if rec.product_id:
                 rec.pro_available = rec.product_id.qty_available
 
-    @api.onchange('price_unit', 'product_qty', 'taxes_id')
-    def _tax_amount_compute(self):
-        if self.price_unit:
-            self.tax_amount = self.price_unit * self.product_qty * self.taxes_id.amount / 100
 
+    @api.onchange('price_unit', 'product_uom_qty', 'taxes_id')
+    def _tax_amount_compute(self):
+        for rec in self:
+            tax_amount = 0
+            if rec.price_unit:
+                for tax in rec.taxes_id:
+                    tax_amount += rec.price_unit * rec.product_uom_qty * tax.amount / 100
+                rec.tax_amount = tax_amount
 
     @api.depends('product_qty', 'price_unit', 'taxes_id')
     def _compute_amount(self):
