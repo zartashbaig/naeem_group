@@ -44,6 +44,15 @@
             <xpath expr="//field[@name='order_line']/tree/field[@name='product_id']" position="before">
                 <field name="brand_id"/>
             </xpath>
+             <xpath expr="//field[@name='order_line']/tree/field[@name='brand_id']" position="after">
+                <field name="pro_available"/>
+            </xpath>
+            <xpath expr="//field[@name='order_line']/tree/field[@name='brand_id']" position="before">
+                <field name="hs_code"/>
+            </xpath>
+             <xpath expr="//field[@name='order_line']/tree/field[@name='hs_code']" position="after">
+                <field name="wh_id"/>
+            </xpath>
             <xpath expr="//field[@name='order_line']/tree/field[@name='product_uom_qty']" position="after">
                 <field name="bonus_quantity"/>
             </xpath>
@@ -53,6 +62,9 @@
             </xpath>
             <xpath expr="//field[@name='order_line']/tree/field[@name='price_subtotal']" position="after">
                 <field name="remarks"/>
+            </xpath>
+            <xpath expr="//field[@name='order_line']/tree/field[@name='tax_id']" position="after">
+                <field name="tax_amount"/>
             </xpath>
             <xpath expr="//notebook/page[@name='order_lines']" position="after">
                 <page string="Quotation Lines">
@@ -75,7 +87,7 @@
                             <field name="count"/>
                         </div>
                     </div>
-                    <div class="col-2">
+                    <div class="col-1">
                         <div class="o_td_label">
                             <label for="total_qty"/>
                             <br/>
@@ -182,7 +194,10 @@
                             <field name="order_line">
                                 <tree editable="bottom">
                                     <field name="brand_id"/>
+                                    <field name="wh_id"/>
+<!--                                    <field name="pro_available"/>-->
                                     <field name="product_id"/>
+                                    <field name="hs_code"/>
                                     <field name="name" widget="section_and_note_text"/>
                                     <field name="product_uom_qty"/>
                                     <field name="bonus_quantity"/>
@@ -192,6 +207,7 @@
                                     <field name="price_unit"/>
                                     <field name="tax_id" widget="many2many_tags" options="{'no_create': True}"
                                            optional="show"/>
+                                    <field name="tax_amount"/>
                                     <field name="discount" string="Disc.%" groups="product.group_discount_per_so_line"
                                            optional="show" widget="product_discount"/>
                                     <field name="prod_total_discount" groups="product.group_discount_per_so_line"
@@ -199,6 +215,7 @@
                                     <field name="price_subtotal"/>
                                     <field name="price_total"/>
                                     <field name="remarks"/>
+
                                 </tree>
                             </field>
                             <div class="row" style="border: 2px solid #875a7b;">

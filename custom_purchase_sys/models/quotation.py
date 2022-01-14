@@ -190,6 +190,11 @@ class QuotationPurchaseLine(models.Model):
 
     order_id = fields.Many2one('cyb.quotation.purchase', string='Purchase Quotation id', ondelete='cascade', index=True)
     remarks = fields.Text(string="Remarks")
+                    # new fields added by WaqassAlii
+    pro_available = fields.Float(compute="product_qty_location_check", string="Product Available")
+    hs_code = fields.Char(string="HS code")
+    tax_amount = fields.Float(string="Tax Amount")
+    wh_id = fields.Many2one('stock.warehouse', string="Ware House")
 
     currency_id = fields.Many2one(related='order_id.currency_id', depends=['order_id.currency_id'], store=True,
                                   string='Currency', readonly=True)
@@ -199,6 +204,16 @@ class QuotationPurchaseLine(models.Model):
     discount = fields.Float(string='Discount %', digits='Discount', default=0.0)
     prod_total_discount = fields.Float('Disc. Amount', readonly=True, store=True)
 
+    # by WaqassAlii
+    def product_qty_location_check(self):
+        for rec in self:
+            if rec.product_id:
+                rec.pro_available = rec.product_id.qty_available
+
+    @api.onchange('price_unit', 'product_qty', 'taxes_id')
+    def _tax_amount_compute(self):
+        if self.price_unit:
+            self.tax_amount = self.price_unit * self.product_qty * self.taxes_id.amount / 100
 
     @api.onchange('price_unit', 'product_qty')
     def onchange_inquiry(self):

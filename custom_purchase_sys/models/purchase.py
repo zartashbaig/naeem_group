@@ -68,8 +68,28 @@ class PurchaseLineDiscount(models.Model):
     prod_total_discount = fields.Float('Disc. Amount', readonly=True, store=True)
     brand_id = fields.Many2one(string="Brand", related='product_id.brand_id')
     remarks = fields.Text(string="Remarks")
+              # new fields added by WaqassAlii
+    wh_id = fields.Many2one('stock.warehouse', string="Ware House")
+    hs_code = fields.Char(string="HS code")
+    tax_amount = fields.Float(string="Tax Amount")
+    # pro_available = fields.Float(related="product_id.qty_available", string="Product Available", store=True)
+    pro_available = fields.Float(compute="product_qty_location_check", string="Product Available")
 
+    # # by WaqassAlii
+    # @api.onchange('product_id')
+    # def product_qty_location_check(self):
+    #     if self.product_id:
+    #         product = self.product_id
+    #         pro_available = product.qty_available
+    def product_qty_location_check(self):
+        for rec in self:
+            if rec.product_id:
+                rec.pro_available = rec.product_id.qty_available
 
+    @api.onchange('price_unit', 'product_qty', 'taxes_id')
+    def _tax_amount_compute(self):
+        if self.price_unit:
+            self.tax_amount = self.price_unit * self.product_qty * self.taxes_id.amount / 100
 
     @api.depends('product_qty', 'price_unit', 'taxes_id','discount')
     def _compute_amount(self):

@@ -75,8 +75,24 @@ class SaleOrderLineExt(models.Model):
 
     brand_id = fields.Many2one(string="Brand", related='product_id.brand_id')
     remarks = fields.Text(string="Remarks")
+    hs_code = fields.Char(string="HS Code")
+    wh_id = fields.Many2one('stock.warehouse', string="Ware House")
     bonus_quantity = fields.Float(string='Bonus Qty', default=1.0)
+    tax_amount = fields.Float(string="Tax Amount")
     prod_total_discount = fields.Float('Disc. Amount', readonly=True, store=True)
+    pro_available = fields.Float(compute="product_qty_location_check", string="Product Available")
+
+    def product_qty_location_check(self):
+        for rec in self:
+            if rec.product_id:
+                rec.pro_available = rec.product_id.qty_available
+
+    @api.onchange('price_unit', 'product_uom_qty', 'tax_id')
+    def _tax_amount_compute(self):
+        if self.price_unit:
+            self.tax_amount = self.price_unit * self.product_uom_qty * self.tax_id.amount / 100
+
+
 
     @api.depends('product_uom_qty', 'discount', 'price_unit', 'tax_id')
     def _compute_amount(self):
@@ -290,6 +306,10 @@ class QuotationFriends(models.Model):
 
     order_id = fields.Many2one('cyb.quotation', string='Quotation id', ondelete='cascade', index=True)
     remarks = fields.Text(string="Remarks")
+    # new fields added by WaqasAli
+    wh_id = fields.Many2one('stock.warehouse', string="Ware House")
+    hs_code = fields.Char(string="HS code")
+    tax_amount = fields.Float(string="Tax Amount")
 
     currency_id = fields.Many2one(related='order_id.currency_id', depends=['order_id.currency_id'], store=True,
                                   string='Currency', readonly=True)

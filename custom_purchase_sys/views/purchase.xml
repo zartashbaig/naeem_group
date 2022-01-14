@@ -32,11 +32,23 @@
                 <xpath expr="//field[@name='order_line']/tree/field[@name='product_id']" position="before">
                     <field name="brand_id"/>
                 </xpath>
+                <xpath expr="//field[@name='order_line']/tree/field[@name='brand_id']" position="after">
+                    <field name="pro_available"/>
+                </xpath>
+                 <xpath expr="//field[@name='order_line']/tree/field[@name='pro_available']" position="before">
+                    <field name="wh_id"/>
+                </xpath>
+                 <xpath expr="//field[@name='order_line']/tree/field[@name='product_id']" position="after">
+                    <field name="hs_code"/>
+                </xpath>
                 <xpath expr="//field[@name='order_line']/tree/field[@name='product_qty']" position="after">
                     <field name="bonus_quantity"/>
                 </xpath>
                 <xpath expr="//field[@name='order_line']/tree/field[@name='taxes_id']" position="after">
                     <field name="discount"/>
+                </xpath>
+                <xpath expr="//field[@name='order_line']/tree/field[@name='discount']" position="before">
+                    <field name="tax_amount"/>
                 </xpath>
                 <xpath expr="//field[@name='order_line']/tree/field[@name='discount']" position="after">
                     <field name="prod_total_discount"/>
@@ -64,7 +76,7 @@
                                 <field name="count"/>
                             </div>
                         </div>
-                        <div class="col-2">
+                        <div class="col-1">
                             <div class="o_td_label">
                                 <label for="total_qty"/>
                                 <br/>
@@ -78,7 +90,7 @@
                                        options="{'currency_field': 'currency_id'}"/>
                             </div>
                         </div>
-                        <div class="col-2">
+                        <div class="col-2" id="amount_1">
                             <div class="o_td_label">
                                 <label string="Total Taxation Amount" for="amount_tax"/>
                                 <field name="amount_tax" widget="monetary"
