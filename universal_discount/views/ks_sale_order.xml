@@ -5,7 +5,7 @@
             <field name="model">sale.order</field>
             <field name="inherit_id" ref="sale.view_order_form"/>
             <field name="arch" type="xml">
-                <xpath expr="//form/sheet/notebook/page/group" position="before">
+                <xpath expr="//field[@name='order_line']" position="after">
                     <div class="ks_container">
                         <field name="ks_enable_discount" invisible="1"/>
                         <field name="ks_amount_discount" invisible="1"/>
