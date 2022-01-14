@@ -74,7 +74,7 @@
         <record id="ks_discount_cyb_quotation_form_inherited" model="ir.ui.view">
             <field name="name">ks.discount.cyb.quotation.form.inherited</field>
             <field name="model">cyb.quotation</field>
-            <field name="inherit_id" ref="sale.view_order_form"/>
+            <field name="inherit_id" ref="inquiry_cyb.cyb_quotation_form"/>
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='order_line']" position="after">
                     <div class="ks_container">
