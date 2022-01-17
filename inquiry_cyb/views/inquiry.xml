@@ -28,12 +28,16 @@
                 <header>
                     <field name='state' widget='statusbar'
                            statusbar_visible="draft,confirm,Cancelled"/>
-                    <button type="object" string="Cancel"
-                            name="action_inquiry_cancel"/>
+
                     <button type="object" string="Confirm"
-                            name="action_inquiry_confirm"/>
+                            name="action_inquiry_confirm" states="draft"/>
+                    <button type="object" string="Cancel"
+                            name="action_inquiry_cancel" states="confirm"/>
                     <button type="action" string="Create Quotation"
-                            name="%(action_transientmodel_wizard)d"/>
+                            name="%(action_transientmodel_wizard)d" states="confirm"/>
+                    <button type="object" string="Reset to Draft"
+                            name="action_inquiry_reset" states="Cancelled"/>
+
                 </header>
                 <sheet>
                     <div class="oe_title">
@@ -50,7 +54,7 @@
                             <field name="supplier_name"/>
                             <field name="currency_id"/>
                             <field name="cyb_quotation_id"/>
-<!--                            <field name="manager_id"/>-->
+                            <!--                            <field name="manager_id"/>-->
                             <field name="remarks"/>
                         </group>
                         <group>
@@ -102,7 +106,8 @@
                                 <group class="oe_subtotal_footer oe_right" colspan="2" name="sale_total">
                                     <field name="amount_untaxed" widget="monetary"
                                            options="{'currency_field': 'currency_id'}"/>
-                                    <field name="amount_tax" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                    <field name="amount_tax" widget="monetary"
+                                           options="{'currency_field': 'currency_id'}"/>
                                     <div class="oe_subtotal_footer_separator oe_inline o_td_label">
                                         <label for="amount_total"/>
                                     </div>

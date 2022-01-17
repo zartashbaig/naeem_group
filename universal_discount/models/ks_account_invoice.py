@@ -10,16 +10,16 @@ class KsGlobalDiscountInvoice(models.Model):
     ks_global_discount_type = fields.Selection([
         ('percent', 'Percentage'),
         ('amount', 'Amount')],
-        string='Universal Discount Type',
+        string='Overall Discount Type',
         readonly=True,
         states={'draft': [('readonly', False)],
                 'sent': [('readonly', False)]},
         default='percent')
-    ks_global_discount_rate = fields.Float('Universal Discount',
+    ks_global_discount_rate = fields.Float('Overall Discount',
                                            readonly=True,
                                            states={'draft': [('readonly', False)],
                                                    'sent': [('readonly', False)]})
-    ks_amount_discount = fields.Monetary(string='Universal Discount',
+    ks_amount_discount = fields.Monetary(string='Overall Discount',
                                          readonly=True,
                                          compute='_compute_amount',
                                          store=True, track_visibility='always')
@@ -89,10 +89,10 @@ class KsGlobalDiscountInvoice(models.Model):
         return ks_res
 
     def ks_update_universal_discount(self):
-        """This Function Updates the Universal Discount through Sale Order"""
+        """This Function Updates the Overall Discount through Sale Order"""
         for rec in self:
             already_exists = self.line_ids.filtered(
-                lambda line: line.name and line.name.find('Universal Discount') == 0)
+                lambda line: line.name and line.name.find('Overall Discount') == 0)
             terms_lines = self.line_ids.filtered(
                 lambda line: line.account_id.user_type_id.type in ('receivable', 'payable'))
             other_lines = self.line_ids.filtered(
@@ -176,13 +176,13 @@ class KsGlobalDiscountInvoice(models.Model):
 
     @api.onchange('ks_global_discount_rate', 'ks_global_discount_type', 'line_ids')
     def _recompute_universal_discount_lines(self):
-        """This Function Create The General Entries for Universal Discount"""
+        """This Function Create The General Entries for Overall Discount"""
         for rec in self:
             type_list = ['out_invoice', 'out_refund', 'in_invoice', 'in_refund']
             if rec.ks_global_discount_rate > 0 and rec.move_type in type_list:
                 if rec.is_invoice(include_receipts=True):
                     in_draft_mode = self != self._origin
-                    ks_name = "Universal Discount "
+                    ks_name = "Overall Discount "
                     if rec.ks_global_discount_type == "amount":
                         ks_value = "of amount #" + str(self.ks_global_discount_rate)
                     elif rec.ks_global_discount_type == "percent":
@@ -196,7 +196,7 @@ class KsGlobalDiscountInvoice(models.Model):
                     terms_lines = self.line_ids.filtered(
                         lambda line: line.account_id.user_type_id.type in ('receivable', 'payable'))
                     already_exists = self.line_ids.filtered(
-                        lambda line: line.name and line.name.find('Universal Discount') == 0)
+                        lambda line: line.name and line.name.find('Overall Discount') == 0)
                     if already_exists:
                         amount = self.ks_amount_discount
                         if self.ks_sales_discount_account_id \
@@ -268,7 +268,7 @@ class KsGlobalDiscountInvoice(models.Model):
                                 self.line_ids += create_method(dict)
                                 # Updation of Invoice Line Id
                                 duplicate_id = self.invoice_line_ids.filtered(
-                                    lambda line: line.name and line.name.find('Universal Discount') == 0)
+                                    lambda line: line.name and line.name.find('Overall Discount') == 0)
                                 self.invoice_line_ids = self.invoice_line_ids - duplicate_id
                             else:
                                 dict.update({
@@ -311,7 +311,7 @@ class KsGlobalDiscountInvoice(models.Model):
                             self.line_ids += create_method(dict)
                             # updation of invoice line id
                             duplicate_id = self.invoice_line_ids.filtered(
-                                lambda line: line.name and line.name.find('Universal Discount') == 0)
+                                lambda line: line.name and line.name.find('Overall Discount') == 0)
                             self.invoice_line_ids = self.invoice_line_ids - duplicate_id
 
                     if in_draft_mode:
@@ -344,7 +344,7 @@ class KsGlobalDiscountInvoice(models.Model):
                         other_lines = self.line_ids.filtered(
                             lambda line: line.account_id.user_type_id.type not in ('receivable', 'payable'))
                         already_exists = self.line_ids.filtered(
-                            lambda line: line.name and line.name.find('Universal Discount') == 0)
+                            lambda line: line.name and line.name.find('Overall Discount') == 0)
                         total_balance = sum(other_lines.mapped('balance')) + amount
                         total_amount_currency = sum(other_lines.mapped('amount_currency'))
                         line_ids = []
@@ -382,7 +382,7 @@ class KsGlobalDiscountInvoice(models.Model):
 
             elif self.ks_global_discount_rate <= 0:
                 already_exists = self.line_ids.filtered(
-                    lambda line: line.name and line.name.find('Universal Discount') == 0)
+                    lambda line: line.name and line.name.find('Overall Discount') == 0)
                 if already_exists:
                     self.line_ids -= already_exists
                     terms_lines = self.line_ids.filtered(

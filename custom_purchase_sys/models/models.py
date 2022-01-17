@@ -67,6 +67,9 @@ class CybPurchase(models.Model):
     def action_inquiry_confirm(self):
         self.state = 'confirm'
 
+    def action_quotation_p_reset(self):
+        self.state = 'draft'
+
     @api.model
     def create(self, vals):
         if vals.get('name', 'P') == 'P':
@@ -173,13 +176,13 @@ class CybSpecialist(models.Model):
                 rec.pro_available = rec.product_id.qty_available
 
 
-    @api.onchange('price_unit', 'product_uom_qty', 'taxes_id')
+    @api.onchange('price_unit', 'product_qty', 'taxes_id')
     def _tax_amount_compute(self):
         for rec in self:
             tax_amount = 0
             if rec.price_unit:
                 for tax in rec.taxes_id:
-                    tax_amount += rec.price_unit * rec.product_uom_qty * tax.amount / 100
+                    tax_amount += rec.price_unit * rec.product_qty * tax.amount / 100
                 rec.tax_amount = tax_amount
 
     @api.depends('product_qty', 'price_unit', 'taxes_id')

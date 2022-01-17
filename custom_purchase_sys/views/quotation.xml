@@ -13,11 +13,13 @@
                            statusbar_visible="Draft,Confirmed,Cancelled"/>
 
                     <button type="object" string="Confirm"
-                            name="action_quotation_confirm"/>
+                            name="action_quotation_confirm" states="draft"/>
                     <button type="object" string="Cancel"
-                            name="action_quotation_cancel"/>
+                            name="action_quotation_cancel" states="confirm"/>
                     <button type="action" string="Create Purchase Order"
-                            name="%(purchase_order_data_wizard)d"/>
+                            name="%(purchase_order_data_wizard)d" states="confirm"/>
+                     <button type="object" string="Reset to Draft"
+                            name="action_quotation_purchase_reset" states="Cancelled"/>
 
                 </header>
                 <sheet>
@@ -85,7 +87,7 @@
                                         <field name="count"/>
                                     </div>
                                 </div>
-                                <div class="col-2">
+                                <div class="col-1">
                                     <div class="o_td_label">
                                         <label for="total_qty"/>
                                         <br/>

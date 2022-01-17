@@ -53,6 +53,14 @@
                 </group>
 
                 <group>
+                    <group>
+                        <field name="ks_global_discount_type"/>
+                        <field name="ks_global_discount_rate"/>
+                        <field name="ks_amount_discount"/>
+                    </group>
+                </group>
+
+                <group>
                     <!--                    <field name="notes"/>-->
                 </group>
 
