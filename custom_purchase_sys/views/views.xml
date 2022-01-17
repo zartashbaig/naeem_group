@@ -29,12 +29,16 @@
                 <header>
                     <field name='state' widget='statusbar'
                            statusbar_visible="draft,confirm,Cancelled"/>
+
+                     <button type="object" string="Confirm"
+                            name="action_inquiry_confirm" states="draft" />
                     <button type="object" string="Cancel"
-                            name="action_inquiry_cancel"/>
-                    <button type="object" string="Confirm"
-                            name="action_inquiry_confirm"/>
+                            name="action_inquiry_cancel" states="confirm"/>
+
                     <button type="action" string="Create Quotation"
-                            name="%(action_quotation_main_transientmodel_wizard)d"/>
+                            name="%(action_quotation_main_transientmodel_wizard)d" states="confirm"/>
+                     <button type="object" string="Reset to Draft"
+                            name="action_quotation_p_reset" states="Cancelled"/>
                 </header>
                 <sheet>
                     <div class="oe_title">

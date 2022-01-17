@@ -25,11 +25,20 @@ class createsaleorder(models.TransientModel):
     crm_lead_id = fields.Many2one('crm.lead', string="CRM Lead", related="so_id.crm_lead_id", store=True)
     date_inquiry = fields.Datetime(string="Inquiry Date", related="so_id.date_inquiry", store=True)
     ref_id = fields.Char(string="Reference", related="so_id.ref_id", store=True)
+    currency_id = fields.Many2one(related='so_id.currency_id', depends=['so_id.currency_id'], store=True, string='Currency', readonly=True)
+
     inquiry_type = fields.Selection([
         ('STOCKIEST', 'STOCKIEST'),
         ('INDENTING', 'INDENTING')
     ], string="Inquiry Type", related="so_id.inquiry_type", store=True)
     notes = fields.Text(string="Remarks", related="so_id.notes", store=True)
+
+    ks_global_discount_type = fields.Selection([('percent', 'Percentage'), ('amount', 'Amount')],
+                                               string='Overall Discount Type',
+                                               readonly=True,)
+    ks_global_discount_rate = fields.Float('Overall Discount Rate',
+                                           readonly=True)
+    ks_amount_discount = fields.Monetary(string='Overall Discount', readonly=True)
 
     @api.model
     def default_get(self, default_fields):
@@ -62,6 +71,9 @@ class createsaleorder(models.TransientModel):
         res.update({'new_order_line_ids': update,
                     'partner_id': data.partner_id[0].id,
                     'inquirymany_id': inquiry_ids,
+                    'ks_global_discount_type': data[0].ks_global_discount_type,
+                    'ks_global_discount_rate': data[0].ks_global_discount_rate,
+                    'ks_amount_discount': data[0].ks_amount_discount,
                     'so_id': self._context.get('active_id')})
         return res
 
@@ -94,6 +106,9 @@ class createsaleorder(models.TransientModel):
             'notes': self.notes,
             # 'so_id': self.so_id.id,
             'order_line': value,
+            'ks_global_discount_type': self[0].ks_global_discount_type,
+            'ks_global_discount_rate': self[0].ks_global_discount_rate,
+            'ks_amount_discount': self[0].ks_amount_discount,
             'state': 'draft',
             'inquirymany_id': self.inquirymany_id.ids
         }

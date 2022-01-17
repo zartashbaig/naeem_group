@@ -149,14 +149,16 @@
             <form string="Quotation">
                 <header>
                     <field name='state' widget='statusbar'
-                           statusbar_visible="Draft,Confirmed,Cancelled"/>
+                           statusbar_visible="draft,confirm,Cancelled"/>
 
                     <button type="object" string="Confirm"
-                            name="action_quotation_confirm"/>
+                            name="action_quotation_confirm" states="draft"/>
                     <button type="object" string="Cancel"
-                            name="action_quotation_cancel"/>
+                            name="action_quotation_cancel" states="confirm"/>
                     <button type="action" string="Create Sale Order"
-                            name="%(inquiry_invoice_wizard)d"/>
+                            name="%(inquiry_invoice_wizard)d" states="confirm"/>
+                          <button type="object" string="Reset to Draft"
+                            name="action_quotation_reset" states="Cancelled"/>
 
                 </header>
                 <sheet>
@@ -190,7 +192,7 @@
                     </group>
 
                     <notebook>
-                        <page string="Quotation line">
+                        <page string="Quotation line" name="order_line">
                             <field name="order_line">
                                 <tree editable="bottom">
                                     <field name="brand_id"/>
@@ -226,7 +228,7 @@
                                         <field name="count"/>
                                     </div>
                                 </div>
-                                <div class="col-2">
+                                <div class="col-1">
                                     <div class="o_td_label">
                                         <label for="total_qty"/>
                                         <br/>
