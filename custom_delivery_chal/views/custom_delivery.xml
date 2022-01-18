@@ -8,27 +8,34 @@
             <field name="arch" type="xml">
                 <xpath expr="//div[hasclass('o_td_label')]" position="replace">
                     <div class="o_td_label">
-                                <label for="partner_id" string="Customer" style="font-weight:bold;" attrs="{'invisible': [('picking_type_code', '!=', 'outgoing')]}"/>
-                                <label for="partner_id" string="Supplier" style="font-weight:bold;" attrs="{'invisible': [('picking_type_code', '!=', 'incoming')]}"/>
-                                <label for="partner_id" string="Contact" style="font-weight:bold;" attrs="{'invisible': [('picking_type_code', 'in', ['incoming', 'outgoing'])]}"/>
-                            </div>
+                        <label for="partner_id" string="Customer" style="font-weight:bold;"
+                               attrs="{'invisible': [('picking_type_code', '!=', 'outgoing')]}"/>
+                        <label for="partner_id" string="Supplier" style="font-weight:bold;"
+                               attrs="{'invisible': [('picking_type_code', '!=', 'incoming')]}"/>
+                        <label for="partner_id" string="Contact" style="font-weight:bold;"
+                               attrs="{'invisible': [('picking_type_code', 'in', ['incoming', 'outgoing'])]}"/>
+                    </div>
                 </xpath>
                 <xpath expr="//field[@name='partner_id']" position="after">
                     <field name="currency_inherit_id"/>
                 </xpath>
                 <xpath expr="//field[@name='currency_inherit_id']" position="before">
-                    <field name="dc_type" string="DC Type" attrs="{'invisible': [('picking_type_code', '=','incoming')]}"/>
-                    <field name="dc_type" string="GRN Type" attrs="{'invisible': [('picking_type_code', '=','outgoing')]}"/>
+                    <field name="dc_type" string="DC Type"
+                           attrs="{'invisible': [('picking_type_code', '=','incoming')]}"/>
+                    <field name="dc_type" string="GRN Type"
+                           attrs="{'invisible': [('picking_type_code', '=','outgoing')]}"/>
                 </xpath>
-<!--                <xpath expr="//label[@string='GRN type']" position="attribute">-->
-<!--                    <field name="dc_type"/>-->
-<!--                </xpath>-->
+                <!--                <xpath expr="//label[@string='GRN type']" position="attribute">-->
+                <!--                    <field name="dc_type"/>-->
+                <!--                </xpath>-->
                 <xpath expr="//field[@name='currency_inherit_id']" position="after">
                     <field name="auto_type" attrs="{'invisible': [('picking_type_code', '=','incoming')]}"/>
                 </xpath>
                 <xpath expr="//field[@name='auto_type']" position="after">
-                    <field name="manager_inherit_id" string="Sales Manager" attrs="{'invisible': [('picking_type_code', '=','incoming')]}"/>
-                    <field name="manager_inherit_id" string="Purchase Manager" attrs="{'invisible': [('picking_type_code', '=','outgoing')]}"/>
+                    <field name="manager_inherit_id" string="Sales Manager"
+                           attrs="{'invisible': [('picking_type_code', '=','incoming')]}"/>
+                    <field name="manager_inherit_id" string="Purchase Manager"
+                           attrs="{'invisible': [('picking_type_code', '=','outgoing')]}"/>
                 </xpath>
                 <xpath expr="//field[@name='manager_inherit_id']" position="after">
                     <field name="account_num_inherit"/>
@@ -38,42 +45,75 @@
                     <field name="ref_no_inherit"/>
                 </xpath>
                 <xpath expr="//field[@name='origin']" position="after">
-                    <field name="delivery_by_inherit" string="Good Delivered By" attrs="{'invisible': [('picking_type_code', '=','incoming')]}"/>
-                    <field name="delivery_by_inherit" string="Good Received By" attrs="{'invisible': [('picking_type_code', '=','outgoing')]}"/>
-                    <field name="delivery_to_inherit" string="Good Delivered To" attrs="{'invisible': [('picking_type_code', '=','incoming')]}"/>
-                    <field name="delivery_to_inherit" string="Good Received To" attrs="{'invisible': [('picking_type_code', '=','outgoing')]}"/>
+                    <field name="delivery_by_inherit" string="Good Delivered By"
+                           attrs="{'invisible': [('picking_type_code', '=','incoming')]}"/>
+                    <field name="delivery_by_inherit" string="Good Received By"
+                           attrs="{'invisible': [('picking_type_code', '=','outgoing')]}"/>
+                    <field name="delivery_to_inherit" string="Good Delivered To"
+                           attrs="{'invisible': [('picking_type_code', '=','incoming')]}"/>
+                    <field name="delivery_to_inherit" string="Good Received To"
+                           attrs="{'invisible': [('picking_type_code', '=','outgoing')]}"/>
 
                     <field name="bilty_inherit" attrs="{'invisible': [('picking_type_code', '=','incoming')]}"/>
                     <field name="delivery_expt_inherit"/>
                     <field name="cancel_inherit"/>
                 </xpath>
-                <xpath expr="//field[@name='move_ids_without_package']/tree/field[@name='product_id']" position="after">
-                    <field name="warehouse_inherit_id"/>
-                </xpath>
-                <xpath expr="//field[@name='move_ids_without_package']/tree/field[@name='warehouse_inherit_id']"
-                       position="after">
-                    <field name="brand_inherit_id"/>
-                </xpath>
-                <xpath expr="//field[@name='move_ids_without_package']/tree/field[@name='brand_inherit_id']" position="after">
-                    <field name="invoice_inherit"/>
-                </xpath>
-                <xpath expr="//field[@name='move_ids_without_package']/tree/field[@name='invoice_inherit']" position="after">
-                    <field name="balance_inherit"/>
-                </xpath>
-                <xpath expr="//field[@name='move_ids_without_package']/tree/field[@name='balance_inherit']" position="after">
-                    <field name="quantity_inherit"/>
-                </xpath>
-                <xpath expr="//field[@name='move_ids_without_package']/tree/field[@name='quantity_inherit']" position="after">
-                    <field name="bonus_qty_inherit"/>
-                </xpath>
-                <xpath expr="//field[@name='move_ids_without_package']/tree/field[@name='bonus_qty_inherit']" position="after">
-                    <field name="total_qty_inherit"/>
-                </xpath>
+                <!--                <xpath expr="//field[@name='move_ids_without_package']/tree/field[@name='product_id']" position="after">-->
+                <!--                    <field name="warehouse_inherit_id"/>-->
+                <!--                </xpath>-->
+                <!--                <xpath expr="//field[@name='move_ids_without_package']/tree/field[@name='warehouse_inherit_id']"-->
+                <!--                       position="after">-->
+                <!--                    <field name="brand_inherit_id"/>-->
+                <!--                </xpath>-->
+                <!--                <xpath expr="//field[@name='move_ids_without_package']/tree/field[@name='brand_inherit_id']" position="after">-->
+                <!--                    <field name="invoice_inherit"/>-->
+                <!--                </xpath>-->
+                <!--                <xpath expr="//field[@name='move_ids_without_package']/tree/field[@name='invoice_inherit']" position="after">-->
+                <!--                    <field name="balance_inherit"/>-->
+                <!--                </xpath>-->
+                <!--                <xpath expr="//field[@name='move_ids_without_package']/tree/field[@name='balance_inherit']" position="after">-->
+                <!--                    <field name="quantity_inherit"/>-->
+                <!--                </xpath>-->
+                <!--                <xpath expr="//field[@name='move_ids_without_package']/tree/field[@name='quantity_inherit']" position="after">-->
+                <!--                    <field name="bonus_qty_inherit"/>-->
+                <!--                </xpath>-->
+                <!--                <xpath expr="//field[@name='move_ids_without_package']/tree/field[@name='bonus_qty_inherit']" position="after">-->
+                <!--                    <field name="total_qty_inherit"/>-->
+                <!--                </xpath>-->
 
                 <xpath expr="//label[@for='scheduled_date']" position="replace">
-                    <label for="scheduled_date" string="GRN Date" attrs="{'invisible': [('picking_type_code', '=','outgoing')]}"/>
-                    <label for="scheduled_date" string="DC Date" attrs="{'invisible': [('picking_type_code', '=','incoming')]}"/>
+                    <label for="scheduled_date" string="GRN Date"
+                           attrs="{'invisible': [('picking_type_code', '=','outgoing')]}"/>
+                    <label for="scheduled_date" string="DC Date"
+                           attrs="{'invisible': [('picking_type_code', '=','incoming')]}"/>
                 </xpath>
+            </field>
+        </record>
+
+
+        <record id="custom_view_picking_form_inherit" model="ir.ui.view">
+            <field name="name">stock.move.line.form</field>
+            <field name="model">stock.move.line</field>
+            <field name="inherit_id" ref="stock.view_stock_move_line_detailed_operation_tree"/>
+            <field name="arch" type="xml">
+
+                <xpath expr="//field[@name='product_id']" position="before">
+                    <field name="wh_id" force_save="1"/>
+                    <field name="brand_id" force_save="1"/>
+                </xpath>
+
+                <xpath expr="//field[@name='qty_done']" position="before">
+                    <field name="ordered_quantity" force_save="1"/>
+                    <field name="bonus_quantity" force_save="1"/>
+                    <field name="total_qty_inherit" force_save="1"/>
+                </xpath>
+
+
+                <!--                <xpath expr="//field[@name='product_uom_qty']" position="attributes">-->
+                <!--                <attribute name="string">Ordered Qty</attribute>-->
+                <!--            </xpath>-->
+
+
             </field>
         </record>
     </data>
