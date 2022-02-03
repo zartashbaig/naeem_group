@@ -57,8 +57,6 @@ class CybInquiry(models.Model):
     currency_id = fields.Many2one(related='pricelist_id.currency_id', depends=["pricelist_id"], store=True, readonly=False)
     quotation_many_ids = fields.Many2many('cyb.quotation', string="Inquiry ID", default="", store=True)
 
-
-
     state = fields.Selection(
         [('draft', 'Draft'),
          ('confirm', 'Confirmed'),
@@ -69,6 +67,9 @@ class CybInquiry(models.Model):
 
     def action_inquiry_confirm(self):
         self.state = 'confirm'
+
+    def action_inquiry_reset(self):
+        self.state = 'draft'
 
     @api.model
     def create(self, vals):

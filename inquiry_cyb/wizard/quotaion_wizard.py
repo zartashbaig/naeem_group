@@ -24,6 +24,14 @@ class InquiryInvoice(models.TransientModel):
     quotation_reference = fields.Char(string="Reference", related="so_id.quotation_reference")
     quotation_sale_many_ids = fields.Many2many('cyb.quotation', string="Quotation ID",
                                                store=True)
+    currency_id = fields.Many2one(related='so_id.currency_id', depends=['so_id.currency_id'], store=True, string='Currency', readonly=True)
+    ks_global_discount_type = fields.Selection([('percent', 'Percentage'), ('amount', 'Amount')],
+                                               string='Overall Discount Type',
+                                               readonly=True,)
+    ks_global_discount_rate = fields.Float('Overall Discount Rate',
+                                           readonly=True)
+    ks_amount_discount = fields.Monetary(string='Overall Discount', readonly=True)
+
 
     @api.model
     def default_get(self, default_fields):
@@ -56,6 +64,9 @@ class InquiryInvoice(models.TransientModel):
                     }))
         res.update({'new_order_line_ids': update,
                     'quotation_sale_many_ids': quotation_ids,
+                    'ks_global_discount_type': data[0].ks_global_discount_type,
+                    'ks_global_discount_rate': data[0].ks_global_discount_rate,
+                    'ks_amount_discount': data[0].ks_amount_discount,
                     'so_id': self._context.get('active_id'),
                     'partner_id': data.partner_id[0].id})
         return res
@@ -91,6 +102,9 @@ class InquiryInvoice(models.TransientModel):
             # 'notes': self.notes,
             # 'so_id': self.so_id.id,
             'order_line': value,
+            'ks_global_discount_type': self[0].ks_global_discount_type,
+            'ks_global_discount_rate': self[0].ks_global_discount_rate,
+            'ks_amount_discount': self[0].ks_amount_discount,
             'quotation_sale_many_ids': self.quotation_sale_many_ids.ids
 
             # 'state': 'draft',

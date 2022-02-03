@@ -54,6 +54,14 @@
                 </group>
 
                 <group>
+                    <group>
+                        <field name="ks_global_discount_type"/>
+                        <field name="ks_global_discount_rate"/>
+                        <field name="ks_amount_discount"/>
+                    </group>
+                </group>
+
+                <group>
                     <field name="notes"/>
                 </group>
 
@@ -70,7 +78,7 @@
     <!-- ACTION     -->
 
     <record id="action_transientmodel_wizard" model="ir.actions.act_window">
-        <field name="name">Create Sale Order</field>
+        <field name="name">Create Quotation</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">create.saleorder</field>
         <field name="view_id" ref="inquiry_cyb.view_transientmodel_wizard_form"/>

@@ -177,6 +177,9 @@ class CybQuotation(models.Model):
     def action_quotation_confirm(self):
         self.state = 'confirm'
 
+    def action_quotation_reset(self):
+        self.state = 'draft'
+
     @api.model
     def create(self, vals):
         if vals.get('name', 'Quo') == 'Quo':
