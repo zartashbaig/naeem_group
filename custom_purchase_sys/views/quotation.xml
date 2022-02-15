@@ -144,7 +144,7 @@
                             <field name="purchase_inquirymany_id"/>
                         </page>
 
-                        <page string="Purchases">
+                        <page string="Purchases" invisible="1">
                             <field name="sale_quotation_ids"/>
                         </page>
 
