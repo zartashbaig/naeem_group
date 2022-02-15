@@ -18,7 +18,9 @@ class CybInquiry(models.Model):
     _description = 'customer inquiry'
 
     name = fields.Char(string='Inquiry Reference', store=True, required=True, readonly=True,
-                       default='Inq')
+                       default='SINQ')
+
+    # name = fields.Char(string='Inquiry Reference', copy=False, default=lambda self: self.env['ir.sequence'].next_by_code('cyb.inquiry'))
 
     partner_id = fields.Many2one(
         'res.partner', string='Customer Name', readonly=True,
@@ -73,8 +75,8 @@ class CybInquiry(models.Model):
 
     @api.model
     def create(self, vals):
-        if vals.get('name', 'Inq') == 'Inq':
-            vals['name'] = self.env['ir.sequence'].next_by_code('cyb.inquiry') or "Inq"
+        if vals.get('name', 'SINQ') == 'SINQ':
+            vals['name'] = self.env['ir.sequence'].next_by_code('cyb.inquiry') or "SINQ"
         result = super(CybInquiry, self).create(vals)
         return result
 
@@ -133,6 +135,8 @@ class CybInquiry(models.Model):
                         'qty_invoiced': record.qty_invoiced,
                         'remarks': record.remarks,
                         'tax_id': record.tax_id.ids,
+                        'discount': record.discount,
+                        'prod_total_discount': record.prod_total_discount,
                         # 'discount': record.discount,
                     }))
         # Force the values of the move line in the context to avoid issues
@@ -156,7 +160,7 @@ class CybSpecialist(models.Model):
     price_unit = fields.Float(string='Unit Price', digits='Product Price')
     qty_delivered = fields.Float(string='Delivered')
     qty_invoiced = fields.Float(string='Invoiced')
-    tax_id = fields.Many2many('account.tax', string='Taxes', domain=['|', ('active', '=', False), ('active', '=', True)])
+    tax_id = fields.Many2many('account.tax', string='Taxes %', domain=['|', ('active', '=', False), ('active', '=', True)])
     brand_id = fields.Many2one(string="Brand", related='product_id.brand_id')
 
     remarks = fields.Text(string="Remarks")
@@ -169,6 +173,8 @@ class CybSpecialist(models.Model):
     price_tax = fields.Float(compute='_compute_amount', string='Total Tax', readonly=True, store=True, digits=(16, 4))
     pro_available = fields.Float(related='product_id.qty_available', string="Product Available")
     price_total = fields.Monetary(compute='_compute_amount', string='Total', readonly=True, store=True, digits=(16, 4))
+    discount = fields.Float(string='Discount %', digits='Discount', default=0.0)
+    prod_total_discount = fields.Float('Disc. Amount', readonly=True, store=True, digits=(16, 4))
 
     def product_qty_location_check(self):
         for rec in self:
@@ -183,21 +189,45 @@ class CybSpecialist(models.Model):
                 for tax in rec.tax_id:
                     tax_amount += rec.price_unit * rec.product_uom_qty * tax.amount / 100
                 rec.tax_amount = tax_amount
-    @api.depends('product_uom_qty', 'price_unit', 'tax_id')
+
+    # @api.depends('product_uom_qty', 'price_unit', 'tax_id')
+    # def _compute_amount(self):
+    #     """
+    #     Compute the amounts of the SO line.
+    #     """
+    #     for line in self:
+    #         if line.product_uom_qty > 0:
+    #             price = line.price_unit * (1 - (line.discount or 0.0) / 100.0)
+    #             taxes = line.tax_id.compute_all(price, line.price_unit, line.order_id.currency_id, line.product_uom_qty,
+    #                                             product=line.product_id)
+    #             line.update({
+    #                 'price_tax': sum(t.get('amount', 0.0) for t in taxes.get('taxes', [])),
+    #                 'price_total': taxes['total_included'],
+    #                 'price_subtotal': taxes['total_excluded'],
+    #             })
+    #
+    #         if self.env.context.get('import_file', False) and not self.env.user.user_has_groups(
+    #                 'account.group_account_manager'):
+    #             line.tax_id.invalidate_cache(['invoice_repartition_line_ids'], [line.tax_id.id])
+
+    @api.depends('product_uom_qty', 'discount', 'price_unit', 'tax_id')
     def _compute_amount(self):
         """
         Compute the amounts of the SO line.
         """
         for line in self:
             if line.product_uom_qty > 0:
-                taxes = line.tax_id.compute_all(line.price_unit, line.order_id.currency_id, line.product_uom_qty,
+                price = line.price_unit * (1 - (line.discount or 0.0) / 100.0)
+                taxes = line.tax_id.compute_all(price, line.order_id.currency_id, line.product_uom_qty,
                                                 product=line.product_id)
+                total_prod_price = line.product_uom_qty*line.price_unit
+                prod_total_discount = total_prod_price*(line.discount / 100)
                 line.update({
                     'price_tax': sum(t.get('amount', 0.0) for t in taxes.get('taxes', [])),
                     'price_total': taxes['total_included'],
                     'price_subtotal': taxes['total_excluded'],
+                    'prod_total_discount': prod_total_discount,
                 })
-
             if self.env.context.get('import_file', False) and not self.env.user.user_has_groups(
                     'account.group_account_manager'):
                 line.tax_id.invalidate_cache(['invoice_repartition_line_ids'], [line.tax_id.id])

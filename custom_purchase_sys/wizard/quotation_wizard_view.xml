@@ -13,9 +13,9 @@
                         <field name="quotation_reference"/>
                         <field name="crm_lead_id"/>
                     </group>
-                    <group>
-                        <field name="quotation_Expiration"/>
-                    </group>
+<!--                    <group>-->
+<!--                        <field name="quotation_Expiration"/>-->
+<!--                    </group>-->
                 </group>
 
                 <group>

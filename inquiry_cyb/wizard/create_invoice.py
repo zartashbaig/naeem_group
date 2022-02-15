@@ -67,6 +67,8 @@ class createsaleorder(models.TransientModel):
                         'qty_invoiced': record.qty_invoiced,
                         'remarks': record.remarks,
                         'tax_id': record.tax_id.ids,
+                        'discount': record.discount,
+                        'prod_total_discount': record.prod_total_discount,
                     }))
         res.update({'new_order_line_ids': update,
                     'partner_id': data.partner_id[0].id,
@@ -97,6 +99,8 @@ class createsaleorder(models.TransientModel):
                     'remarks': data.remarks,
                     'qty_delivered': data.qty_delivered,
                     'qty_invoiced': data.qty_invoiced,
+                    'discount': data.discount,
+                    'prod_total_discount': data.prod_total_discount,
                 }])
 
         sale_order = {
@@ -140,13 +144,15 @@ class Getsaleorderdata(models.TransientModel):
     order_id = fields.Many2one('cyb.inquiry', string='Order Reference', ondelete='cascade', index=True)
     price_unit = fields.Float(string='Unit Price', digits='Product Price')
     price_subtotal = fields.Float(string="Sub Total", compute='_compute_total')
-    tax_id = fields.Many2many('account.tax', string='Taxes',
+    tax_id = fields.Many2many('account.tax', string='Taxes %',
                               domain=['|', ('active', '=', False), ('active', '=', True)])
     qty_delivered = fields.Float(string='Delivered')
     qty_invoiced = fields.Float(string='Invoiced')
     remarks = fields.Text(string="Remarks")
     price_total = fields.Monetary(string='Total', readonly=True, store=True)
     currency_id = fields.Many2one(related='order_id.currency_id', depends=['order_id.currency_id'], store=True, string='Currency', readonly=True)
+    discount = fields.Float(string='Discount %', digits='Discount', default=0.0)
+    prod_total_discount = fields.Float('Disc. Amount', readonly=True, store=True)
 
 
 

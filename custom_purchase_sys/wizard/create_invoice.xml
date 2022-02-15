@@ -21,7 +21,7 @@
                     <group>
                         <field name="inquiry_type"/>
                         <field name="date_inquiry"/>
-                        <field name="date_Expiration"/>
+                        <!--                        <field name="date_Expiration"/>-->
                     </group>
                 </group>
 
@@ -36,10 +36,15 @@
                             <field name="qty_received" invisible="1"/>
                             <field name="qty_invoiced" invisible="1"/>
                             <field name="price_unit"/>
-                            <field name="taxes_id" widget="many2many_tags" options="{'no_create': True}" optional="show"/>
+                            <field name="taxes_id" widget="many2many_tags" options="{'no_create': True}"
+                                   optional="show"/>
+                            <field name="discount" string="Disc.%" groups="product.group_discount_per_so_line"
+                                   optional="show" widget="product_discount"/>
+                            <field name="prod_total_discount" groups="product.group_discount_per_so_line"
+                                   optional="show"/>
                             <field name="price_subtotal"/>
                             <field name="price_total"/>
-                                                        <field name="remarks"/>
+                            <field name="remarks"/>
 
                             <!--                            <control>-->
                             <!--                                <create name="add_section_control" string="Add a section"-->

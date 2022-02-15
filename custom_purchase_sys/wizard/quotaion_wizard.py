@@ -139,7 +139,7 @@ class GetQuotationorderdata(models.TransientModel):
     order_id = fields.Many2one('cyb.quotation.purchase', string='Order Reference', ondelete='cascade', index=True)
     price_unit = fields.Float(string='Unit Price', digits='Product Price')
     price_subtotal = fields.Float(string="Sub Total", compute='_compute_total')
-    taxes_id = fields.Many2many('account.tax', string='Taxes', )
+    taxes_id = fields.Many2many('account.tax', string='Taxes %', )
     qty_received = fields.Float(string='Delivered')
     qty_invoiced = fields.Float(string='Invoiced')
     remarks = fields.Text(string="Remarks")

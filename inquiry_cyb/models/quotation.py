@@ -21,6 +21,8 @@ class SaleOrderExt(models.Model):
         currency_field="currency_id",
         store=True, digits=(16, 4)
     )
+    name = fields.Char(string='Order Reference', required=True, copy=False, readonly=True,
+                       states={'draft': [('readonly', False)]}, index=True, default=lambda self: _('SO'))
     inquiry_type = fields.Selection([
         ('STOCKIEST', 'STOCKIEST'),
         ('INDENTING', 'INDENTING')
@@ -38,6 +40,26 @@ class SaleOrderExt(models.Model):
     remarks = fields.Text(string="Remarks")
     cancel = fields.Boolean(string='Cancel')
     net_amount = fields.Float(string='Net Amount', readonly=True, store=True, digits=(16, 4))
+
+    @api.model
+    def create(self, vals):
+        if 'company_id' in vals:
+            self = self.with_company(vals['company_id'])
+        if vals.get('name', _('SO')) == _('SO'):
+            seq_date = None
+            if 'date_order' in vals:
+                seq_date = fields.Datetime.context_timestamp(self, fields.Datetime.to_datetime(vals['date_order']))
+            vals['name'] = self.env['ir.sequence'].next_by_code('sale.order', sequence_date=seq_date) or _('SO')
+
+        # Makes sure partner_invoice_id', 'partner_shipping_id' and 'pricelist_id' are defined
+        if any(f not in vals for f in ['partner_invoice_id', 'partner_shipping_id', 'pricelist_id']):
+            partner = self.env['res.partner'].browse(vals.get('partner_id'))
+            addr = partner.address_get(['delivery', 'invoice'])
+            vals['partner_invoice_id'] = vals.setdefault('partner_invoice_id', addr['invoice'])
+            vals['partner_shipping_id'] = vals.setdefault('partner_shipping_id', addr['delivery'])
+            vals['pricelist_id'] = vals.setdefault('pricelist_id', partner.property_product_pricelist.id)
+        result = super(SaleOrderExt, self).create(vals)
+        return result
 
     @api.depends('order_line.product_uom_qty')
     def _amount_all_qty(self):
@@ -81,6 +103,8 @@ class SaleOrderLineExt(models.Model):
     tax_amount = fields.Float(string="Tax Amount",compute="_tax_amount_compute", digits=(16, 4))
     prod_total_discount = fields.Float('Disc. Amount', readonly=True, store=True, digits=(16, 4))
     pro_available = fields.Float(related='product_id.qty_available', string="Product Available")
+    tax_id = fields.Many2many('account.tax', string='Taxes %',
+                              domain=['|', ('active', '=', False), ('active', '=', True)])
 
     def product_qty_location_check(self):
         for rec in self:
@@ -95,7 +119,6 @@ class SaleOrderLineExt(models.Model):
                 for tax in rec.tax_id:
                     tax_amount += rec.price_unit * rec.product_uom_qty * tax.amount / 100
                 rec.tax_amount = tax_amount
-
 
     @api.depends('product_uom_qty', 'discount', 'price_unit', 'tax_id')
     def _compute_amount(self):
@@ -126,7 +149,7 @@ class CybQuotation(models.Model):
     _description = 'customer quotation'
 
     name = fields.Char(string='Quotation Reference', store=True, readonly=True,
-                       default='Quo')
+                       default='SQUO')
     partner_id = fields.Many2one(
         'res.partner', string='Customer', readonly=True,
         states={'draft': [('readonly', False)], 'sent': [('readonly', False)]},
@@ -182,8 +205,8 @@ class CybQuotation(models.Model):
 
     @api.model
     def create(self, vals):
-        if vals.get('name', 'Quo') == 'Quo':
-            vals['name'] = self.env['ir.sequence'].next_by_code('cyb.quotation') or "Quo"
+        if vals.get('name', 'SQUO') == 'SQUO':
+            vals['name'] = self.env['ir.sequence'].next_by_code('cyb.quotation') or "SQUO"
         result = super(CybQuotation, self).create(vals)
         return result
 
@@ -305,7 +328,7 @@ class QuotationFriends(models.Model):
     qty_invoiced = fields.Float(string='Invoiced')
     price_unit = fields.Float(string='Unit price', digits=(16, 4))
     # price_subtotal = fields.Float(string="Subtotal")
-    tax_id = fields.Many2many('account.tax', string='Taxes',
+    tax_id = fields.Many2many('account.tax', string='Taxes %',
                               domain=['|', ('active', '=', False), ('active', '=', True)])
 
     product_uom = fields.Many2one('uom.uom', string='Product Unit of Measure')
@@ -334,6 +357,7 @@ class QuotationFriends(models.Model):
                 for tax in rec.tax_id:
                     tax_amount += rec.price_unit * rec.product_uom_qty * tax.amount / 100
                 rec.tax_amount = tax_amount
+
     @api.onchange('price_unit', 'product_uom_qty')
     def onchange_inquiry(self):
         self.price_subtotal = self.product_uom_qty * self.price_unit

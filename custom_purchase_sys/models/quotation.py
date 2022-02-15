@@ -15,12 +15,12 @@ class CybQuotationPurchase(models.Model):
     _description = 'customer quotation purchase'
 
     name = fields.Char(string='Purchase Quotation Reference', store=True, readonly=True,
-                       default='Quo')
+                       default='PQUO')
     partner_id = fields.Many2one(
-        'res.partner', string='Customer', readonly=True,
+        'res.partner', string='Vendor', readonly=True,
         states={'draft': [('readonly', False)], 'sent': [('readonly', False)]},
         change_default=True, index=True)
-    quotation_reference = fields.Char(string='Reference')
+    quotation_reference = fields.Char(string='Document no')
     # quotation_new_id = fields.Many2one('sale.order.template', string='Purchase Quotation Template')
     quotation_payment_id = fields.Many2one('account.payment.term', string='Payment term')
     quotation_Expiration = fields.Date(string="Expiration")
@@ -68,8 +68,8 @@ class CybQuotationPurchase(models.Model):
 
     @api.model
     def create(self, vals):
-        if vals.get('name', 'Quo') == 'Quo':
-            vals['name'] = self.env['ir.sequence'].next_by_code('cyb.quotation.purchase') or "Quo"
+        if vals.get('name', 'PQUO') == 'PQUO':
+            vals['name'] = self.env['ir.sequence'].next_by_code('cyb.quotation.purchase') or "PQUO"
         result = super(CybQuotationPurchase, self).create(vals)
         return result
 
@@ -186,7 +186,7 @@ class QuotationPurchaseLine(models.Model):
     qty_invoiced = fields.Float(string='Invoiced')
     price_unit = fields.Float(string='Unit price')
     # price_subtotal = fields.Float(string="Subtotal")
-    taxes_id = fields.Many2many('account.tax', string='Taxes',
+    taxes_id = fields.Many2many('account.tax', string='Taxes %',
                               domain=['|', ('active', '=', False), ('active', '=', True)])
 
     product_uom = fields.Many2one('uom.uom', string='Product Unit of Measure')
