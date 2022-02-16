@@ -304,6 +304,7 @@ class CybQuotation(models.Model):
                         'tax_id': record.tax_id.ids,
                         'discount': record.discount,
                         'prod_total_discount': record.prod_total_discount,
+                        'pro_available': record.pro_available,
                     }))
 
         # Force the values of the move line in the context to avoid issues

@@ -137,6 +137,7 @@ class CybInquiry(models.Model):
                         'tax_id': record.tax_id.ids,
                         'discount': record.discount,
                         'prod_total_discount': record.prod_total_discount,
+                        'pro_available': record.pro_available,
                         # 'discount': record.discount,
                     }))
         # Force the values of the move line in the context to avoid issues
@@ -164,7 +165,6 @@ class CybSpecialist(models.Model):
     brand_id = fields.Many2one(string="Brand", related='product_id.brand_id')
 
     remarks = fields.Text(string="Remarks")
-                          # new fields added by WaqasAli
     hs_code = fields.Char(string="HS code")
     wh_id = fields.Many2one('stock.warehouse', string="Ware House")
     tax_amount = fields.Float(string="Tax Amount",compute="_tax_amount_compute", digits=(16, 4))

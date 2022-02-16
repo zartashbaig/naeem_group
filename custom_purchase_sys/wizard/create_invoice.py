@@ -67,6 +67,7 @@ class createsaleorder(models.TransientModel):
                         'taxes_id': record.taxes_id.ids,
                         'discount': record.discount,
                         'prod_total_discount': record.prod_total_discount,
+                        'pro_available': record.pro_available,
                     }))
         res.update({'new_order_line_ids': update,
                     'partner_id': data.partner_id[0].id,
@@ -99,6 +100,7 @@ class createsaleorder(models.TransientModel):
                     'qty_invoiced': data.qty_invoiced,
                     'discount': data.discount,
                     'prod_total_discount': data.prod_total_discount,
+                    'pro_available': data.pro_available,
                 }])
 
         sale_order = {
@@ -150,6 +152,8 @@ class Getsaleorderdata(models.TransientModel):
     currency_id = fields.Many2one(related='order_id.currency_id', depends=['order_id.currency_id'], store=True, string='Currency', readonly=True)
     discount = fields.Float(string='Discount %', digits='Discount', default=0.0)
     prod_total_discount = fields.Float('Disc. Amount', readonly=True, store=True)
+    pro_available = fields.Float(string="Product Available")
+
 
 
 
