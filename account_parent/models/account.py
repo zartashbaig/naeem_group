@@ -104,12 +104,12 @@ class AccountAccount(models.Model):
     _order = 'code, id'
     
     
-    @api.model
-    def search(self, args, offset=0, limit=None, order=None, count=False):
-        context = self._context or {}
-        if not context.get('show_parent_account',False):
-            args += [('user_type_id.type', '!=', 'view')]
-        return super(AccountAccount, self).search(args, offset, limit, order, count=count)
+    # @api.model
+    # def search(self, args, offset=0, limit=None, order=None, count=False):
+    #     context = self._context or {}
+    #     if not context.get('show_parent_account',False):
+    #         args += [('user_type_id.type', '!=', 'view')]
+    #     return super(AccountAccount, self).search(args, offset, limit, order, count=count)
 #     
 #     @api.model
 #     def create(self, values):
