@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_account_levels,account.levels,model_account_levels,,1,1,1,1
+access_account_open_chart,account.open.chart,model_account_open_chart,,1,1,1,1

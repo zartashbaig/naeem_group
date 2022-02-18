@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+	<record id="account_account_levels_tree" model="ir.ui.view">
+		<field name="name">account.levels.form</field>
+		<field name="model">account.levels</field>
+		<field name="arch" type="xml">
+			<tree string="Account Levels" editable="bottom">
+				<field name="name" required="1"/>
+			</tree>
+		</field>
+	</record>
+	
+	<record id="action_account_levels" model="ir.actions.act_window">
+		<field name="name">Account Levels</field>
+		<field name="type">ir.actions.act_window</field>
+		<field name="res_model">account.levels</field>
+		<field name="view_mode">tree</field>
+	</record>
+	
+	
+	<menuitem action="action_account_levels"
+		id="menu_action_account_levels"
+		parent="account.account_account_menu" sequence="1"/>
+
+
+</odoo>
