@@ -19,6 +19,7 @@
             </tree>
         </field>
     </record>
+
     <record id="cyb_inquiry_form" model="ir.ui.view">
         <field name="name">cyb.inquiry.form</field>
         <field name="model">cyb.inquiry</field>
