@@ -29,6 +29,7 @@
                     <field name="new_order_line_ids" nolabel="1">
                         <tree create="0">
                             <field name="brand_id" force_save="1"/>
+                            <field name="pro_available"/>
                             <field name="product_id" force_save="1"/>
                             <field name="name" force_save="1"/>
                             <field name="product_uom_qty"/>
@@ -37,9 +38,13 @@
                             <field name="qty_invoiced" invisible="1"/>
                             <field name="price_unit"/>
                             <field name="tax_id" widget="many2many_tags" options="{'no_create': True}" optional="show"/>
+                            <field name="discount" string="Disc.%" groups="product.group_discount_per_so_line"
+                                   optional="show" widget="product_discount"/>
+                            <field name="prod_total_discount" groups="product.group_discount_per_so_line"
+                                   optional="show"/>
                             <field name="price_subtotal"/>
                             <field name="price_total"/>
-                                                        <field name="remarks"/>
+                            <field name="remarks"/>
 
                             <!--                            <control>-->
                             <!--                                <create name="add_section_control" string="Add a section"-->

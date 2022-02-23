@@ -3,24 +3,34 @@
     <data noupdate="1">
 
 
-                        <!-- Sequences for Inquiry -->
+        <!-- Sequences for Inquiry -->
         <record id="Inquiry_purchase_order_ext" model="ir.sequence">
-            <field name="name">Purchase</field>
+            <field name="name">Purchase Sequence</field>
             <field name="code">cyb.purchase</field>
-            <field name="prefix">PI</field>
-            <field name="padding">4</field>
+            <field name="prefix">PINQ01 %(y)s 01 </field>
+            <field eval="True" name="use_date_range"/>
+            <field name="padding">5</field>
             <field name="company_id" eval="False"/>
         </record>
 
-<!--         Sequences for Quotation -->
+        <!--         Sequences for Quotation -->
         <record id="quotation_2_sale_order_ext" model="ir.sequence">
-            <field name="name">Quotation</field>
+            <field name="name">Quotation Sequence</field>
             <field name="code">cyb.quotation.purchase</field>
-            <field name="prefix">Qu</field>
-            <field name="padding">4</field>
+            <field name="prefix">PQUO 01 %(y)s 01 </field>
+            <field eval="True" name="use_date_range"/>
+            <field name="padding">5</field>
             <field name="company_id" eval="False"/>
         </record>
 
+        <!-- Sequences for purchase.order -->
+        <record id="purchase.seq_purchase_order" model="ir.sequence">
+            <field name="name">Purchase Order</field>
+            <field name="code">purchase.order</field>
+            <field name="prefix">PO01 %(y)s 01 </field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
 
 
     </data>

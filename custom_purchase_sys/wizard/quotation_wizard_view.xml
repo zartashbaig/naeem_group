@@ -13,15 +13,16 @@
                         <field name="quotation_reference"/>
                         <field name="crm_lead_id"/>
                     </group>
-                    <group>
-                        <field name="quotation_Expiration"/>
-                    </group>
+<!--                    <group>-->
+<!--                        <field name="quotation_Expiration"/>-->
+<!--                    </group>-->
                 </group>
 
                 <group>
                     <field name="new_order_line_ids" nolabel="1">
                         <tree editable="bottom" create="0">
                             <field name="brand_id" force_save="1"/>
+                            <field name="pro_available" force_save="1"/>
                             <field name="product_id" force_save="1"/>
                             <field name="name" force_save="1"/>
                             <field name="product_qty"/>

@@ -7,6 +7,7 @@ from odoo import api, fields, models
 class PurchaseDiscount(models.Model):
     _inherit = "purchase.order"
 
+    name = fields.Char('Order Reference', required=True, index=True, copy=False, default='PO')
     quotation_sale_many_ids = fields.Many2many('cyb.quotation.purchase', string='Quotation Lines')
     currency_id = fields.Many2one('res.currency', string='Currency')
     manager_id = fields.Many2one('res.user', string='Purchase Manager')
@@ -28,7 +29,6 @@ class PurchaseDiscount(models.Model):
         currency_field="currency_id",
         store=True,
     )
-
 
     @api.depends('order_line.product_qty')
     def _amount_all_qty(self):
@@ -59,6 +59,18 @@ class PurchaseDiscount(models.Model):
                 }
             )
 
+    @api.model
+    def create(self, vals):
+        company_id = vals.get('company_id', self.default_get(['company_id'])['company_id'])
+        # Ensures default picking type and currency are taken from the right company.
+        self_comp = self.with_company(company_id)
+        if vals.get('name', 'PO') == 'PO':
+            seq_date = None
+            if 'date_order' in vals:
+                seq_date = fields.Datetime.context_timestamp(self, fields.Datetime.to_datetime(vals['date_order']))
+            vals['name'] = self_comp.env['ir.sequence'].next_by_code('purchase.order', sequence_date=seq_date) or '/'
+        return super(PurchaseDiscount, self_comp).create(vals)
+
 
 class PurchaseLineDiscount(models.Model):
     _inherit = 'purchase.order.line'
@@ -74,13 +86,14 @@ class PurchaseLineDiscount(models.Model):
     tax_amount = fields.Float(string="Tax Amount",compute="_tax_amount_compute")
     # pro_available = fields.Float(related="product_id.qty_available", string="Product Available", store=True)
     pro_available = fields.Float(compute="product_qty_location_check", string="Product Available")
+    taxes_id = fields.Many2many('account.tax', string='Taxes %', domain=['|', ('active', '=', False), ('active', '=', True)])
 
-    # # by WaqassAlii
     # @api.onchange('product_id')
     # def product_qty_location_check(self):
     #     if self.product_id:
     #         product = self.product_id
     #         pro_available = product.qty_available
+
     def product_qty_location_check(self):
         for rec in self:
             if rec.product_id:
@@ -94,6 +107,7 @@ class PurchaseLineDiscount(models.Model):
                 for tax in rec.taxes_id:
                     tax_amount += rec.price_unit * rec.product_uom_qty * tax.amount / 100
                 rec.tax_amount = tax_amount
+
     @api.depends('product_qty', 'price_unit', 'taxes_id','discount')
     def _compute_amount(self):
         for line in self:

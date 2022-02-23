@@ -37,10 +37,10 @@
                             <field name="currency_id"/>
                             <field name="quotation_reference"/>
                             <field name="remarks"/>
-                            <field name="cancel"/>
+<!--                            <field name="cancel"/>-->
                         </group>
                         <group>
-                            <field name="quotation_Expiration"/>
+<!--                            <field name="quotation_Expiration"/>-->
                             <field name="date_quotation"/>
                             <field name="quotation_payment_id"/>
                             <field name="crm_lead_id"/>
@@ -79,6 +79,10 @@
                                     <field name="remarks"/>
                                 </tree>
                             </field>
+                                    <group>
+                                <field name="notes" class="oe_inline" nolabel="1"
+                                       placeholder="Define your terms and conditions ..."/>
+                            </group>
                             <div class="row" style="border: 2px solid #875a7b;">
                                 <div class="col-1">
                                     <div class="o_td_label">
@@ -131,10 +135,7 @@
                             </div>
 
 
-                            <group>
-                                <field name="notes" class="oe_inline"
-                                       placeholder="Define your terms and conditions ..."/>
-                            </group>
+
 
                         </page>
 
@@ -143,7 +144,7 @@
                             <field name="purchase_inquirymany_id"/>
                         </page>
 
-                        <page string="Purchases">
+                        <page string="Purchases" invisible="1">
                             <field name="sale_quotation_ids"/>
                         </page>
 

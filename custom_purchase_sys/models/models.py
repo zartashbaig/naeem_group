@@ -18,18 +18,18 @@ class CybPurchase(models.Model):
     _description = 'customer purchase'
 
     name = fields.Char(string='Purchase Reference', store=True, required=True, readonly=True,
-                        default='P')
+                        default='PINQ')
 
     partner_id = fields.Many2one(
         'res.partner', string='Customer Name', readonly=True,
         states={'draft': [('readonly', False)]},
         required=True, change_default=True, index=True)
     supplier_name = fields.Many2one('res.partner', string="Supplier Name")
-    ref_id = fields.Char(string="Reference")
+    ref_id = fields.Char(string="Document no")
     # cyb_quotation_id = fields.Many2one('sale.order.template', string='Quotation')
     cyb_payment_id = fields.Many2one('account.payment.term', string='Payment term')
     date_Expiration = fields.Date(string="Expiration")
-    date_inquiry = fields.Datetime(string="Purchase Date")
+    date_inquiry = fields.Datetime(string="Document Date")
     date_order = fields.Datetime(string='Order Date', readonly=True, index=True,
                                  states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}, copy=False,
                                  default=fields.Datetime.now,
@@ -72,8 +72,8 @@ class CybPurchase(models.Model):
 
     @api.model
     def create(self, vals):
-        if vals.get('name', 'P') == 'P':
-            vals['name'] = self.env['ir.sequence'].next_by_code('cyb.purchase') or "P"
+        if vals.get('name', 'PINQ') == 'PINQ':
+            vals['name'] = self.env['ir.sequence'].next_by_code('cyb.purchase') or "PINQ"
         result = super(CybPurchase, self).create(vals)
         return result
 
@@ -132,6 +132,9 @@ class CybPurchase(models.Model):
                         'qty_invoiced': record.qty_invoiced,
                         'remarks': record.remarks,
                         'taxes_id': record.taxes_id.ids,
+                        'discount': record.discount,
+                        'prod_total_discount': record.prod_total_discount,
+                        'pro_available': record.pro_available,
                         # 'discount': record.discount,
                     }))
         # Force the values of the move line in the context to avoid issues
@@ -155,7 +158,7 @@ class CybSpecialist(models.Model):
     price_unit = fields.Float(string='Unit Price', digits='Product Price')
     qty_received = fields.Float(string='Delivered')
     qty_invoiced = fields.Float(string='Invoiced')
-    taxes_id = fields.Many2many('account.tax', string='Taxes', domain=['|', ('active', '=', False), ('active', '=', True)])
+    taxes_id = fields.Many2many('account.tax', string='Taxes %', domain=['|', ('active', '=', False), ('active', '=', True)])
     brand_id = fields.Many2one(string="Brand", related='product_id.brand_id')
 
     remarks = fields.Text(string="Remarks")
@@ -168,6 +171,8 @@ class CybSpecialist(models.Model):
     price_subtotal = fields.Monetary(compute='_compute_amount', string='Subtotal', readonly=True, store=True)
     price_tax = fields.Float(compute='_compute_amount', string='Total Tax', readonly=True, store=True)
     price_total = fields.Monetary(compute='_compute_amount', string='Total', readonly=True, store=True)
+    discount = fields.Float(string='Discount %', digits='Discount', default=0.0)
+    prod_total_discount = fields.Float('Disc. Amount', readonly=True, store=True)
 
     # by WaqassAlii
     def product_qty_location_check(self):
@@ -185,21 +190,43 @@ class CybSpecialist(models.Model):
                     tax_amount += rec.price_unit * rec.product_qty * tax.amount / 100
                 rec.tax_amount = tax_amount
 
-    @api.depends('product_qty', 'price_unit', 'taxes_id')
+    # @api.depends('product_qty', 'price_unit', 'taxes_id')
+    # def _compute_amount(self):
+    #     """
+    #     Compute the amounts of the SO line.
+    #     """
+    #     for line in self:
+    #         if line.product_qty > 0:
+    #             taxes = line.taxes_id.compute_all(line.price_unit, line.order_id.currency_id, line.product_qty,
+    #                                               product=line.product_id)
+    #             line.update({
+    #                 'price_tax': sum(t.get('amount', 0.0) for t in taxes.get('taxes', [])),
+    #                 'price_total': taxes['total_included'],
+    #                 'price_subtotal': taxes['total_excluded'],
+    #             })
+    #
+    #         if self.env.context.get('import_file', False) and not self.env.user.user_has_groups(
+    #                 'account.group_account_manager'):
+    #             line.taxes_id.invalidate_cache(['invoice_repartition_line_ids'], [line.taxes_id.id])
+
+    @api.depends('product_qty', 'discount', 'price_unit', 'taxes_id')
     def _compute_amount(self):
         """
         Compute the amounts of the SO line.
         """
         for line in self:
             if line.product_qty > 0:
-                taxes = line.taxes_id.compute_all(line.price_unit, line.order_id.currency_id, line.product_qty,
-                                                  product=line.product_id)
+                price = line.price_unit * (1 - (line.discount or 0.0) / 100.0)
+                taxes = line.taxes_id.compute_all(price, line.order_id.currency_id, line.product_qty,
+                                                product=line.product_id)
+                total_prod_price = line.product_qty*line.price_unit
+                prod_total_discount = total_prod_price*(line.discount / 100)
                 line.update({
                     'price_tax': sum(t.get('amount', 0.0) for t in taxes.get('taxes', [])),
                     'price_total': taxes['total_included'],
                     'price_subtotal': taxes['total_excluded'],
+                    'prod_total_discount': prod_total_discount,
                 })
-
             if self.env.context.get('import_file', False) and not self.env.user.user_has_groups(
                     'account.group_account_manager'):
                 line.taxes_id.invalidate_cache(['invoice_repartition_line_ids'], [line.taxes_id.id])

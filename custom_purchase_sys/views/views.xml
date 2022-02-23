@@ -9,8 +9,9 @@
             <tree string="purchase tree view">
                 <field name="name"/>
                 <field name="partner_id"/>
-<!--                <field name="cyb_quotation_id"/>-->
-<!--                <field name="cyb_payment_id"/>-->
+                <field name="date_inquiry"/>
+                <!--                <field name="cyb_quotation_id"/>-->
+                <!--                <field name="cyb_payment_id"/>-->
                 <!--                <field name="cyb_order_lines">-->
                 <!--                        <field name="inquiry_subtotal"/>-->
                 <!--                        <field name="product_inquiry_id" invisible="1"/>-->
@@ -30,14 +31,14 @@
                     <field name='state' widget='statusbar'
                            statusbar_visible="draft,confirm,Cancelled"/>
 
-                     <button type="object" string="Confirm"
-                            name="action_inquiry_confirm" states="draft" />
+                    <button type="object" string="Confirm"
+                            name="action_inquiry_confirm" states="draft"/>
                     <button type="object" string="Cancel"
                             name="action_inquiry_cancel" states="confirm"/>
 
                     <button type="action" string="Create Quotation"
                             name="%(action_quotation_main_transientmodel_wizard)d" states="confirm"/>
-                     <button type="object" string="Reset to Draft"
+                    <button type="object" string="Reset to Draft"
                             name="action_quotation_p_reset" states="Cancelled"/>
                 </header>
                 <sheet>
@@ -55,13 +56,13 @@
                             <field name="supplier_name"/>
                             <field name="currency_id"/>
                             <field name="notes"/>
-                            <field name="cancel"/>
-<!--                            <field name="cyb_quotation_id"/>-->
+                            <!--                            <field name="cancel"/>-->
+                            <!--                            <field name="cyb_quotation_id"/>-->
                         </group>
                         <group>
                             <field name="inquiry_type"/>
                             <field name="date_inquiry"/>
-                            <field name="date_Expiration"/>
+                            <!--                            <field name="date_Expiration"/>-->
                             <field name="cyb_payment_id"/>
                             <field name="user_id"/>
                             <field name="crm_lead_id"/>
@@ -88,33 +89,39 @@
                                     <field name="taxes_id" widget="many2many_tags" options="{'no_create': True}"
                                            optional="show"/>
                                     <field name="tax_amount"/>
-                                    <field name="price_total"/>
+                                    <field name="discount" string="Disc.%"
+                                           optional="show" widget="product_discount"/>
+                                    <field name="prod_total_discount"
+                                           optional="show"/>
                                     <field name="price_subtotal"/>
+                                    <field name="price_total"/>
                                     <field name="remarks"/>
+
                                     <!--                                    <field name="product_inquiry_id" invisible="1"/>-->
                                 </tree>
                             </field>
-                                   <group>
-                        <field name="total_qty"/>
-                    </group>
-                    <group name="note_group" col="6" class="mt-2 mt-md-0">
+                            <group>
+                                <field name="total_qty"/>
+                            </group>
+                            <group name="note_group" col="6" class="mt-2 mt-md-0">
 
-                        <group colspan="4">
-                            <field name="notes" class="oe_inline"
-                                   placeholder="Define your terms and conditions ..."/>
-                        </group>
-                        <group class="oe_subtotal_footer oe_right" colspan="2" name="sale_total">
-                            <field name="amount_untaxed" widget="monetary"
-                                   options="{'currency_field': 'currency_id'}"/>
-                            <field name="amount_tax" widget="monetary" options="{'currency_field': 'currency_id'}"/>
-                            <div class="oe_subtotal_footer_separator oe_inline o_td_label">
-                                <label for="amount_total"/>
-                            </div>
-                            <field name="amount_total" nolabel="1" class="oe_subtotal_footer_separator"
-                                   widget="monetary" options="{'currency_field': 'currency_id'}"/>
-                        </group>
-                        <div class="oe_clear"/>
-                    </group>
+                                <group colspan="4">
+                                    <field name="notes" class="oe_inline" nolabel="1"
+                                           placeholder="Define your terms and conditions ..."/>
+                                </group>
+                                <group class="oe_subtotal_footer oe_right" colspan="2" name="sale_total">
+                                    <field name="amount_untaxed" widget="monetary"
+                                           options="{'currency_field': 'currency_id'}"/>
+                                    <field name="amount_tax" widget="monetary"
+                                           options="{'currency_field': 'currency_id'}"/>
+                                    <div class="oe_subtotal_footer_separator oe_inline o_td_label">
+                                        <label for="amount_total"/>
+                                    </div>
+                                    <field name="amount_total" nolabel="1" class="oe_subtotal_footer_separator"
+                                           widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                </group>
+                                <div class="oe_clear"/>
+                            </group>
                         </page>
 
                         <page string="Quotations">
@@ -140,7 +147,8 @@
         <field name="view_mode">tree,form</field>
     </record>
 
-    <menuitem id="purchase_inquiry_roots" parent="purchase.menu_procurement_management" name="Purchase Inquiry" sequence="0" action="action_cyb_purchase_inquiry"/>
+    <menuitem id="purchase_inquiry_roots" parent="purchase.menu_procurement_management" name="Purchase Inquiry"
+              sequence="0" action="action_cyb_purchase_inquiry"/>
 
     <record id="post_data_to_Purchase_Quotation_action" model="ir.actions.server">
         <field name="name">Make Quotation</field>
