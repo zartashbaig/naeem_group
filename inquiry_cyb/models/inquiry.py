@@ -27,14 +27,14 @@ class CybInquiry(models.Model):
         states={'draft': [('readonly', False)]},
         required=True, change_default=True, index=True)
     supplier_name = fields.Many2one('res.partner', string="Supplier Name")
-    ref_id = fields.Char(string="Reference")
-    pi_num = fields.Char(string="Purchase Inquiry No.")
+    ref_id = fields.Char(string="Document No.")
+    # pi_num = fields.Char(string="Inquiry No.")
     cyb_quotation_id = fields.Many2one('sale.order.template', string='Quotation')
     cyb_payment_id = fields.Many2one('account.payment.term', string='Payment term')
     date_Expiration = fields.Date(string="Expiration")
     remarks = fields.Text(string="Remarks")
     # manager_id = fields.Many2one('res.user', string='Purchase Manager')
-    date_inquiry = fields.Datetime(string="Inquiry Date")
+    date_inquiry = fields.Datetime(string="Document Date")
     date_order = fields.Datetime(string='Order Date', readonly=True, index=True,
                                  states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}, copy=False,
                                  default=fields.Datetime.now,
@@ -53,7 +53,7 @@ class CybInquiry(models.Model):
     # new_quotation_line_id = fields.Many2one('cyb.quotation')
     pricelist_id = fields.Many2one(
         'product.pricelist', string='Pricelist', check_company=True,  # Unrequired company
-        readonly=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]},
+         states={'draft': [('readonly', False)], 'sent': [('readonly', False)]},
         domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]", tracking=1,
         help="If you change the pricelist, only newly added lines will be affected.")
     currency_id = fields.Many2one(related='pricelist_id.currency_id', depends=["pricelist_id"], store=True, readonly=False)

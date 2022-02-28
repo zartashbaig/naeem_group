@@ -53,7 +53,7 @@
                                    context="{'res_partner_search_mode': 'customer', 'show_address': 1, 'show_vat': True}"
                                    options='{"always_reload": True}'/>
                             <field name="ref_id"/>
-                            <field name="supplier_name"/>
+<!--                            <field name="supplier_name"/>-->
                             <field name="currency_id"/>
                             <field name="notes"/>
                             <!--                            <field name="cancel"/>-->

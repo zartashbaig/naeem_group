@@ -16,12 +16,17 @@
                         <field name="inquirymany_id" widget="many2many_tags"/>
                         <field name="partner_id"/>
                         <field name="ref_id"/>
-                        <field name="crm_lead_id"/>
+                        <field name="supplier_name"/>
+                        <field name="currency_id"/>
+                        <field name="cyb_quotation_id"/>
                     </group>
                     <group>
                         <field name="inquiry_type"/>
                         <field name="date_inquiry"/>
-                        <field name="date_Expiration"/>
+                        <field name="cyb_payment_id"/>
+                        <field name="user_id"/>
+                        <field name="crm_lead_id"/>
+                        <field name="pricelist_id"/>
                     </group>
                 </group>
 

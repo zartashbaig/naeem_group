@@ -24,9 +24,13 @@ class CybQuotationPurchase(models.Model):
     # quotation_new_id = fields.Many2one('sale.order.template', string='Purchase Quotation Template')
     quotation_payment_id = fields.Many2one('account.payment.term', string='Payment term')
     quotation_Expiration = fields.Date(string="Expiration")
-    date_quotation = fields.Datetime(string="Purchase Quotation Date")
+    date_quotation = fields.Datetime(string="Document Date")
     remarks = fields.Text(string="Remarks")
     cancel = fields.Boolean('Cancel')
+    inquiry_type = fields.Selection([
+        ('STOCKIEST', 'STOCKIEST'),
+        ('INDENTING', 'INDENTING')
+    ], string="Purchase Type")
 
     order_line = fields.One2many('create.quotation.purchase', 'order_id', string='Order line')
     company_id = fields.Many2one('res.company', 'Company', index=True,
@@ -36,18 +40,14 @@ class CybQuotationPurchase(models.Model):
                                  default=fields.Datetime.now,
                                  help="Creation date of draft/sent orders,\nConfirmation date of confirmed orders.")
     crm_lead_id = fields.Many2one('crm.lead', string="CRM Lead")
-    inquiry_type = fields.Selection([
-        ('STOCKIEST', 'STOCKIEST'),
-        ('INDENTING', 'INDENTING')
-    ], string="Purchase Type")
     ref_id = fields.Char(string="Purchase Reference No")
     notes = fields.Text(string="Remarks")
 
     user_id = fields.Many2one(
-        'res.users', string='Salesperson', index=True, tracking=2, default=lambda self: self.env.user,
+        'res.users', string='Purchase Representative', index=True, tracking=2, default=lambda self: self.env.user,
         domain=lambda self: [('groups_id', 'in', self.env.ref('sales_team.group_sale_salesman').id)])
     team_id = fields.Many2one(
-        'crm.team', 'Sales Team', )
+        'crm.team', 'Purchase Team', )
 
     state = fields.Selection(
         [('draft', 'Draft'),
@@ -75,7 +75,6 @@ class CybQuotationPurchase(models.Model):
 
     pricelist_id = fields.Many2one(
         'product.pricelist', string='Pricelist', check_company=True,  # Unrequired company
-        readonly=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]},
         domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]", tracking=1,
         help="If you change the pricelist, only newly added lines will be affected.")
     currency_id = fields.Many2one(related='pricelist_id.currency_id', depends=["pricelist_id"], store=True,

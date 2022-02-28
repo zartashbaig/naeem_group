@@ -34,17 +34,17 @@
                                    context="{'res_partner_search_mode': 'customer', 'show_address': 1, 'show_vat': True}"
                                    options='{"always_reload": True}'/>
 <!--                            <field name="quotation_new_id"/>-->
+                                                        <field name="quotation_reference"/>
                             <field name="currency_id"/>
-                            <field name="quotation_reference"/>
                             <field name="remarks"/>
 <!--                            <field name="cancel"/>-->
                         </group>
                         <group>
 <!--                            <field name="quotation_Expiration"/>-->
+                            <field name="inquiry_type"/>
                             <field name="date_quotation"/>
                             <field name="quotation_payment_id"/>
                             <field name="crm_lead_id"/>
-                            <field name="company_id" invisible="1"/>
                             <field name="pricelist_id"/>
                         </group>
 
@@ -181,7 +181,6 @@
             <tree string="inquiry tree view">
                 <field name="name"/>
                 <field name="partner_id"/>
-                <field name="quotation_Expiration"/>
                 <field name="date_quotation"/>
                 <field name="quotation_payment_id"/>
                 <field name="crm_lead_id"/>

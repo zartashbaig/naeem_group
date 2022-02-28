@@ -22,23 +22,29 @@ class createsaleorder(models.TransientModel):
                                  help="Creation date of draft/sent orders,\nConfirmation date of confirmed orders.")
     so_id = fields.Many2one('cyb.inquiry', string="Inquiry ID", default="", store=True)
     inquirymany_id = fields.Many2many('cyb.inquiry', string="Inquiry ID", default="", store=True)
-    crm_lead_id = fields.Many2one('crm.lead', string="CRM Lead", related="so_id.crm_lead_id", store=True)
+    crm_lead_id = fields.Many2one('crm.lead', string="CRM Lead", related="so_id.crm_lead_id", store=True, readonly=True)
     date_inquiry = fields.Datetime(string="Inquiry Date", related="so_id.date_inquiry", store=True)
-    ref_id = fields.Char(string="Reference", related="so_id.ref_id", store=True)
-    currency_id = fields.Many2one(related='so_id.currency_id', depends=['so_id.currency_id'], store=True, string='Currency', readonly=True)
-
+    ref_id = fields.Char(string="Document No.", store=True, readonly=True)
+    # currency_id = fields.Many2one(related='so_id.currency_id', depends=['so_id.currency_id'], store=True, string='Currency', readonly=True)
+    supplier_name = fields.Many2one('res.partner', string="Supplier Name", readonly=True)
     inquiry_type = fields.Selection([
         ('STOCKIEST', 'STOCKIEST'),
         ('INDENTING', 'INDENTING')
-    ], string="Inquiry Type", related="so_id.inquiry_type", store=True)
-    notes = fields.Text(string="Remarks", related="so_id.notes", store=True)
-
+    ], string="Inquiry Type", readonly=True, store=True)
+    notes = fields.Text(string="Remarks", store=True, readonly=True)
+    currency_id = fields.Many2one('res.currency', store=True, string='Currency', readonly=True)
+    cyb_payment_id = fields.Many2one('account.payment.term', string='Payment term', readonly=True)
+    cyb_quotation_id = fields.Many2one('sale.order.template', string='Quotation', readonly=True)
     ks_global_discount_type = fields.Selection([('percent', 'Percentage'), ('amount', 'Amount')],
                                                string='Overall Discount Type',
                                                readonly=True,)
     ks_global_discount_rate = fields.Float('Overall Discount Rate',
                                            readonly=True)
     ks_amount_discount = fields.Monetary(string='Overall Discount', readonly=True)
+    user_id = fields.Many2one(
+        'res.users', string='Sales Manager', index=True, readonly=True)
+    pricelist_id = fields.Many2one('product.pricelist', string='Pricelist', readonly=True)
+
 
     @api.model
     def default_get(self, default_fields):
@@ -74,6 +80,15 @@ class createsaleorder(models.TransientModel):
         res.update({'new_order_line_ids': update,
                     'partner_id': data.partner_id[0].id,
                     'inquirymany_id': inquiry_ids,
+                    'inquiry_type': data[0].inquiry_type,
+                    'supplier_name': data[0].supplier_name.id,
+                    'cyb_payment_id': data[0].cyb_payment_id.id,
+                    'cyb_quotation_id': data[0].cyb_quotation_id.id,
+                    'user_id': data[0].user_id.id,
+                    'pricelist_id': data[0].pricelist_id.id,
+                    'currency_id': data[0].currency_id.id,
+                    'ref_id': data[0].ref_id,
+                    'crm_lead_id': data.crm_lead_id.id,
                     'ks_global_discount_type': data[0].ks_global_discount_type,
                     'ks_global_discount_rate': data[0].ks_global_discount_rate,
                     'ks_amount_discount': data[0].ks_amount_discount,
@@ -107,10 +122,15 @@ class createsaleorder(models.TransientModel):
 
         sale_order = {
             'partner_id': self.partner_id.id,
-            'inquiry_type': self.inquiry_type,
-            'ref_id': self.ref_id,
+            'inquiry_type': self[0].inquiry_type,
+            'quotation_reference': self[0].ref_id,
+            'quotation_new_id': self[0].cyb_quotation_id.id,
             'notes': self.notes,
-            # 'so_id': self.so_id.id,
+            'currency_id': self.currency_id.id,
+            'date_quotation': self[0].date_inquiry,
+            'quotation_payment_id': self[0].cyb_payment_id.id,
+            'crm_lead_id': self.crm_lead_id.id,
+            'pricelist_id': self[0].pricelist_id.id,
             'order_line': value,
             'ks_global_discount_type': self[0].ks_global_discount_type,
             'ks_global_discount_rate': self[0].ks_global_discount_rate,

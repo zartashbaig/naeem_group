@@ -18,12 +18,18 @@ class InquiryInvoice(models.TransientModel):
                                  states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}, copy=False,
                                  default=fields.Datetime.now,
                                  help="Creation date of draft/sent orders,\nConfirmation date of confirmed orders.")
-    quotation_Expiration = fields.Date(string="Expiration", related="so_id.quotation_Expiration")
+    quotation_Expiration = fields.Date(string="Expiration", readonly=True)
     so_id = fields.Many2one('cyb.quotation.purchase', string="Quotation ID", )
-    currency_id = fields.Many2one(related='so_id.currency_id', depends=['so_id.currency_id'], store=True, string='Currency', readonly=True)
-
-    crm_lead_id = fields.Many2one('crm.lead', string="CRM Lead", related="so_id.crm_lead_id")
-    quotation_reference = fields.Char(string="Reference", related="so_id.quotation_reference")
+    inquiry_type = fields.Selection([
+        ('STOCKIEST', 'STOCKIEST'),
+        ('INDENTING', 'INDENTING')
+    ], string="Purchase Type", store=True, readonly=True)
+    remarks = fields.Text(string="Remarks", readonly=True)
+    currency_id = fields.Many2one('res.currency', store=True, string='Currency', readonly=True)
+    date_quotation = fields.Datetime(string="Document Date", readonly=True)
+    crm_lead_id = fields.Many2one('crm.lead', string="CRM Lead", readonly=True)
+    quotation_payment_id = fields.Many2one('account.payment.term',string="Payment Term", readonly=True)
+    quotation_reference = fields.Char(string="Document No", readonly=True)
     quotation_sale_many_ids = fields.Many2many('cyb.quotation.purchase', string="Quotation ID",
                                                store=True)
     ks_global_discount_type = fields.Selection([('percent', 'Percentage'), ('amount', 'Amount')],
@@ -32,6 +38,8 @@ class InquiryInvoice(models.TransientModel):
     ks_global_discount_rate = fields.Float('Overall Discount Rate',
                                            readonly=True)
     ks_amount_discount = fields.Monetary(string='Overall Discount', readonly=True)
+    pricelist_id = fields.Many2one('product.pricelist', string='Pricelist', readonly=True)
+
 
 
     @api.model
@@ -66,6 +74,14 @@ class InquiryInvoice(models.TransientModel):
                     }))
         res.update({'new_order_line_ids': update,
                     'quotation_sale_many_ids': quotation_ids,
+                    'quotation_reference': data[0].quotation_reference,
+                    'inquiry_type': data[0].inquiry_type,
+                    'remarks': data[0].remarks,
+                    'date_quotation': data[0].date_quotation,
+                    'currency_id': data[0].currency_id.id,
+                    'pricelist_id': data[0].pricelist_id.id,
+                    'crm_lead_id': data[0].crm_lead_id.id,
+                    'quotation_payment_id': data[0].quotation_payment_id.id,
                     'ks_global_discount_type': data[0].ks_global_discount_type,
                     'ks_global_discount_rate': data[0].ks_global_discount_rate,
                     'ks_amount_discount': data[0].ks_amount_discount,
@@ -100,17 +116,19 @@ class InquiryInvoice(models.TransientModel):
                 }])
         sale_order = {
             'partner_id': self.partner_id.id,
-            # 'inquiry_type': self.inquiry_type,
-            # 'ref_id': self.ref_id,
-            # 'notes': self.notes,
-            # 'so_id': self.so_id.id,
+            'dc_type': self[0].inquiry_type,
+            'partner_ref': self[0].quotation_reference,
+            'remarks': self[0].remarks,
+            'date_planned': self[0].date_quotation,
+            'payment_term_id': self[0].quotation_payment_id.id,
+            'pricelist_id': self[0].pricelist_id.id,
+            'crm_lead_id': self[0].crm_lead_id.id,
+            'currency_id': self.currency_id.id,
             'ks_global_discount_type': self[0].ks_global_discount_type,
             'ks_global_discount_rate': self[0].ks_global_discount_rate,
             'ks_amount_discount': self[0].ks_amount_discount,
             'order_line': value,
             'quotation_sale_many_ids': self.quotation_sale_many_ids.ids
-
-            # 'state': 'draft',
         }
         so = self.env['purchase.order'].create(sale_order)
         so.state = 'purchase'
@@ -125,7 +143,6 @@ class InquiryInvoice(models.TransientModel):
             "views": [[False, "form"]],
             "res_id": so.id
         }
-
 
 class GetQuotationorderdata(models.TransientModel):
     _name = 'purchase.wizard.line'

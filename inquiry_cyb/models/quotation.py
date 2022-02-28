@@ -31,7 +31,7 @@ class SaleOrderExt(models.Model):
         ('yes', 'Yes'),
         ('no', 'No')
     ], string="P.Price Apply", default='no')
-    ref_id = fields.Char(string="Reference")
+    ref_id = fields.Char(string="Document No.")
     account_num = fields.Char(string="Account No.")
     credit_lim = fields.Float(string="Credit Limit", digits=(16, 4))
     d_date = fields.Date(string="Delivery Date",)
@@ -154,12 +154,12 @@ class CybQuotation(models.Model):
         'res.partner', string='Customer', readonly=True,
         states={'draft': [('readonly', False)], 'sent': [('readonly', False)]},
         change_default=True, index=True)
-    quotation_reference = fields.Char(string='Reference')
+    quotation_reference = fields.Char(string='Document No.')
     quotation_new_id = fields.Many2one('sale.order.template', string='Quotation Template')
     quotation_payment_id = fields.Many2one('account.payment.term', string='Payment term')
     manager_id = fields.Many2one('res.user', string='Sale Manager')
     quotation_Expiration = fields.Date(string="Expiration")
-    date_quotation = fields.Datetime(string="Quotation Date")
+    date_quotation = fields.Datetime(string="Document Date")
     order_line = fields.One2many('create.quotation.friend', 'order_id', string='Order line')
     company_id = fields.Many2one('res.company', 'Company', index=True,
                                  default=lambda self: self.env.company)

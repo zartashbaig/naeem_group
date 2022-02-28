@@ -11,10 +11,16 @@
                         <field name="so_id" readonly="1" invisible="1"/>
                         <field name="partner_id"/>
                         <field name="quotation_reference"/>
-                        <field name="crm_lead_id"/>
+                        <field name="quotation_new_id"/>
+                        <field name="currency_id"/>
                     </group>
                     <group>
-                        <field name="quotation_Expiration"/>
+                        <field name="inquiry_type"/>
+                        <field name="date_quotation"/>
+                        <field name="quotation_payment_id"/>
+                        <field name="crm_lead_id"/>
+                        <field name="crm_lead_id"/>
+                        <field name="pricelist_id"/>
                     </group>
                 </group>
 

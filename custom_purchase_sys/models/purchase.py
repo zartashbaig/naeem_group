@@ -14,11 +14,11 @@ class PurchaseDiscount(models.Model):
     account_id = fields.Many2one('account.account', string='Account')
     customer_id = fields.Many2one('res.partner', string='Customer Name')
     remarks = fields.Text(string="Remarks")
-
+    crm_lead_id = fields.Many2one('crm.lead', string='CRM Lead')
     dc_type = fields.Selection([
         ('STOCKIEST', 'STOCKIEST'),
         ('INDENTING', 'INDENTING')
-    ], string="Po Type", default='STOCKIEST')
+    ], string="Purchase Type", default='STOCKIEST')
 
     net_amount = fields.Float(string='Net Amount', readonly=True, store=True)
     count = fields.Integer(compute="_compute_discount_total", string='SN (Total)', store=True, readonly=1)
@@ -29,6 +29,10 @@ class PurchaseDiscount(models.Model):
         currency_field="currency_id",
         store=True,
     )
+    pricelist_id = fields.Many2one(
+        'product.pricelist', string='Pricelist', check_company=True,  # Unrequired company
+        domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]", tracking=1,
+        help="If you change the pricelist, only newly added lines will be affected.")
 
     @api.depends('order_line.product_qty')
     def _amount_all_qty(self):

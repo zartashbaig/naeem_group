@@ -10,13 +10,18 @@
                 <xpath expr="//field[@name='partner_ref']" position="after">
                     <field name="currency_id" default='PKR'/>
                 </xpath>
-                <xpath expr="//field[@name='currency_id']" position="after">
+                <xpath expr="//field[@name='date_order']" position="after">
                     <field name="dc_type"/>
                 </xpath>
-                <xpath expr="//field[@name='date_order']" position="before">
-                    <field name="manager_id"/>
+<!--                <xpath expr="//field[@name='date_order']" position="before">-->
+<!--                    <field name="manager_id"/>-->
+<!--                </xpath>-->
+                    <xpath expr="//field[@name='dc_type']" position="after">
+                    <field name="crm_lead_id"/>
+                    <field name="pricelist_id"/>
                 </xpath>
-                <xpath expr="//field[@name='manager_id']" position="before">
+
+                <xpath expr="//field[@name='dc_type']" position="before">
                     <field name="account_id"/>
                 </xpath>
                 <xpath expr="//field[@name='partner_id']" position="attributes">
@@ -26,7 +31,7 @@
                 <xpath expr="//field[@name='dc_type']" position="after">
                     <field name="customer_id"/>
                 </xpath>
-                <xpath expr="//field[@name='customer_id']" position="after">
+                <xpath expr="//field[@name='currency_id']" position="after">
                     <field name="remarks"/>
                 </xpath>
                 <xpath expr="//field[@name='order_line']/tree/field[@name='product_id']" position="before">

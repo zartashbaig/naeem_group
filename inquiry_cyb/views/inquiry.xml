@@ -9,12 +9,9 @@
             <tree string="inquiry tree view">
                 <field name="name"/>
                 <field name="partner_id"/>
+                <field name="date_inquiry"/>
                 <field name="cyb_quotation_id"/>
                 <field name="cyb_payment_id"/>
-                <!--                <field name="cyb_order_lines">-->
-                <!--                        <field name="inquiry_subtotal"/>-->
-                <!--                        <field name="product_inquiry_id" invisible="1"/>-->
-                <!--                </field>-->
                 <field name="state"/>
             </tree>
         </field>
@@ -58,7 +55,7 @@
                             <field name="remarks"/>
                         </group>
                         <group>
-                            <field name="pi_num"/>
+<!--                            <field name="pi_num"/>-->
                             <field name="inquiry_type"/>
                             <field name="date_inquiry"/>
                             <field name="date_Expiration"/>

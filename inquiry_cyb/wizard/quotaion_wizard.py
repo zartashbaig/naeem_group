@@ -18,19 +18,27 @@ class InquiryInvoice(models.TransientModel):
                                  states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}, copy=False,
                                  default=fields.Datetime.now,
                                  help="Creation date of draft/sent orders,\nConfirmation date of confirmed orders.")
-    quotation_Expiration = fields.Date(string="Expiration", related="so_id.quotation_Expiration")
     so_id = fields.Many2one('cyb.quotation', string="Quotation ID", )
-    crm_lead_id = fields.Many2one('crm.lead', string="CRM Lead", related="so_id.crm_lead_id")
-    quotation_reference = fields.Char(string="Reference", related="so_id.quotation_reference")
+    crm_lead_id = fields.Many2one('crm.lead', string="CRM Lead", readonly=True)
+    quotation_reference = fields.Char(string="Document No", readonly=True)
     quotation_sale_many_ids = fields.Many2many('cyb.quotation', string="Quotation ID",
                                                store=True)
-    currency_id = fields.Many2one(related='so_id.currency_id', depends=['so_id.currency_id'], store=True, string='Currency', readonly=True)
+    date_quotation = fields.Datetime(string="Document Date",readonly=True)
+
     ks_global_discount_type = fields.Selection([('percent', 'Percentage'), ('amount', 'Amount')],
                                                string='Overall Discount Type',
-                                               readonly=True,)
+                                               readonly=True)
     ks_global_discount_rate = fields.Float('Overall Discount Rate',
                                            readonly=True)
     ks_amount_discount = fields.Monetary(string='Overall Discount', readonly=True)
+    pricelist_id = fields.Many2one('product.pricelist', string='Pricelist', readonly=True)
+    currency_id = fields.Many2one('res.currency', store=True, string='Currency', readonly=True)
+    quotation_new_id = fields.Many2one('sale.order.template', string='Quotation', readonly=True)
+    quotation_payment_id = fields.Many2one('account.payment.term', string='Payment term', readonly=True)
+    inquiry_type = fields.Selection([
+        ('STOCKIEST', 'STOCKIEST'),
+        ('INDENTING', 'INDENTING')
+    ], string="Inquiry Type", readonly=True, store=True)
 
 
     @api.model
@@ -64,6 +72,14 @@ class InquiryInvoice(models.TransientModel):
                     }))
         res.update({'new_order_line_ids': update,
                     'quotation_sale_many_ids': quotation_ids,
+                    'inquiry_type': data[0].inquiry_type,
+                    'quotation_new_id': data[0].quotation_new_id.id,
+                    'quotation_payment_id': data[0].quotation_payment_id.id,
+                    'pricelist_id': data[0].pricelist_id.id,
+                    'currency_id': data[0].currency_id.id,
+                    'quotation_reference': data[0].quotation_reference,
+                    'crm_lead_id': data.crm_lead_id.id,
+                    'date_quotation': data[0].date_quotation,
                     'ks_global_discount_type': data[0].ks_global_discount_type,
                     'ks_global_discount_rate': data[0].ks_global_discount_rate,
                     'ks_amount_discount': data[0].ks_amount_discount,
@@ -99,10 +115,14 @@ class InquiryInvoice(models.TransientModel):
                 }])
         sale_order = {
             'partner_id': self.partner_id.id,
-            # 'inquiry_type': self.inquiry_type,
-            # 'ref_id': self.ref_id,
-            # 'notes': self.notes,
-            # 'so_id': self.so_id.id,
+            'inquiry_type': self[0].inquiry_type,
+            'sale_order_template_id': self[0].quotation_new_id.id,
+            'payment_term_id': self[0].quotation_payment_id.id,
+            'pricelist_id': self[0].pricelist_id.id,
+            'currency_id': self[0].currency_id.id,
+            'ref_id': self[0].quotation_reference,
+            'crm_lead_id': self.crm_lead_id.id,
+            'date_order': self[0].date_quotation,
             'order_line': value,
             'ks_global_discount_type': self[0].ks_global_discount_type,
             'ks_global_discount_rate': self[0].ks_global_discount_rate,

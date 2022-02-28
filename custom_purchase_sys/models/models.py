@@ -25,7 +25,7 @@ class CybPurchase(models.Model):
         states={'draft': [('readonly', False)]},
         required=True, change_default=True, index=True)
     supplier_name = fields.Many2one('res.partner', string="Supplier Name")
-    ref_id = fields.Char(string="Document no")
+    ref_id = fields.Char(string="Document no", )
     # cyb_quotation_id = fields.Many2one('sale.order.template', string='Quotation')
     cyb_payment_id = fields.Many2one('account.payment.term', string='Payment term')
     date_Expiration = fields.Date(string="Expiration")
@@ -49,7 +49,6 @@ class CybPurchase(models.Model):
     new_quotation_line_id = fields.Many2one('cyb.quotation.purchase')
     pricelist_id = fields.Many2one(
         'product.pricelist', string='Pricelist', check_company=True,  # Unrequired company
-         readonly=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]},
         domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]", tracking=1,
         help="If you change the pricelist, only newly added lines will be affected.")
     currency_id = fields.Many2one(related='pricelist_id.currency_id', depends=["pricelist_id"], store=True, readonly=False)
