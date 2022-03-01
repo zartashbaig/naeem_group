@@ -57,6 +57,11 @@ class CybQuotationPurchase(models.Model):
     purchase_inquirymany_id = fields.Many2many('cyb.purchase', string='Inquiry List')
     sale_quotation_ids = fields.Many2many('purchase.order', string='Sale List')
 
+    taxes_check = fields.Selection([
+        ('With_Tax', 'With Tax'),
+        ('Without_Tax', 'Without Tax')
+    ], string="With Tax / Without Tax")
+
     def action_quotation_cancel(self):
         self.state = 'Cancelled'
 

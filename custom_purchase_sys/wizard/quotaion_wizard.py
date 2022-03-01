@@ -39,7 +39,10 @@ class InquiryInvoice(models.TransientModel):
                                            readonly=True)
     ks_amount_discount = fields.Monetary(string='Overall Discount', readonly=True)
     pricelist_id = fields.Many2one('product.pricelist', string='Pricelist', readonly=True)
-
+    taxes_check = fields.Selection([
+        ('With_Tax', 'With Tax'),
+        ('Without_Tax', 'Without Tax')
+    ], default='With Tax', string="With Tax / Without Tax", readonly=True)
 
 
     @api.model
@@ -80,6 +83,7 @@ class InquiryInvoice(models.TransientModel):
                     'date_quotation': data[0].date_quotation,
                     'currency_id': data[0].currency_id.id,
                     'pricelist_id': data[0].pricelist_id.id,
+                    'taxes_check': data[0].taxes_check,
                     'crm_lead_id': data[0].crm_lead_id.id,
                     'quotation_payment_id': data[0].quotation_payment_id.id,
                     'ks_global_discount_type': data[0].ks_global_discount_type,
@@ -122,6 +126,7 @@ class InquiryInvoice(models.TransientModel):
             'date_planned': self[0].date_quotation,
             'payment_term_id': self[0].quotation_payment_id.id,
             'pricelist_id': self[0].pricelist_id.id,
+            'taxes_check': self[0].taxes_check,
             'crm_lead_id': self[0].crm_lead_id.id,
             'currency_id': self.currency_id.id,
             'ks_global_discount_type': self[0].ks_global_discount_type,

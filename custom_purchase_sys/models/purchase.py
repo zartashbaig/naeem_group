@@ -34,6 +34,11 @@ class PurchaseDiscount(models.Model):
         domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]", tracking=1,
         help="If you change the pricelist, only newly added lines will be affected.")
 
+    taxes_check = fields.Selection([
+        ('With_Tax', 'With Tax'),
+        ('Without_Tax', 'Without Tax')
+    ], string="With Tax / Without Tax")
+
     @api.depends('order_line.product_qty')
     def _amount_all_qty(self):
         """

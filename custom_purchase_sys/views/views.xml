@@ -53,9 +53,10 @@
                                    context="{'res_partner_search_mode': 'customer', 'show_address': 1, 'show_vat': True}"
                                    options='{"always_reload": True}'/>
                             <field name="ref_id"/>
-<!--                            <field name="supplier_name"/>-->
+                            <!--                            <field name="supplier_name"/>-->
                             <field name="currency_id"/>
                             <field name="notes"/>
+                            <field name="taxes_check"/>
                             <!--                            <field name="cancel"/>-->
                             <!--                            <field name="cyb_quotation_id"/>-->
                         </group>
@@ -75,10 +76,10 @@
                         <page string="Inquiry Lines">
                             <field name="order_line">
                                 <tree editable="bottom">
+                                                                        <field name="product_id"/>
                                     <field name="brand_id"/>
                                     <field name="wh_id"/>
                                     <field name="pro_available"/>
-                                    <field name="product_id"/>
                                     <field name="hs_code"/>
                                     <field name="name" widget="section_and_note_text"/>
                                     <field name="product_qty"/>
@@ -86,9 +87,10 @@
                                     <field name="qty_received" invisible="1"/>
                                     <field name="qty_invoiced" invisible="1"/>
                                     <field name="price_unit"/>
-                                    <field name="taxes_id" widget="many2many_tags" options="{'no_create': True}"
-                                           optional="show"/>
-                                    <field name="tax_amount"/>
+                                    <field name="taxes_id" widget="many2many_tags"
+                                           attrs="{'column_invisible': [('parent.taxes_check', '=', 'Without_Tax')]}"/>
+                                    <field name="tax_amount"
+                                           attrs="{'column_invisible': [('parent.taxes_check', '=', 'Without_Tax')]}"/>
                                     <field name="discount" string="Disc.%"
                                            optional="show" widget="product_discount"/>
                                     <field name="prod_total_discount"
@@ -112,8 +114,9 @@
                                 <group class="oe_subtotal_footer oe_right" colspan="2" name="sale_total">
                                     <field name="amount_untaxed" widget="monetary"
                                            options="{'currency_field': 'currency_id'}"/>
-                                    <field name="amount_tax" widget="monetary"
-                                           options="{'currency_field': 'currency_id'}"/>
+                                        <field name="amount_tax" widget="monetary"
+                                               options="{'currency_field': 'currency_id'}" attrs="{'invisible': [('taxes_check', '=', 'Without_Tax')]}"/>
+
                                     <div class="oe_subtotal_footer_separator oe_inline o_td_label">
                                         <label for="amount_total"/>
                                     </div>

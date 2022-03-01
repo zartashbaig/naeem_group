@@ -53,9 +53,10 @@
                             <field name="cyb_quotation_id"/>
                             <!--                            <field name="manager_id"/>-->
                             <field name="remarks"/>
+                            <field name="taxes_check"/>
                         </group>
                         <group>
-<!--                            <field name="pi_num"/>-->
+                            <!--                            <field name="pi_num"/>-->
                             <field name="inquiry_type"/>
                             <field name="date_inquiry"/>
                             <field name="date_Expiration"/>
@@ -71,8 +72,13 @@
                         <page string="Inquiry Lines">
                             <field name="order_line">
                                 <tree editable="bottom">
-                                    <field name="brand_id"/>
+                                         <control>
+                                        <create name="add_product_control" string="Add a product"/>
+                                        <create name="add_section_control" string="Add a section" context="{'default_display_type': 'line_section'}"/>
+                                        <create name="add_note_control" string="Add a note" context="{'default_display_type': 'line_note'}"/>
+                                    </control>
                                     <field name="product_id"/>
+                                    <field name="brand_id"/>
                                     <field name="wh_id"/>
                                     <field name="pro_available"/>
                                     <field name="hs_code"/>
@@ -82,9 +88,13 @@
                                     <field name="qty_delivered" invisible="1"/>
                                     <field name="qty_invoiced" invisible="1"/>
                                     <field name="price_unit"/>
-                                    <field name="tax_id" widget="many2many_tags" options="{'no_create': True}"
-                                           optional="show"/>
-                                    <field name="tax_amount"/>
+
+                                    <field name="tax_id" widget="many2many_tags"
+                                           attrs="{'column_invisible': [('parent.taxes_check', '=', 'Without_Tax')]}"
+                                           options="{'no_create': True}" optional="show"/>
+                                    <field name="tax_amount"
+                                           attrs="{'column_invisible': [('parent.taxes_check', '=', 'Without_Tax')]}"/>
+
                                     <field name="discount" string="Disc.%" groups="product.group_discount_per_so_line"
                                            optional="show" widget="product_discount"/>
                                     <field name="prod_total_discount" groups="product.group_discount_per_so_line"
@@ -108,7 +118,8 @@
                                     <field name="amount_untaxed" widget="monetary"
                                            options="{'currency_field': 'currency_id'}"/>
                                     <field name="amount_tax" widget="monetary"
-                                           options="{'currency_field': 'currency_id'}"/>
+                                           options="{'currency_field': 'currency_id'}"
+                                           attrs="{'invisible': [('taxes_check', '=', 'Without_Tax')]}"/>
                                     <div class="oe_subtotal_footer_separator oe_inline o_td_label">
                                         <label for="amount_total"/>
                                     </div>

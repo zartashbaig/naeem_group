@@ -40,6 +40,12 @@ class SaleOrderExt(models.Model):
     remarks = fields.Text(string="Remarks")
     cancel = fields.Boolean(string='Cancel')
     net_amount = fields.Float(string='Net Amount', readonly=True, store=True, digits=(16, 4))
+    taxes_check = fields.Selection([
+        ('With_Tax', 'With Tax'),
+        ('Without_Tax', 'Without Tax')
+    ], string="With Tax / Without Tax")
+    crm_lead_id = fields.Many2one('crm.lead', string="CRM Lead")
+
 
     @api.model
     def create(self, vals):
@@ -193,6 +199,10 @@ class CybQuotation(models.Model):
     notes_qut = fields.Text('Remarks')
     inquirymany_id = fields.Many2many('cyb.inquiry', string='Inquiry List')
     sale_quotation_ids = fields.Many2many('sale.order', string='Sale List')
+    taxes_check = fields.Selection([
+        ('With_Tax', 'With Tax'),
+        ('Without_Tax', 'Without Tax')
+    ], string="With Tax / Without Tax")
 
     def action_quotation_cancel(self):
         self.state = 'Cancelled'

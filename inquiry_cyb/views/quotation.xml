@@ -8,32 +8,34 @@
         <field name="model">sale.order</field>
         <field name="inherit_id" ref="sale.view_order_form"/>
         <field name="arch" type="xml">
-                        <xpath expr="//field[@name='validity_date']" position="before">
+            <xpath expr="//field[@name='validity_date']" position="before">
                 <field name="manager_id"/>
             </xpath>
-                 <xpath expr="//field[@name='partner_id']" position="after">
+            <xpath expr="//field[@name='partner_id']" position="after">
                 <field name="ref_id"/>
             </xpath>
-                    <xpath expr="//field[@name='ref_id']" position="after">
+            <xpath expr="//field[@name='ref_id']" position="after">
                 <field name="currency_id"/>
+                <field name="taxes_check"/>
             </xpath>
+
             <xpath expr="//field[@name='manager_id']" position="after">
                 <field name="inquiry_type"/>
+                <field name="crm_lead_id"/>
             </xpath>
             <xpath expr="//field[@name='inquiry_type']" position="after">
                 <field name="p_apply"/>
             </xpath>
-<!--            <xpath expr="//field[@name='sale_order_template_id']" position="after">-->
-<!--                <field name="remarks"/>-->
-<!--            </xpath>-->
-<!--            <xpath expr="//field[@name='remarks']" position="after">-->
-<!--                <field name="cancel"/>-->
-<!--            </xpath>-->
+            <!--            <xpath expr="//field[@name='sale_order_template_id']" position="after">-->
+            <!--                <field name="remarks"/>-->
+            <!--            </xpath>-->
+            <!--            <xpath expr="//field[@name='remarks']" position="after">-->
+            <!--                <field name="cancel"/>-->
+            <!--            </xpath>-->
 
             <xpath expr="//field[@name='currency_id']" position="after">
                 <field name="credit_lim"/>
             </xpath>
-
 
             <xpath expr="//field[@name='ref_id']" position="after">
                 <field name="account_num"/>
@@ -44,18 +46,14 @@
             <xpath expr="//label[@for='date_order']" position="replace">
                 <label for='date_order' string="S.Order date"/>
             </xpath>
-            <xpath expr="//field[@name='order_line']/tree/field[@name='product_id']" position="before">
+            <xpath expr="//field[@name='order_line']/tree/field[@name='product_id']" position="after">
                 <field name="brand_id"/>
-            </xpath>
-             <xpath expr="//field[@name='order_line']/tree/field[@name='brand_id']" position="after">
+                <field name="wh_id"/>
                 <field name="pro_available"/>
-            </xpath>
-            <xpath expr="//field[@name='order_line']/tree/field[@name='brand_id']" position="before">
                 <field name="hs_code"/>
             </xpath>
-             <xpath expr="//field[@name='order_line']/tree/field[@name='hs_code']" position="after">
-                <field name="wh_id"/>
-            </xpath>
+
+
             <xpath expr="//field[@name='order_line']/tree/field[@name='product_uom_qty']" position="after">
                 <field name="bonus_quantity"/>
             </xpath>
@@ -67,8 +65,16 @@
                 <field name="remarks"/>
             </xpath>
             <xpath expr="//field[@name='order_line']/tree/field[@name='tax_id']" position="after">
-                <field name="tax_amount"/>
+                <field name="tax_amount" attrs="{'column_invisible': [('parent.taxes_check', '=', 'Without_Tax')]}"/>
             </xpath>
+
+            <xpath expr="//field[@name='order_line']/tree/field[@name='tax_id']" position="replace">
+                <field name="tax_id" widget="many2many_tags" options="{'no_create': True}"
+                       domain="[('type_tax_use','=','sale'),('company_id','=',parent.company_id)]"
+                       attrs="{'column_invisible': [('parent.taxes_check', '=', 'Without_Tax')]}" optional="show"/>
+
+            </xpath>
+
             <xpath expr="//notebook/page[@name='order_lines']" position="after">
                 <page string="Quotation Lines">
                     <field name="quotation_sale_many_ids"/>
@@ -81,11 +87,9 @@
             </xpath>
 
 
-
-
             <xpath expr="//notebook/page[@name='order_lines']/group[@name='note_group']" position="before">
-                   <field name="note" class="oe_inline" nolabel="1" placeholder="Terms and conditions..."/>
-                    <div class="oe_clear"/>
+                <field name="note" class="oe_inline" nolabel="1" placeholder="Terms and conditions..."/>
+                <div class="oe_clear"/>
                 <div class="row" style="border: 2px solid #875a7b;">
                     <div class="col-1">
                         <div class="o_td_label">
@@ -108,7 +112,7 @@
                                    options="{'currency_field': 'currency_id'}"/>
                         </div>
                     </div>
-                    <div class="col-2">
+                    <div class="col-2" attrs="{'invisible': [('taxes_check', '=', 'Without_Tax')]}">
                         <div class="o_td_label">
                             <label string="Total Taxation Amount" for="amount_tax"/>
                             <field name="amount_tax" widget="monetary"
@@ -161,7 +165,7 @@
                             name="action_quotation_cancel" states="confirm"/>
                     <button type="action" string="Create Sale Order"
                             name="%(inquiry_invoice_wizard)d" states="confirm"/>
-                          <button type="object" string="Reset to Draft"
+                    <button type="object" string="Reset to Draft"
                             name="action_quotation_reset" states="Cancelled"/>
 
                 </header>
@@ -176,11 +180,12 @@
                             <field name="partner_id" widget="res_partner_many2one"
                                    context="{'res_partner_search_mode': 'customer', 'show_address': 1, 'show_vat': True}"
                                    options='{"always_reload": True}'/>
-                                                        <field name="quotation_reference"/>
+                            <field name="quotation_reference"/>
                             <field name="quotation_new_id"/>
                             <field name="currency_id"/>
-<!--                            <field name="manager_id"/>-->
+                            <!--                            <field name="manager_id"/>-->
                             <field name="p_apply"/>
+                            <field name="taxes_check"/>
                         </group>
                         <group>
                             <field name="quotation_Expiration" invisible="1"/>
@@ -200,8 +205,8 @@
                         <page string="Quotation line" name="order_line">
                             <field name="order_line">
                                 <tree editable="bottom">
-                                    <field name="brand_id"/>
                                     <field name="product_id"/>
+                                    <field name="brand_id"/>
                                     <field name="wh_id"/>
                                     <field name="pro_available"/>
                                     <field name="hs_code"/>
@@ -213,8 +218,10 @@
                                     <field name="qty_invoiced" invisible="1"/>
                                     <field name="price_unit"/>
                                     <field name="tax_id" widget="many2many_tags" options="{'no_create': True}"
-                                           optional="show"/>
-                                    <field name="tax_amount"/>
+                                           optional="show"
+                                           attrs="{'column_invisible': [('parent.taxes_check', '=', 'Without_Tax')]}"/>
+                                    <field name="tax_amount"
+                                           attrs="{'column_invisible': [('parent.taxes_check', '=', 'Without_Tax')]}"/>
                                     <field name="discount" string="Disc.%" groups="product.group_discount_per_so_line"
                                            optional="show" widget="product_discount"/>
                                     <field name="prod_total_discount" groups="product.group_discount_per_so_line"
@@ -226,7 +233,7 @@
                                 </tree>
                             </field>
 
-                                 <group>
+                            <group>
                                 <field name="notes" class="oe_inline" nolabel="1"
                                        placeholder="Define your terms and conditions ..."/>
                             </group>
@@ -253,7 +260,7 @@
                                                options="{'currency_field': 'currency_id'}"/>
                                     </div>
                                 </div>
-                                <div class="col-2">
+                                <div class="col-2" attrs="{'invisible': [('taxes_check', '=', 'Without_Tax')]}">
                                     <div class="o_td_label">
                                         <label for="amount_tax"/>
                                         <field name="amount_tax" widget="monetary"
@@ -281,8 +288,6 @@
                                     </div>
                                 </div>
                             </div>
-
-
 
 
                         </page>
@@ -329,7 +334,7 @@
             <tree string="Inquiry tree view">
                 <field name="name"/>
                 <field name="partner_id"/>
-<!--                <field name="quotation_Expiration"/>-->
+                <!--                <field name="quotation_Expiration"/>-->
                 <field name="date_quotation"/>
                 <field name="quotation_payment_id"/>
                 <field name="crm_lead_id"/>

@@ -41,6 +41,10 @@ class createsaleorder(models.TransientModel):
     ks_amount_discount = fields.Monetary(string='Overall Discount', readonly=True)
 
     pricelist_id = fields.Many2one('product.pricelist', string='Pricelist', readonly=True)
+    taxes_check = fields.Selection([
+        ('With_Tax', 'With Tax'),
+        ('Without_Tax', 'Without Tax')
+    ], default='With Tax', string="With Tax / Without Tax", readonly=True)
 
     @api.model
     def default_get(self, default_fields):
@@ -77,6 +81,7 @@ class createsaleorder(models.TransientModel):
                     'partner_id': data.partner_id[0].id,
                     'ref_id': data[0].ref_id,
                     'inquiry_type': data[0].inquiry_type,
+                    'taxes_check': data[0].taxes_check,
                     'date_inquiry': data[0].date_inquiry,
                     'crm_lead_id': data[0].crm_lead_id.id,
                     'pricelist_id': data[0].pricelist_id.id,
@@ -121,6 +126,7 @@ class createsaleorder(models.TransientModel):
             'quotation_reference': self[0].ref_id,
             'remarks': self[0].notes,
             'date_quotation': self[0].date_inquiry,
+            'taxes_check': self[0].taxes_check,
             'ks_global_discount_type': self[0].ks_global_discount_type,
             'ks_global_discount_rate': self[0].ks_global_discount_rate,
             'ks_amount_discount': self[0].ks_amount_discount,

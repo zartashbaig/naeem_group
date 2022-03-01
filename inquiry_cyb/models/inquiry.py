@@ -58,6 +58,10 @@ class CybInquiry(models.Model):
         help="If you change the pricelist, only newly added lines will be affected.")
     currency_id = fields.Many2one(related='pricelist_id.currency_id', depends=["pricelist_id"], store=True, readonly=False)
     quotation_many_ids = fields.Many2many('cyb.quotation', string="Inquiry ID", default="", store=True)
+    taxes_check = fields.Selection([
+        ('With_Tax', 'With Tax'),
+        ('Without_Tax', 'Without Tax')
+    ], string="With Tax / Without Tax")
 
     state = fields.Selection(
         [('draft', 'Draft'),
@@ -174,7 +178,10 @@ class CybSpecialist(models.Model):
     pro_available = fields.Float(related='product_id.qty_available', string="Product Available")
     price_total = fields.Monetary(compute='_compute_amount', string='Total', readonly=True, store=True, digits=(16, 4))
     discount = fields.Float(string='Discount %', digits='Discount', default=0.0)
-    prod_total_discount = fields.Float('Disc. Amount', readonly=True, store=True, digits=(16, 4))
+    prod_total_discount = fields.Float('Disc. Amount', store=True, digits=(16, 4))
+    display_type = fields.Selection([
+        ('line_section', "Section"),
+        ('line_note', "Note")], default=False, help="Technical field for UX purpose.")
 
     def product_qty_location_check(self):
         for rec in self:

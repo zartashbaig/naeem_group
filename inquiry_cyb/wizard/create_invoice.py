@@ -45,6 +45,11 @@ class createsaleorder(models.TransientModel):
         'res.users', string='Sales Manager', index=True, readonly=True)
     pricelist_id = fields.Many2one('product.pricelist', string='Pricelist', readonly=True)
 
+    taxes_check = fields.Selection([
+        ('With_Tax', 'With Tax'),
+        ('Without_Tax', 'Without Tax')
+    ], default='With Tax', string="With Tax / Without Tax" , readonly=True)
+
 
     @api.model
     def default_get(self, default_fields):
@@ -84,6 +89,7 @@ class createsaleorder(models.TransientModel):
                     'supplier_name': data[0].supplier_name.id,
                     'cyb_payment_id': data[0].cyb_payment_id.id,
                     'cyb_quotation_id': data[0].cyb_quotation_id.id,
+                    'taxes_check': data[0].taxes_check,
                     'user_id': data[0].user_id.id,
                     'pricelist_id': data[0].pricelist_id.id,
                     'currency_id': data[0].currency_id.id,
@@ -131,6 +137,7 @@ class createsaleorder(models.TransientModel):
             'quotation_payment_id': self[0].cyb_payment_id.id,
             'crm_lead_id': self.crm_lead_id.id,
             'pricelist_id': self[0].pricelist_id.id,
+            'taxes_check': self[0].taxes_check,
             'order_line': value,
             'ks_global_discount_type': self[0].ks_global_discount_type,
             'ks_global_discount_rate': self[0].ks_global_discount_rate,

@@ -53,7 +53,12 @@ class CybPurchase(models.Model):
         help="If you change the pricelist, only newly added lines will be affected.")
     currency_id = fields.Many2one(related='pricelist_id.currency_id', depends=["pricelist_id"], store=True, readonly=False)
     purchase_inquiry_many_ids = fields.Many2many('cyb.quotation.purchase', string="Purchase Inquiry ID", default="", store=True)
+    # taxes_check = fields.Boolean(string='Enable Taxes')
 
+    taxes_check = fields.Selection([
+        ('With_Tax', 'With Tax'),
+        ('Without_Tax', 'Without Tax')
+    ], string="With Tax / Without Tax")
 
     state = fields.Selection(
         [('draft', 'Draft'),
@@ -171,7 +176,7 @@ class CybSpecialist(models.Model):
     price_tax = fields.Float(compute='_compute_amount', string='Total Tax', readonly=True, store=True)
     price_total = fields.Monetary(compute='_compute_amount', string='Total', readonly=True, store=True)
     discount = fields.Float(string='Discount %', digits='Discount', default=0.0)
-    prod_total_discount = fields.Float('Disc. Amount', readonly=True, store=True)
+    prod_total_discount = fields.Float('Disc. Amount', store=True)
 
     # by WaqassAlii
     def product_qty_location_check(self):

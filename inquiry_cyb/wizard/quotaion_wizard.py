@@ -39,6 +39,10 @@ class InquiryInvoice(models.TransientModel):
         ('STOCKIEST', 'STOCKIEST'),
         ('INDENTING', 'INDENTING')
     ], string="Inquiry Type", readonly=True, store=True)
+    taxes_check = fields.Selection([
+        ('With_Tax', 'With Tax'),
+        ('Without_Tax', 'Without Tax')
+    ], default='With Tax', string="With Tax / Without Tax", readonly=True)
 
 
     @api.model
@@ -77,6 +81,7 @@ class InquiryInvoice(models.TransientModel):
                     'quotation_payment_id': data[0].quotation_payment_id.id,
                     'pricelist_id': data[0].pricelist_id.id,
                     'currency_id': data[0].currency_id.id,
+                    'taxes_check': data[0].taxes_check,
                     'quotation_reference': data[0].quotation_reference,
                     'crm_lead_id': data.crm_lead_id.id,
                     'date_quotation': data[0].date_quotation,
@@ -122,6 +127,7 @@ class InquiryInvoice(models.TransientModel):
             'currency_id': self[0].currency_id.id,
             'ref_id': self[0].quotation_reference,
             'crm_lead_id': self.crm_lead_id.id,
+            'taxes_check': self[0].taxes_check,
             'date_order': self[0].date_quotation,
             'order_line': value,
             'ks_global_discount_type': self[0].ks_global_discount_type,

@@ -18,7 +18,7 @@
                             name="action_quotation_cancel" states="confirm"/>
                     <button type="action" string="Create Purchase Order"
                             name="%(purchase_order_data_wizard)d" states="confirm"/>
-                     <button type="object" string="Reset to Draft"
+                    <button type="object" string="Reset to Draft"
                             name="action_quotation_purchase_reset" states="Cancelled"/>
 
                 </header>
@@ -33,14 +33,15 @@
                             <field name="partner_id" widget="res_partner_many2one"
                                    context="{'res_partner_search_mode': 'customer', 'show_address': 1, 'show_vat': True}"
                                    options='{"always_reload": True}'/>
-<!--                            <field name="quotation_new_id"/>-->
-                                                        <field name="quotation_reference"/>
+                            <!--                            <field name="quotation_new_id"/>-->
+                            <field name="quotation_reference"/>
                             <field name="currency_id"/>
                             <field name="remarks"/>
-<!--                            <field name="cancel"/>-->
+                            <field name="taxes_check"/>
+
                         </group>
                         <group>
-<!--                            <field name="quotation_Expiration"/>-->
+                            <!--                            <field name="quotation_Expiration"/>-->
                             <field name="inquiry_type"/>
                             <field name="date_quotation"/>
                             <field name="quotation_payment_id"/>
@@ -55,10 +56,11 @@
                         <page string="Quotation line">
                             <field name="order_line">
                                 <tree editable="bottom">
+                                                                        <field name="product_id"/>
+
                                     <field name="brand_id"/>
                                     <field name="wh_id"/>
                                     <field name="pro_available"/>
-                                    <field name="product_id"/>
                                     <field name="hs_code"/>
                                     <field name="name" widget="section_and_note_text"/>
                                     <field name="product_qty"/>
@@ -67,9 +69,10 @@
                                     <field name="qty_received" invisible="1"/>
                                     <field name="qty_invoiced" invisible="1"/>
                                     <field name="price_unit"/>
-                                    <field name="taxes_id" widget="many2many_tags" options="{'no_create': True}"
-                                           optional="show"/>
-                                    <field name="tax_amount"/>
+                                    <field name="taxes_id" widget="many2many_tags"
+                                           attrs="{'column_invisible': [('parent.taxes_check', '=', 'Without_Tax')]}"/>
+                                    <field name="tax_amount"
+                                           attrs="{'column_invisible': [('parent.taxes_check', '=', 'Without_Tax')]}"/>
                                     <field name="discount" string="Disc.%"
                                            optional="show" widget="product_discount"/>
                                     <field name="prod_total_discount"
@@ -79,7 +82,7 @@
                                     <field name="remarks"/>
                                 </tree>
                             </field>
-                                    <group>
+                            <group>
                                 <field name="notes" class="oe_inline" nolabel="1"
                                        placeholder="Define your terms and conditions ..."/>
                             </group>
@@ -105,7 +108,7 @@
                                                options="{'currency_field': 'currency_id'}"/>
                                     </div>
                                 </div>
-                                <div class="col-2">
+                                <div class="col-2" attrs="{'invisible': [('taxes_check', '=', 'Without_Tax')]}">
                                     <div class="o_td_label">
                                         <label for="amount_tax"/>
                                         <field name="amount_tax" widget="monetary"
@@ -133,8 +136,6 @@
                                     </div>
                                 </div>
                             </div>
-
-
 
 
                         </page>
@@ -196,7 +197,8 @@
         <field name="view_mode">tree,form</field>
     </record>
 
-    <menuitem id="purchase.menu_purchase_quotations" parent="purchase.menu_procurement_management" name="Quotations" sequence="1"
+    <menuitem id="purchase.menu_purchase_quotations" parent="purchase.menu_procurement_management" name="Quotations"
+              sequence="1"
               action="action_cyb_quotation_purchase"/>
 
     <record id="post_data_to_sale_order_action" model="ir.actions.server">
@@ -215,9 +217,9 @@
 
     </record>
 
-<!--    <menuitem id="purchase.menu_purchase_quotations"-->
-<!--              action="sale.action_quotations_with_onboarding"-->
-<!--              name="Purchase Quotation"-->
-<!--              parent="purchase.menu_procurement_management"-->
-<!--              sequence="1" groups="sales_team.group_sale_salesman"/>-->
+    <!--    <menuitem id="purchase.menu_purchase_quotations"-->
+    <!--              action="sale.action_quotations_with_onboarding"-->
+    <!--              name="Purchase Quotation"-->
+    <!--              parent="purchase.menu_procurement_management"-->
+    <!--              sequence="1" groups="sales_team.group_sale_salesman"/>-->
 </odoo>
