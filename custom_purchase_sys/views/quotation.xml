@@ -54,9 +54,17 @@
 
                     <notebook>
                         <page string="Quotation line">
-                            <field name="order_line">
+                            <field name="order_line" widget="section_and_note_one2many">
                                 <tree editable="bottom">
+                                                       <control>
+                                        <create name="add_line_control" string="Add a record"/>
+                                        <create name="add_section_control" string="Add a section"
+                                                context="{'default_display_type': 'line_section'}"/>
+                                        <create name="add_note_control" string="Add a note"
+                                                context="{'default_display_type': 'line_note'}"/>
+                                    </control>
                                                                         <field name="product_id"/>
+                                    <field name="display_type" force_save="1" invisible="1"/>
 
                                     <field name="brand_id"/>
                                     <field name="wh_id"/>

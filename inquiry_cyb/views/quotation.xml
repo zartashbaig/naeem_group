@@ -183,14 +183,13 @@
                             <field name="quotation_reference"/>
                             <field name="quotation_new_id"/>
                             <field name="currency_id"/>
-                            <!--                            <field name="manager_id"/>-->
                             <field name="p_apply"/>
                             <field name="taxes_check"/>
                         </group>
                         <group>
                             <field name="quotation_Expiration" invisible="1"/>
                             <field name="inquiry_type"/>
-                            <field name="date_quotation"/>
+                            <field name="date_order"/>
                             <field name="quotation_payment_id"/>
                             <field name="crm_lead_id"/>
                             <field name="company_id" invisible="1"/>
@@ -203,9 +202,18 @@
 
                     <notebook>
                         <page string="Quotation line" name="order_line">
-                            <field name="order_line">
-                                <tree editable="bottom">
+                            <field name="order_line" widget="section_and_note_one2many">
+                                <tree string="Quotation Lines" editable="bottom">
+                                    <control>
+                                        <create name="add_line_control" string="Add a record"/>
+                                        <create name="add_section_control" string="Add a section"
+                                                context="{'default_display_type': 'line_section'}"/>
+                                        <create name="add_note_control" string="Add a note"
+                                                context="{'default_display_type': 'line_note'}"/>
+                                    </control>
                                     <field name="product_id"/>
+                                    <field name="display_type" force_save="1" invisible="1"/>
+
                                     <field name="brand_id"/>
                                     <field name="wh_id"/>
                                     <field name="pro_available"/>

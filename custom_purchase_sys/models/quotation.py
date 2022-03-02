@@ -151,6 +151,7 @@ class CybQuotationPurchase(models.Model):
             for record in order.order_line:
                 if record.product_id:
                     update.append((0, 0, {
+                        'display_type': False,
                         'brand_id': record.brand_id.id,
                         'product_id': record.product_id.id,
                         'product_uom': record.product_uom.id,
@@ -168,6 +169,45 @@ class CybQuotationPurchase(models.Model):
                         'prod_total_discount': record.prod_total_discount,
                         'pro_available': record.pro_available,
                     }))
+                else:
+                    if record.display_type == 'line_section':
+                        update.append([0, 0, {
+                            'display_type': 'line_section',
+                            'product_id': record.product_id.id,
+                            'product_uom': record.product_uom.id,
+                            'order_id': record.order_id.id,
+                            'name': record.name,
+                            'product_qty': record.product_qty,
+                            'bonus_quantity': record.bonus_quantity,
+                            'price_unit': record.price_unit,
+                            'price_subtotal': record.price_subtotal,
+                            'qty_received': record.qty_received,
+                            'qty_invoiced': record.qty_invoiced,
+                            'remarks': record.remarks,
+                            'taxes_id': record.taxes_id.ids,
+                            'discount': record.discount,
+                            'prod_total_discount': record.prod_total_discount,
+                            'pro_available': record.pro_available,
+                        }])
+                    elif record.display_type == 'line_note':
+                        update.append([0, 0, {
+                            'display_type': 'line_note',
+                            'product_id': record.product_id.id,
+                            'product_uom': record.product_uom.id,
+                            'order_id': record.order_id.id,
+                            'name': record.name,
+                            'product_qty': record.product_qty,
+                            'bonus_quantity': record.bonus_quantity,
+                            'price_unit': record.price_unit,
+                            'price_subtotal': record.price_subtotal,
+                            'qty_received': record.qty_received,
+                            'qty_invoiced': record.qty_invoiced,
+                            'remarks': record.remarks,
+                            'taxes_id': record.taxes_id.ids,
+                            'discount': record.discount,
+                            'prod_total_discount': record.prod_total_discount,
+                            'pro_available': record.pro_available,
+                        }])
 
         # Force the values of the move line in the context to avoid issues
         ctx = dict(self.env.context)
@@ -182,7 +222,7 @@ class QuotationPurchaseLine(models.Model):
     _name = 'create.quotation.purchase'
     _description = 'quotation purchase'
 
-    name = fields.Text(string="Description", compute='_compute_product_description')
+    name = fields.Text(string="Description")
     product_id = fields.Many2one('product.product', string='Product')
     brand_id = fields.Many2one(string="Brand", related='product_id.brand_id')
     product_qty = fields.Float(string='Quantity', digits='Product Unit of Measure', default=1.0)
@@ -190,7 +230,6 @@ class QuotationPurchaseLine(models.Model):
     qty_received = fields.Float(string='Delivered')
     qty_invoiced = fields.Float(string='Invoiced')
     price_unit = fields.Float(string='Unit price')
-    # price_subtotal = fields.Float(string="Subtotal")
     taxes_id = fields.Many2many('account.tax', string='Taxes %',
                               domain=['|', ('active', '=', False), ('active', '=', True)])
 
@@ -198,7 +237,6 @@ class QuotationPurchaseLine(models.Model):
 
     order_id = fields.Many2one('cyb.quotation.purchase', string='Purchase Quotation id', ondelete='cascade', index=True)
     remarks = fields.Text(string="Remarks")
-                    # new fields added by WaqassAlii
     pro_available = fields.Float(compute="product_qty_location_check", string="Product Available")
     hs_code = fields.Char(string="HS code")
     tax_amount = fields.Float(string="Tax Amount",compute="_tax_amount_compute")
@@ -211,8 +249,10 @@ class QuotationPurchaseLine(models.Model):
     price_total = fields.Monetary(compute='_compute_amount', string='Total', readonly=True, store=True)
     discount = fields.Float(string='Discount %', digits='Discount', default=0.0)
     prod_total_discount = fields.Float('Disc. Amount', readonly=True, store=True)
+    display_type = fields.Selection([
+        ('line_section', "Section"),
+        ('line_note', "Note")], default=False, help="Technical field for UX purpose.")
 
-    # by WaqassAlii
     def product_qty_location_check(self):
         for rec in self:
             if rec.product_id:
@@ -226,6 +266,9 @@ class QuotationPurchaseLine(models.Model):
                 for tax in rec.taxes_id:
                     tax_amount += rec.price_unit * rec.product_qty * tax.amount / 100
                 rec.tax_amount = tax_amount
+            else:
+                rec.tax_amount = 0.0
+
     @api.onchange('price_unit', 'product_qty')
     def onchange_inquiry(self):
         self.price_subtotal = self.product_qty * self.price_unit

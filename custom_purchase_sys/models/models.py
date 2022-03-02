@@ -124,6 +124,7 @@ class CybPurchase(models.Model):
             for record in order.order_line:
                 if record.product_id:
                     update.append((0, 0, {
+                        'display_type': False,
                         'brand_id': record.brand_id.id,
                         'product_id': record.product_id.id,
                         'product_uom': record.product_uom.id,
@@ -139,8 +140,46 @@ class CybPurchase(models.Model):
                         'discount': record.discount,
                         'prod_total_discount': record.prod_total_discount,
                         'pro_available': record.pro_available,
-                        # 'discount': record.discount,
                     }))
+                else:
+                    if record.display_type == 'line_section':
+                        update.append([0, 0, {
+                            'display_type': 'line_section',
+                            'brand_id': record.brand_id.id,
+                            'product_id': record.product_id.id,
+                            'product_uom': record.product_uom.id,
+                            'order_id': record.order_id.id,
+                            'name': record.name,
+                            'product_qty': record.product_qty,
+                            'price_unit': record.price_unit,
+                            'price_subtotal': record.price_subtotal,
+                            'qty_received': record.qty_received,
+                            'qty_invoiced': record.qty_invoiced,
+                            'remarks': record.remarks,
+                            'taxes_id': record.taxes_id.ids,
+                            'discount': record.discount,
+                            'prod_total_discount': record.prod_total_discount,
+                            'pro_available': record.pro_available,
+                        }])
+                    elif record.display_type == 'line_note':
+                        update.append([0, 0, {
+                            'display_type': 'line_note',
+                            'brand_id': record.brand_id.id,
+                            'product_id': record.product_id.id,
+                            'product_uom': record.product_uom.id,
+                            'order_id': record.order_id.id,
+                            'name': record.name,
+                            'product_qty': record.product_qty,
+                            'price_unit': record.price_unit,
+                            'price_subtotal': record.price_subtotal,
+                            'qty_received': record.qty_received,
+                            'qty_invoiced': record.qty_invoiced,
+                            'remarks': record.remarks,
+                            'taxes_id': record.taxes_id.ids,
+                            'discount': record.discount,
+                            'prod_total_discount': record.prod_total_discount,
+                            'pro_available': record.pro_available,
+                        }])
         # Force the values of the move line in the context to avoid issues
         ctx = dict(self.env.context)
         ctx.pop('active_id', None)
@@ -154,7 +193,7 @@ class CybSpecialist(models.Model):
     _name = 'cyb.product.purchase'
     _description = 'product inquiry information'
 
-    name = fields.Text(string="Description", compute='_compute_product_description')
+    name = fields.Text(string="Description")
     product_id = fields.Many2one('product.product', string='Product')
     product_qty = fields.Float(string='Quantity', digits='Product Unit of Measure', required=True, default=1.0)
     product_uom = fields.Many2one('uom.uom', string='Product Unit of Measure')
@@ -177,6 +216,9 @@ class CybSpecialist(models.Model):
     price_total = fields.Monetary(compute='_compute_amount', string='Total', readonly=True, store=True)
     discount = fields.Float(string='Discount %', digits='Discount', default=0.0)
     prod_total_discount = fields.Float('Disc. Amount', store=True)
+    display_type = fields.Selection([
+        ('line_section', "Section"),
+        ('line_note', "Note")], default=False, help="Technical field for UX purpose.")
 
     # by WaqassAlii
     def product_qty_location_check(self):
@@ -193,6 +235,8 @@ class CybSpecialist(models.Model):
                 for tax in rec.taxes_id:
                     tax_amount += rec.price_unit * rec.product_qty * tax.amount / 100
                 rec.tax_amount = tax_amount
+            else:
+                rec.tax_amount = 0.0
 
     # @api.depends('product_qty', 'price_unit', 'taxes_id')
     # def _compute_amount(self):

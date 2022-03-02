@@ -60,6 +60,7 @@ class createsaleorder(models.TransientModel):
             for record in rec.order_line:
                 if record.product_id:
                     update.append((0, 0, {
+                        'display_type': False,
                         'brand_id': record.brand_id.id,
                         'product_id': record.product_id.id,
                         'product_uom': record.product_uom.id,
@@ -77,6 +78,47 @@ class createsaleorder(models.TransientModel):
                         'prod_total_discount': record.prod_total_discount,
                         'pro_available': record.pro_available,
                     }))
+                else:
+                    if record.display_type == 'line_section':
+                        update.append([0, 0, {
+                            'display_type': 'line_section',
+                            'brand_id': record.brand_id.id,
+                            'product_id': record.product_id.id,
+                            'product_uom': record.product_uom.id,
+                            'order_id': record.order_id.id,
+                            'name': record.name,
+                            'product_qty': record.product_qty,
+                            'price_unit': record.price_unit,
+                            'price_subtotal': record.price_subtotal,
+                            'price_total': record.price_total,
+                            'qty_received': record.qty_received,
+                            'qty_invoiced': record.qty_invoiced,
+                            'remarks': record.remarks,
+                            'taxes_id': record.taxes_id.ids,
+                            'discount': record.discount,
+                            'prod_total_discount': record.prod_total_discount,
+                            'pro_available': record.pro_available,
+                        }])
+                    elif record.display_type == 'line_note':
+                        update.append([0, 0, {
+                            'display_type': 'line_note',
+                            'brand_id': record.brand_id.id,
+                            'product_id': record.product_id.id,
+                            'product_uom': record.product_uom.id,
+                            'order_id': record.order_id.id,
+                            'name': record.name,
+                            'product_qty': record.product_qty,
+                            'price_unit': record.price_unit,
+                            'price_subtotal': record.price_subtotal,
+                            'price_total': record.price_total,
+                            'qty_received': record.qty_received,
+                            'qty_invoiced': record.qty_invoiced,
+                            'remarks': record.remarks,
+                            'taxes_id': record.taxes_id.ids,
+                            'discount': record.discount,
+                            'prod_total_discount': record.prod_total_discount,
+                            'pro_available': record.pro_available,
+                        }])
         res.update({'new_order_line_ids': update,
                     'partner_id': data.partner_id[0].id,
                     'ref_id': data[0].ref_id,
@@ -101,7 +143,7 @@ class createsaleorder(models.TransientModel):
         for data in self.new_order_line_ids:
             if data.product_id:
                 value.append([0, 0, {
-                    # 'display_type': False,
+                    'display_type': False,
                     'brand_id': data.brand_id.id,
                     'product_id': data.product_id.id,
                     'product_uom': data.product_uom.id,
@@ -119,6 +161,47 @@ class createsaleorder(models.TransientModel):
                     'prod_total_discount': data.prod_total_discount,
                     'pro_available': data.pro_available,
                 }])
+            if not data.product_id:
+                if data.display_type == 'line_section':
+                    value.append((0, 0, {
+                        'display_type': 'line_section',
+                        'brand_id': data.brand_id.id,
+                        'product_id': data.product_id.id,
+                        'product_uom': data.product_uom.id,
+                        'order_id': data.order_id.id,
+                        'name': data.name,
+                        'product_qty': data.product_qty,
+                        'price_unit': data.price_unit,
+                        'taxes_id': data.taxes_id.ids,
+                        'price_subtotal': data.price_subtotal,
+                        'price_total': data.price_total,
+                        'remarks': data.remarks,
+                        'qty_received': data.qty_received,
+                        'qty_invoiced': data.qty_invoiced,
+                        'discount': data.discount,
+                        'prod_total_discount': data.prod_total_discount,
+                        'pro_available': data.pro_available,
+                    }))
+                elif data.display_type == 'line_note':
+                    value.append((0, 0, {
+                        'display_type': 'line_note',
+                        'brand_id': data.brand_id.id,
+                        'product_id': data.product_id.id,
+                        'product_uom': data.product_uom.id,
+                        'order_id': data.order_id.id,
+                        'name': data.name,
+                        'product_qty': data.product_qty,
+                        'price_unit': data.price_unit,
+                        'taxes_id': data.taxes_id.ids,
+                        'price_subtotal': data.price_subtotal,
+                        'price_total': data.price_total,
+                        'remarks': data.remarks,
+                        'qty_received': data.qty_received,
+                        'qty_invoiced': data.qty_invoiced,
+                        'discount': data.discount,
+                        'prod_total_discount': data.prod_total_discount,
+                        'pro_available': data.pro_available,
+                    }))
 
         sale_order = {
             'partner_id': self.partner_id.id,
@@ -157,7 +240,7 @@ class Getsaleorderdata(models.TransientModel):
     _description = "Get Sale Order Data"
 
     new_order_line_id = fields.Many2one('create.inquiry.order')
-    name = fields.Text(string="Description", compute='_compute_product_description', store=True)
+    name = fields.Text(string="Description", store=True)
     product_id = fields.Many2one('product.product', string="Product")
     brand_id = fields.Many2one(string="Brand", related='product_id.brand_id')
     product_qty = fields.Float(string='Quantity', digits='Product Unit of Measure', required=True, default=1.0)
@@ -175,14 +258,10 @@ class Getsaleorderdata(models.TransientModel):
     discount = fields.Float(string='Discount %', digits='Discount', default=0.0)
     prod_total_discount = fields.Float('Disc. Amount', readonly=True, store=True)
     pro_available = fields.Float(string="Product Available")
+    display_type = fields.Selection([
+        ('line_section', "Section"),
+        ('line_note', "Note")], default=False, help="Technical field for UX purpose.")
 
-
-
-
-    # display_type = fields.Selection([
-    #     ('line_section', "Section"),
-    #     ('line_note', "Note")], default=False, help="Technical field for UX purpose.")
-    # discount = fields.Float('Disc.%')
 
     @api.depends('product_qty', 'price_unit')
     def _compute_total(self):

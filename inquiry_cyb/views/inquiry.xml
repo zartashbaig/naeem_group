@@ -70,14 +70,17 @@
 
                     <notebook>
                         <page string="Inquiry Lines">
-                            <field name="order_line">
-                                <tree editable="bottom">
-                                         <control>
-                                        <create name="add_product_control" string="Add a product"/>
-                                        <create name="add_section_control" string="Add a section" context="{'default_display_type': 'line_section'}"/>
-                                        <create name="add_note_control" string="Add a note" context="{'default_display_type': 'line_note'}"/>
+                            <field name="order_line" widget="section_and_note_one2many">
+                                <tree string="Inquiry Lines" editable="bottom">
+                                    <control>
+                                        <create name="add_line_control" string="Add a record"/>
+                                        <create name="add_section_control" string="Add a section"
+                                                context="{'default_display_type': 'line_section'}"/>
+                                        <create name="add_note_control" string="Add a note"
+                                                context="{'default_display_type': 'line_note'}"/>
                                     </control>
                                     <field name="product_id"/>
+                                    <field name="display_type" force_save="1" invisible="1"/>
                                     <field name="brand_id"/>
                                     <field name="wh_id"/>
                                     <field name="pro_available"/>
@@ -88,13 +91,11 @@
                                     <field name="qty_delivered" invisible="1"/>
                                     <field name="qty_invoiced" invisible="1"/>
                                     <field name="price_unit"/>
-
                                     <field name="tax_id" widget="many2many_tags"
                                            attrs="{'column_invisible': [('parent.taxes_check', '=', 'Without_Tax')]}"
                                            options="{'no_create': True}" optional="show"/>
                                     <field name="tax_amount"
                                            attrs="{'column_invisible': [('parent.taxes_check', '=', 'Without_Tax')]}"/>
-
                                     <field name="discount" string="Disc.%" groups="product.group_discount_per_so_line"
                                            optional="show" widget="product_discount"/>
                                     <field name="prod_total_discount" groups="product.group_discount_per_so_line"
@@ -102,7 +103,6 @@
                                     <field name="price_total"/>
                                     <field name="price_subtotal"/>
                                     <field name="remarks"/>
-                                    <!--                                    <field name="product_inquiry_id" invisible="1"/>-->
                                 </tree>
                             </field>
                             <group>

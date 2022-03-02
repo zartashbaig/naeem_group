@@ -125,6 +125,8 @@ class SaleOrderLineExt(models.Model):
                 for tax in rec.tax_id:
                     tax_amount += rec.price_unit * rec.product_uom_qty * tax.amount / 100
                 rec.tax_amount = tax_amount
+            else:
+                rec.tax_amount = 0.0
 
     @api.depends('product_uom_qty', 'discount', 'price_unit', 'tax_id')
     def _compute_amount(self):
@@ -170,7 +172,6 @@ class CybQuotation(models.Model):
     company_id = fields.Many2one('res.company', 'Company', index=True,
                                  default=lambda self: self.env.company)
     date_order = fields.Datetime(string='Order Date', readonly=True, index=True,
-                                 states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}, copy=False,
                                  default=fields.Datetime.now,
                                  help="Creation date of draft/sent orders,\nConfirmation date of confirmed orders.")
     crm_lead_id = fields.Many2one('crm.lead', string="CRM Lead")
@@ -226,7 +227,6 @@ class CybQuotation(models.Model):
     #     self.env['mail.template'].browse(inquiry_template_id).send_mail(self.id, force_send=True)
     pricelist_id = fields.Many2one(
         'product.pricelist', string='Pricelist', check_company=True,  # Unrequired company
-        readonly=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]},
         domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]", tracking=1,
         help="If you change the pricelist, only newly added lines will be affected.")
     currency_id = fields.Many2one(related='pricelist_id.currency_id', depends=["pricelist_id"], store=True,
@@ -299,6 +299,7 @@ class CybQuotation(models.Model):
             for record in order.order_line:
                 if record.product_id:
                     update.append((0, 0, {
+                        'display_type': False,
                         'brand_id': record.brand_id.id,
                         'product_id': record.product_id.id,
                         'product_uom': record.product_uom.id,
@@ -316,6 +317,47 @@ class CybQuotation(models.Model):
                         'prod_total_discount': record.prod_total_discount,
                         'pro_available': record.pro_available,
                     }))
+                else:
+                    if record.display_type == 'line_section':
+                        update.append([0, 0, {
+                            'display_type': 'line_section',
+                            'brand_id': record.brand_id.id,
+                            'product_id': record.product_id.id,
+                            'product_uom': record.product_uom.id,
+                            'order_id': record.order_id.id,
+                            'name': record.name,
+                            'product_uom_qty': record.product_uom_qty,
+                            'bonus_quantity': record.bonus_quantity,
+                            'price_unit': record.price_unit,
+                            'price_subtotal': record.price_subtotal,
+                            'qty_delivered': record.qty_delivered,
+                            'qty_invoiced': record.qty_invoiced,
+                            'remarks': record.remarks,
+                            'tax_id': record.tax_id.ids,
+                            'discount': record.discount,
+                            'prod_total_discount': record.prod_total_discount,
+                            'pro_available': record.pro_available,
+                        }])
+                    elif record.display_type == 'line_note':
+                        update.append([0, 0, {
+                            'display_type': 'line_note',
+                            'brand_id': record.brand_id.id,
+                            'product_id': record.product_id.id,
+                            'product_uom': record.product_uom.id,
+                            'order_id': record.order_id.id,
+                            'name': record.name,
+                            'product_uom_qty': record.product_uom_qty,
+                            'bonus_quantity': record.bonus_quantity,
+                            'price_unit': record.price_unit,
+                            'price_subtotal': record.price_subtotal,
+                            'qty_delivered': record.qty_delivered,
+                            'qty_invoiced': record.qty_invoiced,
+                            'remarks': record.remarks,
+                            'tax_id': record.tax_id.ids,
+                            'discount': record.discount,
+                            'prod_total_discount': record.prod_total_discount,
+                            'pro_available': record.pro_available,
+                        }])
 
         # Force the values of the move line in the context to avoid issues
         ctx = dict(self.env.context)
@@ -330,7 +372,7 @@ class QuotationFriends(models.Model):
     _name = 'create.quotation.friend'
     _description = 'quotation'
 
-    name = fields.Text(string="Description", compute='_compute_product_description')
+    name = fields.Text(string="Description")
     product_id = fields.Many2one('product.product', string='Product')
     brand_id = fields.Many2one(string="Brand", related='product_id.brand_id')
     product_uom_qty = fields.Float(string='Quantity', digits='Product Unit of Measure', default=1.0)
@@ -359,6 +401,9 @@ class QuotationFriends(models.Model):
     price_total = fields.Monetary(compute='_compute_amount', string='Total', readonly=True, store=True, digits=(16, 4))
     discount = fields.Float(string='Discount %', digits='Discount', default=0.0)
     prod_total_discount = fields.Float('Disc. Amount', readonly=True, store=True, digits=(16, 4))
+    display_type = fields.Selection([
+        ('line_section', "Section"),
+        ('line_note', "Note")], default=False, help="Technical field for UX purpose.")
 
     @api.onchange('price_unit', 'product_uom_qty', 'tax_id')
     def _tax_amount_compute(self):
@@ -368,6 +413,8 @@ class QuotationFriends(models.Model):
                 for tax in rec.tax_id:
                     tax_amount += rec.price_unit * rec.product_uom_qty * tax.amount / 100
                 rec.tax_amount = tax_amount
+            else:
+                rec.tax_amount = 0.0
 
     @api.onchange('price_unit', 'product_uom_qty')
     def onchange_inquiry(self):
