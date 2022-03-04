@@ -179,7 +179,7 @@ class CybQuotation(models.Model):
     inquiry_type = fields.Selection([
         ('STOCKIEST', 'STOCKIEST'),
         ('INDENTING', 'INDENTING')
-    ], string="Inquiry Type")
+    ], string="Sale Quotation Type")
     p_apply = fields.Selection([
         ('yes', 'Yes'),
         ('no', 'No')
@@ -404,6 +404,38 @@ class QuotationFriends(models.Model):
     display_type = fields.Selection([
         ('line_section', "Section"),
         ('line_note', "Note")], default=False, help="Technical field for UX purpose.")
+    partner_id = fields.Many2one(
+        'res.partner', string='Customer Name', index=True)
+
+    def _get_computed_name(self):
+        self.ensure_one()
+
+        if not self.product_id:
+            return ''
+
+        if self.partner_id.lang:
+            product = self.product_id.with_context(lang=self.partner_id.lang)
+        else:
+            product = self.product_id
+
+        values = []
+        if product.partner_ref:
+            values.append(product.partner_ref)
+        # if self.journal_id.type == 'sale':
+        if product.description_sale:
+            values.append(product.description_sale)
+        # elif self.journal_id.type == 'purchase':
+        #     if product.description_purchase:
+        #         values.append(product.description_purchase)
+        return '\n'.join(values)
+
+    @api.onchange('product_id')
+    def _onchange_product_id(self):
+        for line in self:
+            if not line.product_id or line.display_type in ('line_section', 'line_note'):
+                continue
+
+            line.name = line._get_computed_name()
 
     @api.onchange('price_unit', 'product_uom_qty', 'tax_id')
     def _tax_amount_compute(self):

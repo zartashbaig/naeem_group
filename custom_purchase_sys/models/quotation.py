@@ -30,7 +30,7 @@ class CybQuotationPurchase(models.Model):
     inquiry_type = fields.Selection([
         ('STOCKIEST', 'STOCKIEST'),
         ('INDENTING', 'INDENTING')
-    ], string="Purchase Type")
+    ], string="Purchase Quotation Type")
 
     order_line = fields.One2many('create.quotation.purchase', 'order_id', string='Order line')
     company_id = fields.Many2one('res.company', 'Company', index=True,
@@ -173,6 +173,7 @@ class CybQuotationPurchase(models.Model):
                     if record.display_type == 'line_section':
                         update.append([0, 0, {
                             'display_type': 'line_section',
+                            'brand_id': record.brand_id.id,
                             'product_id': record.product_id.id,
                             'product_uom': record.product_uom.id,
                             'order_id': record.order_id.id,
@@ -192,6 +193,7 @@ class CybQuotationPurchase(models.Model):
                     elif record.display_type == 'line_note':
                         update.append([0, 0, {
                             'display_type': 'line_note',
+                            'brand_id': record.brand_id.id,
                             'product_id': record.product_id.id,
                             'product_uom': record.product_uom.id,
                             'order_id': record.order_id.id,
@@ -217,6 +219,86 @@ class CybQuotationPurchase(models.Model):
         action['context'] = ctx
         return action
 
+    @api.onchange('purchase_inquirymany_id')
+    def quotation_lines_append(self):
+        self.ensure_one()
+        value = []
+        for data in self.purchase_inquirymany_id[-1].order_line:
+            for merger in self.order_line:
+                if data.product_id.id == merger.product_id.id:
+                    merger.product_qty += data.product_qty
+                else:
+                    if data.product_id:
+                        value.append([0, 0, {
+                            'display_type': False,
+                            'brand_id': data.brand_id.id,
+                            'product_id': data.product_id.id,
+                            'order_id': data.order_id.id,
+                            'name': data.name,
+                            'product_qty': data.product_qty,
+                            # 'bonus_quantity': data.bonus_quantity,
+                            'price_unit': data.price_unit,
+                            'taxes_id': data.taxes_id.ids,
+                            'price_subtotal': data.price_subtotal,
+                            'price_total': data.price_total,
+                            'remarks': data.remarks,
+                            'qty_received': data.qty_received,
+                            'qty_invoiced': data.qty_invoiced,
+                            'discount': data.discount,
+                            'prod_total_discount': data.prod_total_discount,
+                            'pro_available': data.pro_available,
+                        }])
+                    if not data.product_id:
+                        if data.display_type == 'line_section':
+                            value.append((0, 0, {
+                                'display_type': 'line_section',
+                                'brand_id': data.brand_id.id,
+                                'product_id': data.product_id.id,
+                                'order_id': data.order_id.id,
+                                'name': data.name,
+                                'product_qty': data.product_qty,
+                                # 'bonus_quantity': data.bonus_quantity,
+                                'price_unit': data.price_unit,
+                                'taxes_id': data.taxes_id.ids,
+                                'price_subtotal': data.price_subtotal,
+                                'price_total': data.price_total,
+                                'remarks': data.remarks,
+                                'qty_received': data.qty_received,
+                                'qty_invoiced': data.qty_invoiced,
+                                'discount': data.discount,
+                                'prod_total_discount': data.prod_total_discount,
+                                'pro_available': data.pro_available,
+                            }))
+                        elif data.display_type == 'line_note':
+                            value.append((0, 0, {
+                                'display_type': 'line_note',
+                                'brand_id': data.brand_id.id,
+                                'product_id': data.product_id.id,
+                                'order_id': data.order_id.id,
+                                'name': data.name,
+                                'product_qty': data.product_qty,
+                                # 'bonus_quantity': data.bonus_quantity,
+                                'price_unit': data.price_unit,
+                                'taxes_id': data.taxes_id.ids,
+                                'price_subtotal': data.price_subtotal,
+                                'price_total': data.price_total,
+                                'remarks': data.remarks,
+                                'qty_received': data.qty_received,
+                                'qty_invoiced': data.qty_invoiced,
+                                'discount': data.discount,
+                                'prod_total_discount': data.prod_total_discount,
+                                'pro_available': data.pro_available,
+                            }))
+            quotation_order = {
+                'order_line': value,
+            }
+            qo_main = self.write(quotation_order)
+        # return True
+        # return {
+        #     "res_id": qo_main
+        # }
+    # data = self.env['cyb.purchase'].browse(self._context.get('active_ids', []))
+
 
 class QuotationPurchaseLine(models.Model):
     _name = 'create.quotation.purchase'
@@ -237,7 +319,7 @@ class QuotationPurchaseLine(models.Model):
 
     order_id = fields.Many2one('cyb.quotation.purchase', string='Purchase Quotation id', ondelete='cascade', index=True)
     remarks = fields.Text(string="Remarks")
-    pro_available = fields.Float(compute="product_qty_location_check", string="Product Available")
+    pro_available = fields.Float(related='product_id.qty_available', store=True, string="Product Available")
     hs_code = fields.Char(string="HS code")
     tax_amount = fields.Float(string="Tax Amount",compute="_tax_amount_compute")
     wh_id = fields.Many2one('stock.warehouse', string="Ware House")
@@ -252,11 +334,38 @@ class QuotationPurchaseLine(models.Model):
     display_type = fields.Selection([
         ('line_section', "Section"),
         ('line_note', "Note")], default=False, help="Technical field for UX purpose.")
+    partner_id = fields.Many2one(
+        'res.partner', string='Customer Name', index=True)
 
-    def product_qty_location_check(self):
-        for rec in self:
-            if rec.product_id:
-                rec.pro_available = rec.product_id.qty_available
+    def _get_computed_name(self):
+        self.ensure_one()
+
+        if not self.product_id:
+            return ''
+
+        if self.partner_id.lang:
+            product = self.product_id.with_context(lang=self.partner_id.lang)
+        else:
+            product = self.product_id
+
+        values = []
+        if product.partner_ref:
+            values.append(product.partner_ref)
+        # if self.journal_id.type == 'sale':
+        if product.description_purchase:
+            values.append(product.description_purchase)
+        # elif self.journal_id.type == 'purchase':
+        #     if product.description_purchase:
+        #         values.append(product.description_purchase)
+        return '\n'.join(values)
+
+    @api.onchange('product_id')
+    def _onchange_product_id(self):
+        for line in self:
+            if not line.product_id or line.display_type in ('line_section', 'line_note'):
+                continue
+
+            line.name = line._get_computed_name()
 
     @api.onchange('price_unit', 'product_qty', 'taxes_id')
     def _tax_amount_compute(self):

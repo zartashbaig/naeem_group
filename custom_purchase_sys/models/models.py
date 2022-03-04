@@ -38,7 +38,7 @@ class CybPurchase(models.Model):
     inquiry_type = fields.Selection([
         ('STOCKIEST', 'STOCKIEST'),
         ('INDENTING', 'INDENTING')
-    ], string="Purchase Type")
+    ], string="Purchase Inquiry Type")
     notes = fields.Text(string="Remarks")
     cancel = fields.Boolean(string='Cancel')
     user_id = fields.Many2one(
@@ -53,12 +53,15 @@ class CybPurchase(models.Model):
         help="If you change the pricelist, only newly added lines will be affected.")
     currency_id = fields.Many2one(related='pricelist_id.currency_id', depends=["pricelist_id"], store=True, readonly=False)
     purchase_inquiry_many_ids = fields.Many2many('cyb.quotation.purchase', string="Purchase Inquiry ID", default="", store=True)
-    # taxes_check = fields.Boolean(string='Enable Taxes')
-
     taxes_check = fields.Selection([
         ('With_Tax', 'With Tax'),
         ('Without_Tax', 'Without Tax')
     ], string="With Tax / Without Tax")
+    amount_untaxed = fields.Monetary(string='Untaxed Amount', store=True, readonly=True, compute='_amount_all',
+                                     tracking=5)
+    amount_tax = fields.Monetary(string='Taxes', store=True, readonly=True, compute='_amount_all')
+    amount_total = fields.Monetary(string='Total', store=True, readonly=True, compute='_amount_all', tracking=4)
+    total_qty = fields.Float(string='Total QTY', store=True, readonly=True, compute='_amount_all_qty', tracking=4)
 
     state = fields.Selection(
         [('draft', 'Draft'),
@@ -80,12 +83,6 @@ class CybPurchase(models.Model):
             vals['name'] = self.env['ir.sequence'].next_by_code('cyb.purchase') or "PINQ"
         result = super(CybPurchase, self).create(vals)
         return result
-
-    amount_untaxed = fields.Monetary(string='Untaxed Amount', store=True, readonly=True, compute='_amount_all',
-                                     tracking=5)
-    amount_tax = fields.Monetary(string='Taxes', store=True, readonly=True, compute='_amount_all')
-    amount_total = fields.Monetary(string='Total', store=True, readonly=True, compute='_amount_all', tracking=4)
-    total_qty = fields.Float(string='Total QTY', store=True, readonly=True, compute='_amount_all_qty', tracking=4)
 
     @api.depends('order_line.price_total')
     def _amount_all(self):
@@ -189,6 +186,7 @@ class CybPurchase(models.Model):
         return action
 
 
+
 class CybSpecialist(models.Model):
     _name = 'cyb.product.purchase'
     _description = 'product inquiry information'
@@ -205,11 +203,10 @@ class CybSpecialist(models.Model):
     brand_id = fields.Many2one(string="Brand", related='product_id.brand_id')
 
     remarks = fields.Text(string="Remarks")
-                      # new fields added by WaqassAlii
     hs_code = fields.Char(string="HS code")
     tax_amount = fields.Float(string="Tax Amount",compute="_tax_amount_compute")
     wh_id = fields.Many2one('stock.warehouse', string="Ware House")
-    pro_available = fields.Float(compute="product_qty_location_check", string="Product Available")
+    pro_available = fields.Float(related='product_id.qty_available', store=True, string="Product Available")
     currency_id = fields.Many2one(related='order_id.currency_id', depends=['order_id.currency_id'], store=True, string='Currency', readonly=True)
     price_subtotal = fields.Monetary(compute='_compute_amount', string='Subtotal', readonly=True, store=True)
     price_tax = fields.Float(compute='_compute_amount', string='Total Tax', readonly=True, store=True)
@@ -220,12 +217,38 @@ class CybSpecialist(models.Model):
         ('line_section', "Section"),
         ('line_note', "Note")], default=False, help="Technical field for UX purpose.")
 
-    # by WaqassAlii
-    def product_qty_location_check(self):
-        for rec in self:
-            if rec.product_id:
-                rec.pro_available = rec.product_id.qty_available
+    partner_id = fields.Many2one(
+        'res.partner', string='Customer Name', index=True)
 
+    def _get_computed_name(self):
+        self.ensure_one()
+
+        if not self.product_id:
+            return ''
+
+        if self.partner_id.lang:
+            product = self.product_id.with_context(lang=self.partner_id.lang)
+        else:
+            product = self.product_id
+
+        values = []
+        if product.partner_ref:
+            values.append(product.partner_ref)
+        # if self.journal_id.type == 'sale':
+        if product.description_purchase:
+            values.append(product.description_purchase)
+        # elif self.journal_id.type == 'purchase':
+        #     if product.description_purchase:
+        #         values.append(product.description_purchase)
+        return '\n'.join(values)
+
+    @api.onchange('product_id')
+    def _onchange_product_id(self):
+        for line in self:
+            if not line.product_id or line.display_type in ('line_section', 'line_note'):
+                continue
+
+            line.name = line._get_computed_name()
 
     @api.onchange('price_unit', 'product_qty', 'taxes_id')
     def _tax_amount_compute(self):

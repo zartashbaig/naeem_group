@@ -20,8 +20,6 @@ class CybInquiry(models.Model):
     name = fields.Char(string='Inquiry Reference', store=True, required=True, readonly=True,
                        default='SINQ')
 
-    # name = fields.Char(string='Inquiry Reference', copy=False, default=lambda self: self.env['ir.sequence'].next_by_code('cyb.inquiry'))
-
     partner_id = fields.Many2one(
         'res.partner', string='Customer Name', readonly=True,
         states={'draft': [('readonly', False)]},
@@ -43,7 +41,7 @@ class CybInquiry(models.Model):
     inquiry_type = fields.Selection([
         ('STOCKIEST', 'STOCKIEST'),
         ('INDENTING', 'INDENTING')
-    ], string="S.O Type", default='STOCKIEST')
+    ], string="Sale Inquiry Type", default='STOCKIEST')
     notes = fields.Text(string="Remarks")
     user_id = fields.Many2one(
         'res.users', string='Sales Manager', index=True, tracking=2, default=lambda self: self.env.user)
@@ -61,6 +59,7 @@ class CybInquiry(models.Model):
         ('With_Tax', 'With Tax'),
         ('Without_Tax', 'Without Tax')
     ], string="With Tax / Without Tax")
+
 
     state = fields.Selection(
         [('draft', 'Draft'),
@@ -221,6 +220,51 @@ class CybSpecialist(models.Model):
     display_type = fields.Selection([
         ('line_section', "Section"),
         ('line_note', "Note")], default=False, help="Technical field for UX purpose.")
+    partner_id = fields.Many2one(
+        'res.partner', string='Customer Name', index=True)
+    # journal_id = fields.Many2one(related='order_id.journal_id', store=True, index=True, copy=False)
+
+    def _get_computed_name(self):
+        self.ensure_one()
+
+        if not self.product_id:
+            return ''
+
+        if self.partner_id.lang:
+            product = self.product_id.with_context(lang=self.partner_id.lang)
+        else:
+            product = self.product_id
+
+        values = []
+        if product.partner_ref:
+            values.append(product.partner_ref)
+        # if self.journal_id.type == 'sale':
+        if product.description_sale:
+            values.append(product.description_sale)
+        # elif self.journal_id.type == 'purchase':
+        #     if product.description_purchase:
+        #         values.append(product.description_purchase)
+        return '\n'.join(values)
+
+    @api.onchange('product_id')
+    def _onchange_product_id(self):
+        for line in self:
+            if not line.product_id or line.display_type in ('line_section', 'line_note'):
+                continue
+
+            line.name = line._get_computed_name()
+
+    # @api.depends('ref_id', 'order_id')
+    # def name_get(self):
+    #     result = []
+    #     for line in self:
+    #         name = line.order_id.name or ''
+    #         if line.ref:
+    #             name += " (%s)" % line.ref
+    #         name += (line.name or line.product_id.display_name) and (' ' + (line.name or line.product_id.display_name)) or ''
+    #         result.append((line.id, name))
+    #     return result
+
 
     def product_qty_location_check(self):
         for rec in self:

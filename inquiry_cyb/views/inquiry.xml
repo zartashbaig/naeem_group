@@ -1,6 +1,37 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
 
+
+        <!--    inquiry Search view model-->
+    <record id="sale_inquiry_search_view" model="ir.ui.view">
+        <field name="name">Sale Inquiry Search View</field>
+        <field name="model">cyb.inquiry</field>
+        <field name="arch" type="xml">
+            <search string="Search Sale Inquiries">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="ref_id"/>
+                <field name="date_inquiry"/>
+                <field name="state"/>
+                <field name="taxes_check"/>
+                <field name="inquiry_type"/>
+                <filter string="Serial No" name="name"/>
+                <filter string="Customer" name="partner_id"/>
+                <field string="Document No." name="ref_id"/>
+                <filter string="Document Date" name="date_inquiry"/>
+                <filter string="State" name="state"/>
+                <filter string="With / Without Tax" name="taxes_check"/>
+                <filter string="Inquiry Type" name="inquiry_type"/>
+                <group expand="1" string="Group By">
+                    <filter string="Customer" name="partner_id" context="{'group_by':'partner_id'}"/>
+                    <filter string="Document No" name="ref_id" context="{'group_by':'ref_id'}"/>
+                    <filter string="Document Date" name="date_inquiry" context="{'group_by':'date_inquiry'}"/>
+                    <filter string="With / Without Tax" name="taxes_check" context="{'group_by':'taxes_check'}"/>
+                    <filter string="Inquiry Type" name="inquiry_type" context="{'group_by':'inquiry_type'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
     <!--    inquiry tree view model-->
     <record id="inquiry_tree" model="ir.ui.view">
         <field name="name">inquiry.tree</field>
@@ -16,6 +47,7 @@
             </tree>
         </field>
     </record>
+        <!--    inquiry Search view model-->
     <record id="cyb_inquiry_form" model="ir.ui.view">
         <field name="name">cyb.inquiry.form</field>
         <field name="model">cyb.inquiry</field>
