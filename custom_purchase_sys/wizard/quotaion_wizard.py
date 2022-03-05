@@ -18,12 +18,18 @@ class InquiryInvoice(models.TransientModel):
                                  states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}, copy=False,
                                  default=fields.Datetime.now,
                                  help="Creation date of draft/sent orders,\nConfirmation date of confirmed orders.")
-    quotation_Expiration = fields.Date(string="Expiration", related="so_id.quotation_Expiration")
+    quotation_Expiration = fields.Date(string="Expiration", readonly=True)
     so_id = fields.Many2one('cyb.quotation.purchase', string="Quotation ID", )
-    currency_id = fields.Many2one(related='so_id.currency_id', depends=['so_id.currency_id'], store=True, string='Currency', readonly=True)
-
-    crm_lead_id = fields.Many2one('crm.lead', string="CRM Lead", related="so_id.crm_lead_id")
-    quotation_reference = fields.Char(string="Reference", related="so_id.quotation_reference")
+    inquiry_type = fields.Selection([
+        ('STOCKIEST', 'STOCKIEST'),
+        ('INDENTING', 'INDENTING')
+    ], string="Purchase Type", store=True, readonly=True)
+    remarks = fields.Text(string="Remarks", readonly=True)
+    currency_id = fields.Many2one('res.currency', store=True, string='Currency', readonly=True)
+    date_quotation = fields.Datetime(string="Document Date", readonly=True)
+    crm_lead_id = fields.Many2one('crm.lead', string="CRM Lead", readonly=True)
+    quotation_payment_id = fields.Many2one('account.payment.term',string="Payment Term", readonly=True)
+    quotation_reference = fields.Char(string="Document No", readonly=True)
     quotation_sale_many_ids = fields.Many2many('cyb.quotation.purchase', string="Quotation ID",
                                                store=True)
     ks_global_discount_type = fields.Selection([('percent', 'Percentage'), ('amount', 'Amount')],
@@ -32,6 +38,11 @@ class InquiryInvoice(models.TransientModel):
     ks_global_discount_rate = fields.Float('Overall Discount Rate',
                                            readonly=True)
     ks_amount_discount = fields.Monetary(string='Overall Discount', readonly=True)
+    pricelist_id = fields.Many2one('product.pricelist', string='Pricelist', readonly=True)
+    taxes_check = fields.Selection([
+        ('With_Tax', 'With Tax'),
+        ('Without_Tax', 'Without Tax')
+    ], default='With Tax', string="With Tax / Without Tax", readonly=True)
 
 
     @api.model
@@ -45,9 +56,9 @@ class InquiryInvoice(models.TransientModel):
             for record in rec.order_line:
                 if record.product_id:
                     update.append((0, 0, {
+                        'display_type': False,
                         'brand_id': record.brand_id.id,
                         'product_id': record.product_id.id,
-                        # 'product_uom': record.product_uom.id,
                         'order_id': record.order_id.id,
                         'name': record.name,
                         'product_qty': record.product_qty,
@@ -62,10 +73,59 @@ class InquiryInvoice(models.TransientModel):
                         'discount': record.discount,
                         'prod_total_discount': record.prod_total_discount,
                         'pro_available': record.pro_available,
-
                     }))
+                else:
+                    if record.display_type == 'line_section':
+                        update.append([0, 0, {
+                            'display_type': 'line_section',
+                            'brand_id': record.brand_id.id,
+                            'product_id': record.product_id.id,
+                            'order_id': record.order_id.id,
+                            'name': record.name,
+                            'product_qty': record.product_qty,
+                            'bonus_quantity': record.bonus_quantity,
+                            'price_unit': record.price_unit,
+                            'price_subtotal': record.price_subtotal,
+                            'price_total': record.price_total,
+                            'qty_received': record.qty_received,
+                            'qty_invoiced': record.qty_invoiced,
+                            'taxes_id': record.taxes_id.ids,
+                            'remarks': record.remarks,
+                            'discount': record.discount,
+                            'prod_total_discount': record.prod_total_discount,
+                            'pro_available': record.pro_available,
+                        }])
+                    elif record.display_type == 'line_note':
+                        update.append([0, 0, {
+                            'display_type': 'line_note',
+                            'brand_id': record.brand_id.id,
+                            'product_id': record.product_id.id,
+                            'order_id': record.order_id.id,
+                            'name': record.name,
+                            'product_qty': record.product_qty,
+                            'bonus_quantity': record.bonus_quantity,
+                            'price_unit': record.price_unit,
+                            'price_subtotal': record.price_subtotal,
+                            'price_total': record.price_total,
+                            'qty_received': record.qty_received,
+                            'qty_invoiced': record.qty_invoiced,
+                            'taxes_id': record.taxes_id.ids,
+                            'remarks': record.remarks,
+                            'discount': record.discount,
+                            'prod_total_discount': record.prod_total_discount,
+                            'pro_available': record.pro_available,
+                        }])
         res.update({'new_order_line_ids': update,
                     'quotation_sale_many_ids': quotation_ids,
+                    'quotation_reference': data[0].quotation_reference,
+                    'inquiry_type': data[0].inquiry_type,
+                    'remarks': data[0].remarks,
+                    'date_quotation': data[0].date_quotation,
+                    'currency_id': data[0].currency_id.id,
+                    'pricelist_id': data[0].pricelist_id.id,
+                    'taxes_check': data[0].taxes_check,
+                    'crm_lead_id': data[0].crm_lead_id.id,
+                    'quotation_payment_id': data[0].quotation_payment_id.id,
                     'ks_global_discount_type': data[0].ks_global_discount_type,
                     'ks_global_discount_rate': data[0].ks_global_discount_rate,
                     'ks_amount_discount': data[0].ks_amount_discount,
@@ -79,7 +139,7 @@ class InquiryInvoice(models.TransientModel):
         for data in self.new_order_line_ids:
             if data.product_id:
                 value.append([0, 0, {
-                    # 'display_type': False,
+                    'display_type': False,
                     'brand_id': data.brand_id.id,
                     'product_id': data.product_id.id,
                     # 'product_uom': data.product_uom.id,
@@ -98,19 +158,65 @@ class InquiryInvoice(models.TransientModel):
                     'prod_total_discount': data.prod_total_discount,
                     'pro_available': data.pro_available,
                 }])
+            if not data.product_id:
+                if data.display_type == 'line_section':
+                    value.append((0, 0, {
+                        'display_type': 'line_section',
+                        'brand_id': data.brand_id.id,
+                        'product_id': data.product_id.id,
+                        # 'product_uom': data.product_uom.id,
+                        'order_id': data.order_id.id,
+                        'name': data.name,
+                        'product_qty': data.product_qty,
+                        'bonus_quantity': data.bonus_quantity,
+                        'price_unit': data.price_unit,
+                        'taxes_id': data.taxes_id.ids,
+                        'price_subtotal': data.price_subtotal,
+                        'price_total': data.price_total,
+                        'remarks': data.remarks,
+                        'qty_received': data.qty_received,
+                        'qty_invoiced': data.qty_invoiced,
+                        'discount': data.discount,
+                        'prod_total_discount': data.prod_total_discount,
+                        'pro_available': data.pro_available,
+                    }))
+                elif data.display_type == 'line_note':
+                    value.append((0, 0, {
+                        'display_type': 'line_note',
+                        'brand_id': data.brand_id.id,
+                        'product_id': data.product_id.id,
+                        # 'product_uom': data.product_uom.id,
+                        'order_id': data.order_id.id,
+                        'name': data.name,
+                        'product_qty': data.product_qty,
+                        'bonus_quantity': data.bonus_quantity,
+                        'price_unit': data.price_unit,
+                        'taxes_id': data.taxes_id.ids,
+                        'price_subtotal': data.price_subtotal,
+                        'price_total': data.price_total,
+                        'remarks': data.remarks,
+                        'qty_received': data.qty_received,
+                        'qty_invoiced': data.qty_invoiced,
+                        'discount': data.discount,
+                        'prod_total_discount': data.prod_total_discount,
+                        'pro_available': data.pro_available,
+                    }))
         sale_order = {
             'partner_id': self.partner_id.id,
-            # 'inquiry_type': self.inquiry_type,
-            # 'ref_id': self.ref_id,
-            # 'notes': self.notes,
-            # 'so_id': self.so_id.id,
+            'dc_type': self[0].inquiry_type,
+            'partner_ref': self[0].quotation_reference,
+            'remarks': self[0].remarks,
+            'date_planned': self[0].date_quotation,
+            'payment_term_id': self[0].quotation_payment_id.id,
+            'pricelist_id': self[0].pricelist_id.id,
+            'taxes_check': self[0].taxes_check,
+            'crm_lead_id': self[0].crm_lead_id.id,
+            'currency_id': self.currency_id.id,
             'ks_global_discount_type': self[0].ks_global_discount_type,
             'ks_global_discount_rate': self[0].ks_global_discount_rate,
             'ks_amount_discount': self[0].ks_amount_discount,
             'order_line': value,
             'quotation_sale_many_ids': self.quotation_sale_many_ids.ids
-
-            # 'state': 'draft',
         }
         so = self.env['purchase.order'].create(sale_order)
         so.state = 'purchase'
@@ -125,7 +231,6 @@ class InquiryInvoice(models.TransientModel):
             "views": [[False, "form"]],
             "res_id": so.id
         }
-
 
 class GetQuotationorderdata(models.TransientModel):
     _name = 'purchase.wizard.line'
@@ -151,11 +256,9 @@ class GetQuotationorderdata(models.TransientModel):
     discount = fields.Float(string='Discount %', digits='Discount', default=0.0)
     prod_total_discount = fields.Float('Disc. Amount', readonly=True, store=True)
     pro_available = fields.Float(string="Product Available")
-
-    # display_type = fields.Selection([
-    #     ('line_section', "Section"),
-    #     ('line_note', "Note")], default=False, help="Technical field for UX purpose.")
-    # discount = fields.Float('Disc.%')
+    display_type = fields.Selection([
+        ('line_section', "Section"),
+        ('line_note', "Note")], default=False, help="Technical field for UX purpose.")
 
     @api.depends('product_qty', 'price_unit')
     def _compute_total(self):

@@ -10,13 +10,18 @@
                 <xpath expr="//field[@name='partner_ref']" position="after">
                     <field name="currency_id" default='PKR'/>
                 </xpath>
-                <xpath expr="//field[@name='currency_id']" position="after">
+                <xpath expr="//field[@name='date_order']" position="after">
                     <field name="dc_type"/>
                 </xpath>
-                <xpath expr="//field[@name='date_order']" position="before">
-                    <field name="manager_id"/>
+                <!--                <xpath expr="//field[@name='date_order']" position="before">-->
+                <!--                    <field name="manager_id"/>-->
+                <!--                </xpath>-->
+                <xpath expr="//field[@name='dc_type']" position="after">
+                    <field name="crm_lead_id"/>
+                    <field name="pricelist_id"/>
                 </xpath>
-                <xpath expr="//field[@name='manager_id']" position="before">
+
+                <xpath expr="//field[@name='dc_type']" position="before">
                     <field name="account_id"/>
                 </xpath>
                 <xpath expr="//field[@name='partner_id']" position="attributes">
@@ -26,29 +31,41 @@
                 <xpath expr="//field[@name='dc_type']" position="after">
                     <field name="customer_id"/>
                 </xpath>
-                <xpath expr="//field[@name='customer_id']" position="after">
+                <xpath expr="//field[@name='currency_id']" position="after">
                     <field name="remarks"/>
                 </xpath>
-                <xpath expr="//field[@name='order_line']/tree/field[@name='product_id']" position="before">
-                    <field name="brand_id"/>
-                </xpath>
-                <xpath expr="//field[@name='order_line']/tree/field[@name='brand_id']" position="after">
-                    <field name="pro_available"/>
-                </xpath>
-                <xpath expr="//field[@name='order_line']/tree/field[@name='pro_available']" position="before">
-                    <field name="wh_id"/>
+                <xpath expr="//field[@name='remarks']" position="after">
+                    <field name="taxes_check"/>
                 </xpath>
                 <xpath expr="//field[@name='order_line']/tree/field[@name='product_id']" position="after">
+                    <field name="brand_id"/>
+                    <field name="wh_id"/>
+                    <field name="pro_available"/>
                     <field name="hs_code"/>
+
                 </xpath>
+
                 <xpath expr="//field[@name='order_line']/tree/field[@name='product_qty']" position="after">
                     <field name="bonus_quantity"/>
                 </xpath>
                 <xpath expr="//field[@name='order_line']/tree/field[@name='taxes_id']" position="after">
                     <field name="discount"/>
                 </xpath>
+                <!--                <xpath expr="//field[@name='order_line']/tree/field[@name='taxes_id']" position="attributes">-->
+                <!--                    <attribute name="attrs">"{'column_invisible': [('parent.taxes_check', '=', 'Without_Tax')]}"</attribute>-->
+                <!--                </xpath>-->
+
+                <xpath expr="//field[@name='order_line']/tree/field[@name='taxes_id']" position="replace">
+                    <field name="taxes_id" widget="many2many_tags"
+                           domain="[('type_tax_use','=','purchase'), ('company_id', '=', parent.company_id)]"
+                           context="{'default_type_tax_use': 'purchase', 'search_view_ref': 'account.account_tax_view_search'}"
+                           options="{'no_create': True}" optional="show"
+                           attrs="{'column_invisible': [('parent.taxes_check', '=', 'Without_Tax')]}"/>
+                </xpath>
+
                 <xpath expr="//field[@name='order_line']/tree/field[@name='discount']" position="before">
-                    <field name="tax_amount"/>
+                    <field name="tax_amount"
+                           attrs="{'column_invisible': [('parent.taxes_check', '=', 'Without_Tax')]}"/>
                 </xpath>
                 <xpath expr="//field[@name='order_line']/tree/field[@name='discount']" position="after">
                     <field name="prod_total_discount"/>
@@ -66,7 +83,7 @@
                         <field name="quotation_sale_many_ids"/>
                     </page>
                 </xpath>
-                                <xpath expr="//field[@name='notes']" position="attributes">
+                <xpath expr="//field[@name='notes']" position="attributes">
                     <attribute name="invisible">1</attribute>
                 </xpath>
 
@@ -95,7 +112,7 @@
                                        options="{'currency_field': 'currency_id'}"/>
                             </div>
                         </div>
-                        <div class="col-2" id="amount_1">
+                        <div class="col-2" id="amount_1" attrs="{'invisible': [('taxes_check', '=', 'Without_Tax')]}">
                             <div class="o_td_label">
                                 <label string="Total Taxation Amount" for="amount_tax"/>
                                 <field name="amount_tax" widget="monetary"

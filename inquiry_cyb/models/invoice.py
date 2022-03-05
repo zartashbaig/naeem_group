@@ -9,6 +9,28 @@ _logger = logging.getLogger(__name__)
 from odoo import api, fields, models, _
 
 
+class ProductCategoryBrandExt(models.Model):
+    _inherit = "product.category"
+
+    brand_id = fields.Many2one('product.brand', string="Brand")
+
+    @api.depends('name', 'brand_id.name', 'parent_id.complete_name')
+    def _compute_complete_name(self):
+        for category in self:
+            if category.parent_id and category.brand_id:
+                category.complete_name = '%s / %s / %s' % (category.parent_id.complete_name, category.brand_id.name, category.name)
+            elif category.parent_id:
+                category.complete_name = '%s / %s' % (category.parent_id.complete_name, category.name)
+            else:
+                category.complete_name = category.name
+
+    # @api.constrains('parent_id', 'brand_id')
+    # def _check_category_recursion(self):
+    #     if not self._check_recursion():
+    #         raise ValidationError(_('You cannot create recursive Categories & Brands.'))
+    #     return True
+
+
 class SaleOrderExt(models.Model):
     _inherit = "account.move"
 
@@ -119,3 +141,7 @@ class SaleOrderLineExt(models.Model):
         if currency:
             res = {k: currency.round(v) for k, v in res.items()}
         return res
+
+
+
+

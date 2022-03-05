@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-# Part of BrowseInfo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, fields, models
 
@@ -14,11 +13,11 @@ class PurchaseDiscount(models.Model):
     account_id = fields.Many2one('account.account', string='Account')
     customer_id = fields.Many2one('res.partner', string='Customer Name')
     remarks = fields.Text(string="Remarks")
-
+    crm_lead_id = fields.Many2one('crm.lead', string='CRM Lead')
     dc_type = fields.Selection([
         ('STOCKIEST', 'STOCKIEST'),
         ('INDENTING', 'INDENTING')
-    ], string="Po Type", default='STOCKIEST')
+    ], string="Purchase Type", default='STOCKIEST')
 
     net_amount = fields.Float(string='Net Amount', readonly=True, store=True)
     count = fields.Integer(compute="_compute_discount_total", string='SN (Total)', store=True, readonly=1)
@@ -29,6 +28,15 @@ class PurchaseDiscount(models.Model):
         currency_field="currency_id",
         store=True,
     )
+    pricelist_id = fields.Many2one(
+        'product.pricelist', string='Pricelist', check_company=True,  # Unrequired company
+        domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]", tracking=1,
+        help="If you change the pricelist, only newly added lines will be affected.")
+
+    taxes_check = fields.Selection([
+        ('With_Tax', 'With Tax'),
+        ('Without_Tax', 'Without Tax')
+    ], string="With Tax / Without Tax")
 
     @api.depends('order_line.product_qty')
     def _amount_all_qty(self):
@@ -59,6 +67,85 @@ class PurchaseDiscount(models.Model):
                 }
             )
 
+    @api.onchange('quotation_sale_many_ids')
+    def quotation_lines_append(self):
+        self.ensure_one()
+        value = []
+        for data in self.quotation_sale_many_ids[-1].order_line:
+            for merger in self.order_line:
+                if data.product_id.id == merger.product_id.id:
+                    merger.product_qty += data.product_qty
+                else:
+                    if data.product_id:
+                        value.append([0, 0, {
+                            'display_type': False,
+                            'brand_id': data.brand_id.id,
+                            'product_id': data.product_id.id,
+                            'order_id': data.order_id.id,
+                            'name': data.name,
+                            'product_qty': data.product_qty,
+                            # 'bonus_quantity': data.bonus_quantity,
+                            'price_unit': data.price_unit,
+                            'taxes_id': data.taxes_id.ids,
+                            'price_subtotal': data.price_subtotal,
+                            'price_total': data.price_total,
+                            'remarks': data.remarks,
+                            'qty_received': data.qty_received,
+                            'qty_invoiced': data.qty_invoiced,
+                            'discount': data.discount,
+                            'prod_total_discount': data.prod_total_discount,
+                            'pro_available': data.pro_available,
+                        }])
+                    if not data.product_id:
+                        if data.display_type == 'line_section':
+                            value.append((0, 0, {
+                                'display_type': 'line_section',
+                                'brand_id': data.brand_id.id,
+                                'product_id': data.product_id.id,
+                                'order_id': data.order_id.id,
+                                'name': data.name,
+                                'product_qty': data.product_qty,
+                                # 'bonus_quantity': data.bonus_quantity,
+                                'price_unit': data.price_unit,
+                                'taxes_id': data.taxes_id.ids,
+                                'price_subtotal': data.price_subtotal,
+                                'price_total': data.price_total,
+                                'remarks': data.remarks,
+                                'qty_received': data.qty_received,
+                                'qty_invoiced': data.qty_invoiced,
+                                'discount': data.discount,
+                                'prod_total_discount': data.prod_total_discount,
+                                'pro_available': data.pro_available,
+                            }))
+                        elif data.display_type == 'line_note':
+                            value.append((0, 0, {
+                                'display_type': 'line_note',
+                                'brand_id': data.brand_id.id,
+                                'product_id': data.product_id.id,
+                                'order_id': data.order_id.id,
+                                'name': data.name,
+                                'product_qty': data.product_qty,
+                                # 'bonus_quantity': data.bonus_quantity,
+                                'price_unit': data.price_unit,
+                                'taxes_id': data.taxes_id.ids,
+                                'price_subtotal': data.price_subtotal,
+                                'price_total': data.price_total,
+                                'remarks': data.remarks,
+                                'qty_received': data.qty_received,
+                                'qty_invoiced': data.qty_invoiced,
+                                'discount': data.discount,
+                                'prod_total_discount': data.prod_total_discount,
+                                'pro_available': data.pro_available,
+                            }))
+            quotation_order = {
+                'order_line': value,
+            }
+            qo_main = self.write(quotation_order)
+        # return True
+        # return {
+        #     "res_id": qo_main
+        # }
+
     @api.model
     def create(self, vals):
         company_id = vals.get('company_id', self.default_get(['company_id'])['company_id'])
@@ -85,7 +172,7 @@ class PurchaseLineDiscount(models.Model):
     hs_code = fields.Char(string="HS code")
     tax_amount = fields.Float(string="Tax Amount",compute="_tax_amount_compute")
     # pro_available = fields.Float(related="product_id.qty_available", string="Product Available", store=True)
-    pro_available = fields.Float(compute="product_qty_location_check", string="Product Available")
+    pro_available = fields.Float(related='product_id.qty_available', store=True, string="Product Available")
     taxes_id = fields.Many2many('account.tax', string='Taxes %', domain=['|', ('active', '=', False), ('active', '=', True)])
 
     # @api.onchange('product_id')
@@ -94,10 +181,10 @@ class PurchaseLineDiscount(models.Model):
     #         product = self.product_id
     #         pro_available = product.qty_available
 
-    def product_qty_location_check(self):
-        for rec in self:
-            if rec.product_id:
-                rec.pro_available = rec.product_id.qty_available
+    # def product_qty_location_check(self):
+    #     for rec in self:
+    #         if rec.product_id:
+    #             rec.pro_available = rec.product_id.qty_available
 
     @api.onchange('price_unit', 'product_uom_qty', 'taxes_id')
     def _tax_amount_compute(self):
@@ -130,5 +217,4 @@ class PurchaseLineDiscount(models.Model):
                         'price_subtotal': taxes['total_excluded'],
                     })
 
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
 

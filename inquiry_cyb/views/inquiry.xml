@@ -1,6 +1,37 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
 
+
+        <!--    inquiry Search view model-->
+    <record id="sale_inquiry_search_view" model="ir.ui.view">
+        <field name="name">Sale Inquiry Search View</field>
+        <field name="model">cyb.inquiry</field>
+        <field name="arch" type="xml">
+            <search string="Search Sale Inquiries">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="ref_id"/>
+                <field name="date_inquiry"/>
+                <field name="state"/>
+                <field name="taxes_check"/>
+                <field name="inquiry_type"/>
+                <filter string="Serial No" name="name"/>
+                <filter string="Customer" name="partner_id"/>
+                <field string="Document No." name="ref_id"/>
+                <filter string="Document Date" name="date_inquiry"/>
+                <filter string="State" name="state"/>
+                <filter string="With / Without Tax" name="taxes_check"/>
+                <filter string="Inquiry Type" name="inquiry_type"/>
+                <group expand="1" string="Group By">
+                    <filter string="Customer" name="partner_id" context="{'group_by':'partner_id'}"/>
+                    <filter string="Document No" name="ref_id" context="{'group_by':'ref_id'}"/>
+                    <filter string="Document Date" name="date_inquiry" context="{'group_by':'date_inquiry'}"/>
+                    <filter string="With / Without Tax" name="taxes_check" context="{'group_by':'taxes_check'}"/>
+                    <filter string="Inquiry Type" name="inquiry_type" context="{'group_by':'inquiry_type'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
     <!--    inquiry tree view model-->
     <record id="inquiry_tree" model="ir.ui.view">
         <field name="name">inquiry.tree</field>
@@ -9,16 +40,14 @@
             <tree string="inquiry tree view">
                 <field name="name"/>
                 <field name="partner_id"/>
+                <field name="date_inquiry"/>
                 <field name="cyb_quotation_id"/>
                 <field name="cyb_payment_id"/>
-                <!--                <field name="cyb_order_lines">-->
-                <!--                        <field name="inquiry_subtotal"/>-->
-                <!--                        <field name="product_inquiry_id" invisible="1"/>-->
-                <!--                </field>-->
                 <field name="state"/>
             </tree>
         </field>
     </record>
+        <!--    inquiry Search view model-->
     <record id="cyb_inquiry_form" model="ir.ui.view">
         <field name="name">cyb.inquiry.form</field>
         <field name="model">cyb.inquiry</field>
@@ -56,9 +85,10 @@
                             <field name="cyb_quotation_id"/>
                             <!--                            <field name="manager_id"/>-->
                             <field name="remarks"/>
+                            <field name="taxes_check"/>
                         </group>
                         <group>
-                            <field name="pi_num"/>
+                            <!--                            <field name="pi_num"/>-->
                             <field name="inquiry_type"/>
                             <field name="date_inquiry"/>
                             <field name="date_Expiration"/>
@@ -72,10 +102,18 @@
 
                     <notebook>
                         <page string="Inquiry Lines">
-                            <field name="order_line">
-                                <tree editable="bottom">
-                                    <field name="brand_id"/>
+                            <field name="order_line" widget="section_and_note_one2many">
+                                <tree string="Inquiry Lines" editable="bottom">
+                                    <control>
+                                        <create name="add_line_control" string="Add a record"/>
+                                        <create name="add_section_control" string="Add a section"
+                                                context="{'default_display_type': 'line_section'}"/>
+                                        <create name="add_note_control" string="Add a note"
+                                                context="{'default_display_type': 'line_note'}"/>
+                                    </control>
                                     <field name="product_id"/>
+                                    <field name="display_type" force_save="1" invisible="1"/>
+                                    <field name="brand_id"/>
                                     <field name="wh_id"/>
                                     <field name="pro_available"/>
                                     <field name="hs_code"/>
@@ -85,9 +123,11 @@
                                     <field name="qty_delivered" invisible="1"/>
                                     <field name="qty_invoiced" invisible="1"/>
                                     <field name="price_unit"/>
-                                    <field name="tax_id" widget="many2many_tags" options="{'no_create': True}"
-                                           optional="show"/>
-                                    <field name="tax_amount"/>
+                                    <field name="tax_id" widget="many2many_tags"
+                                           attrs="{'column_invisible': [('parent.taxes_check', '=', 'Without_Tax')]}"
+                                           options="{'no_create': True}" optional="show"/>
+                                    <field name="tax_amount"
+                                           attrs="{'column_invisible': [('parent.taxes_check', '=', 'Without_Tax')]}"/>
                                     <field name="discount" string="Disc.%" groups="product.group_discount_per_so_line"
                                            optional="show" widget="product_discount"/>
                                     <field name="prod_total_discount" groups="product.group_discount_per_so_line"
@@ -95,7 +135,6 @@
                                     <field name="price_total"/>
                                     <field name="price_subtotal"/>
                                     <field name="remarks"/>
-                                    <!--                                    <field name="product_inquiry_id" invisible="1"/>-->
                                 </tree>
                             </field>
                             <group>
@@ -111,7 +150,8 @@
                                     <field name="amount_untaxed" widget="monetary"
                                            options="{'currency_field': 'currency_id'}"/>
                                     <field name="amount_tax" widget="monetary"
-                                           options="{'currency_field': 'currency_id'}"/>
+                                           options="{'currency_field': 'currency_id'}"
+                                           attrs="{'invisible': [('taxes_check', '=', 'Without_Tax')]}"/>
                                     <div class="oe_subtotal_footer_separator oe_inline o_td_label">
                                         <label for="amount_total"/>
                                     </div>

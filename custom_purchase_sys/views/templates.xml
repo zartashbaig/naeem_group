@@ -1,24 +1,20 @@
 <odoo>
     <data>
-<!--
-        <template id="listing">
-          <ul>
-            <li t-foreach="objects" t-as="object">
-              <a t-attf-href="#{ root }/objects/#{ object.id }">
-                <t t-esc="object.display_name"/>
-              </a>
-            </li>
-          </ul>
-        </template>
-        <template id="object">
-          <h1><t t-esc="object.display_name"/></h1>
-          <dl>
-            <t t-foreach="object._fields" t-as="field">
-              <dt><t t-esc="field"/></dt>
-              <dd><t t-esc="object[field]"/></dd>
-            </t>
-          </dl>
-        </template>
--->
+
+<!--        <template id="inherit_purchase_report_document_ext" inherit_id="purchase.report_purchaseorder_document">-->
+<!--            <xpath expr="//table/thead/tr/td[@name='th_taxes']" position="before">-->
+
+<!--            </xpath>-->
+
+<!--             <xpath expr="//td[@name='th_taxes']" position="replace">-->
+<!--                 <t t-if="o.taxes_check = 'With_Tax'">-->
+<!--                        <th name="th_taxes"><strong>Taxes</strong></th>-->
+
+<!--                 </t>-->
+<!--                 <t t-else="">-->
+<!--                 </t>-->
+<!--        </xpath>-->
+<!--        </template>-->
+
     </data>
 </odoo>

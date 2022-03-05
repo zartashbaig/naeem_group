@@ -1,6 +1,37 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
 
+    <!--    inquiry Search view model-->
+    <record id="purchase_inquiry_search_view" model="ir.ui.view">
+        <field name="name">Purchase Inquiry Search View</field>
+        <field name="model">cyb.purchase</field>
+        <field name="arch" type="xml">
+            <search string="Search Purchase Inquiries">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="ref_id"/>
+                <field name="date_inquiry"/>
+                <field name="state"/>
+                <field name="taxes_check"/>
+                <field name="inquiry_type"/>
+                <filter string="Serial No" name="name"/>
+                <filter string="Customer" name="partner_id"/>
+                <field string="Document No." name="ref_id"/>
+                <filter string="Document Date" name="date_inquiry"/>
+                <filter string="State" name="state"/>
+                <filter string="With / Without Tax" name="taxes_check"/>
+                <filter string="Inquiry Type" name="inquiry_type"/>
+                <group expand="1" string="Group By">
+                    <filter string="Customer" name="partner_id" context="{'group_by':'partner_id'}"/>
+                    <filter string="Document No" name="ref_id" context="{'group_by':'ref_id'}"/>
+                    <filter string="Document Date" name="date_inquiry" context="{'group_by':'date_inquiry'}"/>
+                    <filter string="With / Without Tax" name="taxes_check" context="{'group_by':'taxes_check'}"/>
+                    <filter string="Inquiry Type" name="inquiry_type" context="{'group_by':'inquiry_type'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
     <!--    inquiry tree view model-->
     <record id="purchase_inquiry_tree" model="ir.ui.view">
         <field name="name">purchase.inquiry.tree</field>
@@ -21,6 +52,7 @@
         </field>
     </record>
 
+    <!--    inquiry Form view model-->
     <record id="cyb_purchase_inquiry_form" model="ir.ui.view">
         <field name="name">cyb.purchase.form</field>
         <field name="model">cyb.purchase</field>
@@ -53,9 +85,10 @@
                                    context="{'res_partner_search_mode': 'customer', 'show_address': 1, 'show_vat': True}"
                                    options='{"always_reload": True}'/>
                             <field name="ref_id"/>
-                            <field name="supplier_name"/>
+                            <!--                            <field name="supplier_name"/>-->
                             <field name="currency_id"/>
                             <field name="notes"/>
+                            <field name="taxes_check"/>
                             <!--                            <field name="cancel"/>-->
                             <!--                            <field name="cyb_quotation_id"/>-->
                         </group>
@@ -73,12 +106,20 @@
 
                     <notebook>
                         <page string="Inquiry Lines">
-                            <field name="order_line">
+                            <field name="order_line" widget="section_and_note_one2many">
                                 <tree editable="bottom">
+                                    <control>
+                                        <create name="add_line_control" string="Add a record"/>
+                                        <create name="add_section_control" string="Add a section"
+                                                context="{'default_display_type': 'line_section'}"/>
+                                        <create name="add_note_control" string="Add a note"
+                                                context="{'default_display_type': 'line_note'}"/>
+                                    </control>
+                                    <field name="product_id"/>
+                                    <field name="display_type" force_save="1" invisible="1"/>
                                     <field name="brand_id"/>
                                     <field name="wh_id"/>
                                     <field name="pro_available"/>
-                                    <field name="product_id"/>
                                     <field name="hs_code"/>
                                     <field name="name" widget="section_and_note_text"/>
                                     <field name="product_qty"/>
@@ -86,9 +127,10 @@
                                     <field name="qty_received" invisible="1"/>
                                     <field name="qty_invoiced" invisible="1"/>
                                     <field name="price_unit"/>
-                                    <field name="taxes_id" widget="many2many_tags" options="{'no_create': True}"
-                                           optional="show"/>
-                                    <field name="tax_amount"/>
+                                    <field name="taxes_id" widget="many2many_tags"
+                                           attrs="{'column_invisible': [('parent.taxes_check', '=', 'Without_Tax')]}"/>
+                                    <field name="tax_amount"
+                                           attrs="{'column_invisible': [('parent.taxes_check', '=', 'Without_Tax')]}"/>
                                     <field name="discount" string="Disc.%"
                                            optional="show" widget="product_discount"/>
                                     <field name="prod_total_discount"
@@ -96,8 +138,6 @@
                                     <field name="price_subtotal"/>
                                     <field name="price_total"/>
                                     <field name="remarks"/>
-
-                                    <!--                                    <field name="product_inquiry_id" invisible="1"/>-->
                                 </tree>
                             </field>
                             <group>
@@ -113,7 +153,9 @@
                                     <field name="amount_untaxed" widget="monetary"
                                            options="{'currency_field': 'currency_id'}"/>
                                     <field name="amount_tax" widget="monetary"
-                                           options="{'currency_field': 'currency_id'}"/>
+                                           options="{'currency_field': 'currency_id'}"
+                                           attrs="{'invisible': [('taxes_check', '=', 'Without_Tax')]}"/>
+
                                     <div class="oe_subtotal_footer_separator oe_inline o_td_label">
                                         <label for="amount_total"/>
                                     </div>

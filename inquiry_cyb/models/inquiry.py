@@ -20,21 +20,19 @@ class CybInquiry(models.Model):
     name = fields.Char(string='Inquiry Reference', store=True, required=True, readonly=True,
                        default='SINQ')
 
-    # name = fields.Char(string='Inquiry Reference', copy=False, default=lambda self: self.env['ir.sequence'].next_by_code('cyb.inquiry'))
-
     partner_id = fields.Many2one(
         'res.partner', string='Customer Name', readonly=True,
         states={'draft': [('readonly', False)]},
         required=True, change_default=True, index=True)
     supplier_name = fields.Many2one('res.partner', string="Supplier Name")
-    ref_id = fields.Char(string="Reference")
-    pi_num = fields.Char(string="Purchase Inquiry No.")
+    ref_id = fields.Char(string="Document No.")
+    # pi_num = fields.Char(string="Inquiry No.")
     cyb_quotation_id = fields.Many2one('sale.order.template', string='Quotation')
     cyb_payment_id = fields.Many2one('account.payment.term', string='Payment term')
     date_Expiration = fields.Date(string="Expiration")
     remarks = fields.Text(string="Remarks")
     # manager_id = fields.Many2one('res.user', string='Purchase Manager')
-    date_inquiry = fields.Datetime(string="Inquiry Date")
+    date_inquiry = fields.Datetime(string="Document Date")
     date_order = fields.Datetime(string='Order Date', readonly=True, index=True,
                                  states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}, copy=False,
                                  default=fields.Datetime.now,
@@ -43,7 +41,7 @@ class CybInquiry(models.Model):
     inquiry_type = fields.Selection([
         ('STOCKIEST', 'STOCKIEST'),
         ('INDENTING', 'INDENTING')
-    ], string="S.O Type", default='STOCKIEST')
+    ], string="Sale Inquiry Type", default='STOCKIEST')
     notes = fields.Text(string="Remarks")
     user_id = fields.Many2one(
         'res.users', string='Sales Manager', index=True, tracking=2, default=lambda self: self.env.user)
@@ -53,11 +51,15 @@ class CybInquiry(models.Model):
     # new_quotation_line_id = fields.Many2one('cyb.quotation')
     pricelist_id = fields.Many2one(
         'product.pricelist', string='Pricelist', check_company=True,  # Unrequired company
-        readonly=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]},
         domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]", tracking=1,
         help="If you change the pricelist, only newly added lines will be affected.")
     currency_id = fields.Many2one(related='pricelist_id.currency_id', depends=["pricelist_id"], store=True, readonly=False)
     quotation_many_ids = fields.Many2many('cyb.quotation', string="Inquiry ID", default="", store=True)
+    taxes_check = fields.Selection([
+        ('With_Tax', 'With Tax'),
+        ('Without_Tax', 'Without Tax')
+    ], string="With Tax / Without Tax")
+
 
     state = fields.Selection(
         [('draft', 'Draft'),
@@ -123,6 +125,7 @@ class CybInquiry(models.Model):
             for record in order.order_line:
                 if record.product_id:
                     update.append((0, 0, {
+                        'display_type': False,
                         'brand_id': record.brand_id.id,
                         'product_id': record.product_id.id,
                         'product_uom': record.product_uom.id,
@@ -138,8 +141,48 @@ class CybInquiry(models.Model):
                         'discount': record.discount,
                         'prod_total_discount': record.prod_total_discount,
                         'pro_available': record.pro_available,
-                        # 'discount': record.discount,
                     }))
+                else:
+                    if record.display_type == 'line_section':
+                        update.append([0, 0, {
+                            'display_type': 'line_section',
+                            'brand_id': record.brand_id.id,
+                            'product_id': record.product_id.id,
+                            'product_uom': record.product_uom.id,
+                            'order_id': record.order_id.id,
+                            'name': record.name,
+                            'product_uom_qty': record.product_uom_qty,
+                            'price_unit': record.price_unit,
+                            'price_subtotal': record.price_subtotal,
+                            'price_total': record.price_total,
+                            'qty_delivered': record.qty_delivered,
+                            'qty_invoiced': record.qty_invoiced,
+                            'remarks': record.remarks,
+                            'tax_id': record.tax_id.ids,
+                            'discount': record.discount,
+                            'prod_total_discount': record.prod_total_discount,
+                            'pro_available': record.pro_available,
+                        }])
+                    elif record.display_type == 'line_note':
+                        update.append([0, 0, {
+                            'display_type': 'line_note',
+                            'brand_id': record.brand_id.id,
+                            'product_id': record.product_id.id,
+                            'product_uom': record.product_uom.id,
+                            'order_id': record.order_id.id,
+                            'name': record.name,
+                            'product_uom_qty': record.product_uom_qty,
+                            'price_unit': record.price_unit,
+                            'price_subtotal': record.price_subtotal,
+                            'price_total': record.price_total,
+                            'qty_delivered': record.qty_delivered,
+                            'qty_invoiced': record.qty_invoiced,
+                            'remarks': record.remarks,
+                            'tax_id': record.tax_id.ids,
+                            'discount': record.discount,
+                            'prod_total_discount': record.prod_total_discount,
+                            'pro_available': record.pro_available,
+                        }])
         # Force the values of the move line in the context to avoid issues
         ctx = dict(self.env.context)
         ctx.pop('active_id', None)
@@ -153,7 +196,7 @@ class CybSpecialist(models.Model):
     _name = 'cyb.product.inquiry'
     _description = 'product inquiry information'
 
-    name = fields.Text(string="Description", compute='_compute_product_description')
+    name = fields.Text(string="Description")
     product_id = fields.Many2one('product.product', string='Product')
     product_uom_qty = fields.Float(string='Quantity', digits='Product Unit of Measure', required=True, default=1.0)
     product_uom = fields.Many2one('uom.uom', string='Product Unit of Measure')
@@ -163,25 +206,72 @@ class CybSpecialist(models.Model):
     qty_invoiced = fields.Float(string='Invoiced')
     tax_id = fields.Many2many('account.tax', string='Taxes %', domain=['|', ('active', '=', False), ('active', '=', True)])
     brand_id = fields.Many2one(string="Brand", related='product_id.brand_id')
-
     remarks = fields.Text(string="Remarks")
     hs_code = fields.Char(string="HS code")
     wh_id = fields.Many2one('stock.warehouse', string="Ware House")
-    tax_amount = fields.Float(string="Tax Amount",compute="_tax_amount_compute", digits=(16, 4))
+    tax_amount = fields.Float(compute="_tax_amount_compute", string="Tax Amount",  digits=(16, 4))
     currency_id = fields.Many2one(related='order_id.currency_id', depends=['order_id.currency_id'], store=True, string='Currency', readonly=True)
     price_subtotal = fields.Monetary(compute='_compute_amount', string='Subtotal', readonly=True, store=True, digits=(16, 4))
     price_tax = fields.Float(compute='_compute_amount', string='Total Tax', readonly=True, store=True, digits=(16, 4))
     pro_available = fields.Float(related='product_id.qty_available', string="Product Available")
     price_total = fields.Monetary(compute='_compute_amount', string='Total', readonly=True, store=True, digits=(16, 4))
     discount = fields.Float(string='Discount %', digits='Discount', default=0.0)
-    prod_total_discount = fields.Float('Disc. Amount', readonly=True, store=True, digits=(16, 4))
+    prod_total_discount = fields.Float('Disc. Amount', store=True, digits=(16, 4))
+    display_type = fields.Selection([
+        ('line_section', "Section"),
+        ('line_note', "Note")], default=False, help="Technical field for UX purpose.")
+    partner_id = fields.Many2one(
+        'res.partner', string='Customer Name', index=True)
+    # journal_id = fields.Many2one(related='order_id.journal_id', store=True, index=True, copy=False)
+
+    def _get_computed_name(self):
+        self.ensure_one()
+
+        if not self.product_id:
+            return ''
+
+        if self.partner_id.lang:
+            product = self.product_id.with_context(lang=self.partner_id.lang)
+        else:
+            product = self.product_id
+
+        values = []
+        if product.partner_ref:
+            values.append(product.partner_ref)
+        # if self.journal_id.type == 'sale':
+        if product.description_sale:
+            values.append(product.description_sale)
+        # elif self.journal_id.type == 'purchase':
+        #     if product.description_purchase:
+        #         values.append(product.description_purchase)
+        return '\n'.join(values)
+
+    @api.onchange('product_id')
+    def _onchange_product_id(self):
+        for line in self:
+            if not line.product_id or line.display_type in ('line_section', 'line_note'):
+                continue
+
+            line.name = line._get_computed_name()
+
+    # @api.depends('ref_id', 'order_id')
+    # def name_get(self):
+    #     result = []
+    #     for line in self:
+    #         name = line.order_id.name or ''
+    #         if line.ref:
+    #             name += " (%s)" % line.ref
+    #         name += (line.name or line.product_id.display_name) and (' ' + (line.name or line.product_id.display_name)) or ''
+    #         result.append((line.id, name))
+    #     return result
+
 
     def product_qty_location_check(self):
         for rec in self:
             if rec.product_id:
                 rec.pro_available = rec.product_id.qty_available
 
-    @api.onchange('price_unit', 'product_uom_qty', 'tax_id')
+    @api.depends('price_unit', 'product_uom_qty', 'tax_id')
     def _tax_amount_compute(self):
         for rec in self:
             tax_amount = 0
@@ -189,6 +279,8 @@ class CybSpecialist(models.Model):
                 for tax in rec.tax_id:
                     tax_amount += rec.price_unit * rec.product_uom_qty * tax.amount / 100
                 rec.tax_amount = tax_amount
+            else:
+                rec.tax_amount = 0.0
 
     # @api.depends('product_uom_qty', 'price_unit', 'tax_id')
     # def _compute_amount(self):
@@ -242,10 +334,13 @@ class CybSpecialist(models.Model):
             if self.product_id.list_price:
                 self.price_unit = self.product_id.list_price
 
+    @api.depends('name')
     def _compute_product_description(self):
         for rec in self:
             if rec.product_id:
                 rec.name = str([rec.product_id.default_code]) + ' ' + str(rec.product_id.name) + str(rec.product_id.description_sale)
+
+
 
 
 

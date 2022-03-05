@@ -1,8 +1,24 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
 
-    <!-- INVOICE ORDER INHERITED VIEW    -->
 
+    <!-- Product Category INHERITED VIEW    -->
+    <record model="ir.ui.view" id="product_category_form_view_inherit">
+        <field name="name">product.category.form.inherit</field>
+        <field name="model">product.category</field>
+        <field name="inherit_id" ref="product.product_category_form_view"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//group[@name='first']" position="after">
+                  <group name="second" col="2">
+                            <field name="brand_id" class="oe_inline"/>
+                        </group>
+            </xpath>
+        </field>
+    </record>
+
+
+    <!-- INVOICE INHERITED VIEW    -->
     <record model="ir.ui.view" id="account_move_template_form_view_inherit">
         <field name="name">account.move.form.inherit</field>
         <field name="model">account.move</field>
@@ -35,7 +51,7 @@
                             <field name="total_qty"/>
                         </div>
                     </div>
-                    <div class="col-2" id="main" >
+                    <div class="col-2" id="main">
                         <div class="o_td_label">
                             <label string="Total Excl ST Amount" for="amount_untaxed"/>
                             <field name="amount_untaxed" widget="monetary"
@@ -81,9 +97,9 @@
                     </div>
                 </div>
             </xpath>
-<!--            <xpath expr="//group[hasclass('oe_subtotal_footer')]" position="attributes">-->
-<!--                <attribute name="invisible">1</attribute>-->
-<!--            </xpath>-->
+            <!--            <xpath expr="//group[hasclass('oe_subtotal_footer')]" position="attributes">-->
+            <!--                <attribute name="invisible">1</attribute>-->
+            <!--            </xpath>-->
         </field>
     </record>
 

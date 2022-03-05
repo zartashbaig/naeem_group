@@ -8,7 +8,7 @@
     """,
     'category': 'Uncategorized',
     'website': 'https://cybat.com',
-    'depends' : ['sale_management','sale_crm','sales_team', 'utm', 'product_brand_inventory', 'account', 'purchase'],
+    'depends' : ['sale_management','sale','sale_crm','sales_team', 'utm', 'product_brand_inventory', 'account', 'purchase'],
 
     'data': [
         'security/ir.model.access.csv',
