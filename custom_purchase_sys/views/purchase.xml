@@ -37,11 +37,12 @@
                 <xpath expr="//field[@name='remarks']" position="after">
                     <field name="taxes_check"/>
                 </xpath>
-                <xpath expr="//field[@name='order_line']/tree/field[@name='product_id']" position="after">
+                <xpath expr="//field[@name='order_line']/tree/field[@name='name']" position="after">
                     <field name="brand_id"/>
+                    <field name="hs_code"/>
                     <field name="wh_id"/>
                     <field name="pro_available"/>
-                    <field name="hs_code"/>
+
 
                 </xpath>
 

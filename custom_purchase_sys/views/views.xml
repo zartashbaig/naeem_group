@@ -117,11 +117,11 @@
                                     </control>
                                     <field name="product_id"/>
                                     <field name="display_type" force_save="1" invisible="1"/>
+                                    <field name="name" widget="section_and_note_text"/>
                                     <field name="brand_id"/>
+                                    <field name="hs_code"/>
                                     <field name="wh_id"/>
                                     <field name="pro_available"/>
-                                    <field name="hs_code"/>
-                                    <field name="name" widget="section_and_note_text"/>
                                     <field name="product_qty"/>
                                     <field name="product_uom"/>
                                     <field name="qty_received" invisible="1"/>
