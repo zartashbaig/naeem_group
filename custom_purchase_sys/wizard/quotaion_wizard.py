@@ -51,7 +51,9 @@ class InquiryInvoice(models.TransientModel):
         data = self.env['cyb.quotation.purchase'].browse(self._context.get('active_ids', []))
         update = []
         quotation_ids = []
+        vendors = []
         for rec in data:
+            vendors.append(rec.partner_id.id)
             quotation_ids.append(rec.id)
             for record in rec.order_line:
                 if record.product_id:
@@ -115,23 +117,27 @@ class InquiryInvoice(models.TransientModel):
                             'prod_total_discount': record.prod_total_discount,
                             'pro_available': record.pro_available,
                         }])
-        res.update({'new_order_line_ids': update,
-                    'quotation_sale_many_ids': quotation_ids,
-                    'quotation_reference': data[0].quotation_reference,
-                    'inquiry_type': data[0].inquiry_type,
-                    'remarks': data[0].remarks,
-                    'date_quotation': data[0].date_quotation,
-                    'currency_id': data[0].currency_id.id,
-                    'pricelist_id': data[0].pricelist_id.id,
-                    'taxes_check': data[0].taxes_check,
-                    'crm_lead_id': data[0].crm_lead_id.id,
-                    'quotation_payment_id': data[0].quotation_payment_id.id,
-                    'ks_global_discount_type': data[0].ks_global_discount_type,
-                    'ks_global_discount_rate': data[0].ks_global_discount_rate,
-                    'ks_amount_discount': data[0].ks_amount_discount,
-                    'so_id': self._context.get('active_id'),
-                    'partner_id': data.partner_id[0].id})
-        return res
+        check = all(x==vendors[0] for x in vendors)
+        if check:
+            res.update({'new_order_line_ids': update,
+                        'quotation_sale_many_ids': quotation_ids,
+                        'quotation_reference': data[0].quotation_reference,
+                        'inquiry_type': data[0].inquiry_type,
+                        'remarks': data[0].remarks,
+                        'date_quotation': data[0].date_quotation,
+                        'currency_id': data[0].currency_id.id,
+                        'pricelist_id': data[0].pricelist_id.id,
+                        'taxes_check': data[0].taxes_check,
+                        'crm_lead_id': data[0].crm_lead_id.id,
+                        'quotation_payment_id': data[0].quotation_payment_id.id,
+                        'ks_global_discount_type': data[0].ks_global_discount_type,
+                        'ks_global_discount_rate': data[0].ks_global_discount_rate,
+                        'ks_amount_discount': data[0].ks_amount_discount,
+                        'so_id': self._context.get('active_id'),
+                        'partner_id': data.partner_id[0].id})
+            return res
+        else:
+            raise ValidationError('Please select quotations of same vendor')
 
     def action_create_quotation_order(self):
         self.ensure_one()

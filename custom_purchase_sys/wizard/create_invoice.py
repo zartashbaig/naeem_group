@@ -55,7 +55,9 @@ class createsaleorder(models.TransientModel):
         #     raise ValidationError('You can not create quotation of multiple inquiries if the customer is not same.')
         update = []
         inquiry_ids = []
+        vendors = []
         for rec in data:
+            vendors.append(rec.partner_id.id)
             inquiry_ids.append(rec.id)
             for record in rec.order_line:
                 if record.product_id:
@@ -119,24 +121,27 @@ class createsaleorder(models.TransientModel):
                             'prod_total_discount': record.prod_total_discount,
                             'pro_available': record.pro_available,
                         }])
-        res.update({'new_order_line_ids': update,
-                    'partner_id': data.partner_id[0].id,
-                    'ref_id': data[0].ref_id,
-                    'inquiry_type': data[0].inquiry_type,
-                    'taxes_check': data[0].taxes_check,
-                    'date_inquiry': data[0].date_inquiry,
-                    'crm_lead_id': data[0].crm_lead_id.id,
-                    'pricelist_id': data[0].pricelist_id.id,
-                    'cyb_payment_id': data[0].cyb_payment_id.id,
-                    'notes': data[0].notes,
-                    'ks_global_discount_type': data[0].ks_global_discount_type,
-                    'ks_global_discount_rate': data[0].ks_global_discount_rate,
-                    'currency_id': data[0].currency_id.id,
-                    'ks_amount_discount': data[0].ks_amount_discount,
-                    'purchase_inquirymany_id': inquiry_ids,
-                    'so_id': self._context.get('active_id')})
-        return res
-
+        check = all(x == vendors[0] for x in vendors)
+        if check:
+            res.update({'new_order_line_ids': update,
+                        'partner_id': data.partner_id[0].id,
+                        'ref_id': data[0].ref_id,
+                        'inquiry_type': data[0].inquiry_type,
+                        'taxes_check': data[0].taxes_check,
+                        'date_inquiry': data[0].date_inquiry,
+                        'crm_lead_id': data[0].crm_lead_id.id,
+                        'pricelist_id': data[0].pricelist_id.id,
+                        'cyb_payment_id': data[0].cyb_payment_id.id,
+                        'notes': data[0].notes,
+                        'ks_global_discount_type': data[0].ks_global_discount_type,
+                        'ks_global_discount_rate': data[0].ks_global_discount_rate,
+                        'currency_id': data[0].currency_id.id,
+                        'ks_amount_discount': data[0].ks_amount_discount,
+                        'purchase_inquirymany_id': inquiry_ids,
+                        'so_id': self._context.get('active_id')})
+            return res
+        else:
+            raise ValidationError('Please select inquiries of same vendor')
     def action_create_sale_order(self):
         self.ensure_one()
         value = []
