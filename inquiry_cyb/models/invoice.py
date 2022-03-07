@@ -18,7 +18,7 @@ class ProductCategoryBrandExt(models.Model):
     def _compute_complete_name(self):
         for category in self:
             if category.parent_id and category.brand_id:
-                category.complete_name = '%s / %s / %s' % (category.parent_id.complete_name, category.brand_id.name, category.name)
+                category.complete_name = '%s / %s / %s' % (category.brand_id.name,category.parent_id.complete_name,  category.name)
             elif category.parent_id:
                 category.complete_name = '%s / %s' % (category.parent_id.complete_name, category.name)
             else:
