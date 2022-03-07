@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="inherit_invoice_form_for_cogs" model="ir.ui.view">
+            <field name="name">inherit.invoice.form.cogs</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_move_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='invoice_date']" position="after">
+                    <field name="cost_of_goods"/>
+                    <field name="net_pro_loss"/>
+                </xpath>
+            </field>
+        </record>
+
+    </data>
+</odoo>
