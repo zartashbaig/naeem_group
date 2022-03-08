@@ -215,14 +215,13 @@ class CybSpecialist(models.Model):
     price_tax = fields.Float(compute='_compute_amount', string='Total Tax', readonly=True, store=True, digits=(16, 4))
     pro_available = fields.Float(related='product_id.qty_available', string="Product Available")
     price_total = fields.Monetary(compute='_compute_amount', string='Total', readonly=True, store=True, digits=(16, 4))
-    discount = fields.Float(string='Discount %', digits='Discount', default=0.0)
+    discount = fields.Float(string='Discount %', digits='Discount', default=0.0, store=True,)
     prod_total_discount = fields.Float('Disc. Amount', store=True, digits=(16, 4))
     display_type = fields.Selection([
         ('line_section', "Section"),
         ('line_note', "Note")], default=False, help="Technical field for UX purpose.")
     partner_id = fields.Many2one(
         'res.partner', string='Customer Name', index=True)
-    # journal_id = fields.Many2one(related='order_id.journal_id', store=True, index=True, copy=False)
 
     def _get_computed_name(self):
         self.ensure_one()
@@ -253,18 +252,6 @@ class CybSpecialist(models.Model):
                 continue
 
             line.name = line._get_computed_name()
-
-    # @api.depends('ref_id', 'order_id')
-    # def name_get(self):
-    #     result = []
-    #     for line in self:
-    #         name = line.order_id.name or ''
-    #         if line.ref:
-    #             name += " (%s)" % line.ref
-    #         name += (line.name or line.product_id.display_name) and (' ' + (line.name or line.product_id.display_name)) or ''
-    #         result.append((line.id, name))
-    #     return result
-
 
     def product_qty_location_check(self):
         for rec in self:
@@ -302,7 +289,7 @@ class CybSpecialist(models.Model):
     #                 'account.group_account_manager'):
     #             line.tax_id.invalidate_cache(['invoice_repartition_line_ids'], [line.tax_id.id])
 
-    @api.depends('product_uom_qty', 'discount', 'price_unit', 'tax_id')
+    @api.depends('product_uom_qty', 'discount', 'price_unit', 'tax_id', 'prod_total_discount')
     def _compute_amount(self):
         """
         Compute the amounts of the SO line.
@@ -313,12 +300,23 @@ class CybSpecialist(models.Model):
                 taxes = line.tax_id.compute_all(price, line.order_id.currency_id, line.product_uom_qty,
                                                 product=line.product_id)
                 total_prod_price = line.product_uom_qty*line.price_unit
-                prod_total_discount = total_prod_price*(line.discount / 100)
+                prod_total_discount = 0
+                discount_perc = 0
+                if line.discount:
+                    prod_total_discount = total_prod_price * (line.discount / 100)
+                    line.update({
+                        'prod_total_discount': prod_total_discount,
+                    })
+                elif line.prod_total_discount:
+
+                    discount_perc = (line.prod_total_discount / total_prod_price) * 100
+                    line.update({
+                        'discount': discount_perc,
+                    })
                 line.update({
                     'price_tax': sum(t.get('amount', 0.0) for t in taxes.get('taxes', [])),
                     'price_total': taxes['total_included'],
                     'price_subtotal': taxes['total_excluded'],
-                    'prod_total_discount': prod_total_discount,
                 })
             if self.env.context.get('import_file', False) and not self.env.user.user_has_groups(
                     'account.group_account_manager'):
@@ -334,11 +332,6 @@ class CybSpecialist(models.Model):
             if self.product_id.list_price:
                 self.price_unit = self.product_id.list_price
 
-    @api.depends('name')
-    def _compute_product_description(self):
-        for rec in self:
-            if rec.product_id:
-                rec.name = str([rec.product_id.default_code]) + ' ' + str(rec.product_id.name) + str(rec.product_id.description_sale)
 
 
 

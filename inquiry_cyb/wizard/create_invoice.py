@@ -282,10 +282,10 @@ class Getsaleorderdata(models.TransientModel):
         for record in self:
             record.price_subtotal = record.product_uom_qty * record.price_unit
 
-    def _compute_product_description(self):
-        for rec in self:
-            if rec.product_id:
-                rec.name = str([rec.product_id.default_code]) + ' ' + str(rec.product_id.name) + str(
-                    rec.product_id.description_sale)
+    # def _compute_product_description(self):
+    #     for rec in self:
+    #         if rec.product_id:
+    #             rec.name = str([rec.product_id.default_code]) + ' ' + str(rec.product_id.name) + str(
+    #                 rec.product_id.description_sale)
 
 

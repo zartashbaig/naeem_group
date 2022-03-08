@@ -131,8 +131,8 @@
                                            attrs="{'column_invisible': [('parent.taxes_check', '=', 'Without_Tax')]}"/>
                                     <field name="discount" string="Disc.%" groups="product.group_discount_per_so_line"
                                            optional="show" widget="product_discount"/>
-                                    <field name="prod_total_discount" groups="product.group_discount_per_so_line"
-                                           optional="show"/>
+                                    <field name="prod_total_discount"
+                                           optional="show" readonly="0"/>
                                     <field name="price_total"/>
                                     <field name="price_subtotal"/>
                                     <field name="remarks"/>
