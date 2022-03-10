@@ -36,5 +36,16 @@
         </record>
 
 
+<!--        -->
+
+                <record id="stock.seq_picking_internal" model="ir.sequence">
+            <field name="name">Picking INT</field>
+            <field name="code">stock.picking</field>
+            <field name="prefix">INT 01 %(y)s 01 </field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+
     </data>
 </odoo>
