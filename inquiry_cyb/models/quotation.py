@@ -97,6 +97,85 @@ class SaleOrderExt(models.Model):
                 }
             )
 
+    @api.onchange('quotation_sale_many_ids')
+    def quotation_lines_append(self):
+        self.ensure_one()
+        value = []
+        for data in self.quotation_sale_many_ids.order_line:
+            for merger in self.order_line:
+                if data.product_id.id == merger.product_id.id:
+                    merger.product_uom_qty += data.product_uom_qty
+                else:
+                    if data.product_id:
+                        value.append([0, 0, {
+                            'display_type': False,
+                            'brand_id': data.brand_id.id,
+                            'product_id': data.product_id.id,
+                            'product_uom': data.product_uom.id,
+                            'order_id': data.order_id.id,
+                            'name': data.name,
+                            'product_uom_qty': data.product_uom_qty,
+                            'bonus_quantity': data.bonus_quantity,
+                            'price_unit': data.price_unit,
+                            'price_subtotal': data.price_subtotal,
+                            'qty_delivered': data.qty_delivered,
+                            'qty_invoiced': data.qty_invoiced,
+                            'remarks': data.remarks,
+                            'tax_id': data.tax_id.ids,
+                            'discount': data.discount,
+                            'prod_total_discount': data.prod_total_discount,
+                            'pro_available': data.pro_available,
+                        }])
+                    if not data.product_id:
+                        if data.display_type == 'line_section':
+                            value.append((0, 0, {
+                                'display_type': 'line_section',
+                                'brand_id': data.brand_id.id,
+                                'product_id': data.product_id.id,
+                                'product_uom': data.product_uom.id,
+                                'order_id': data.order_id.id,
+                                'name': data.name,
+                                'product_uom_qty': data.product_uom_qty,
+                                'bonus_quantity': data.bonus_quantity,
+                                'price_unit': data.price_unit,
+                                'price_subtotal': data.price_subtotal,
+                                'qty_delivered': data.qty_delivered,
+                                'qty_invoiced': data.qty_invoiced,
+                                'remarks': data.remarks,
+                                'tax_id': data.tax_id.ids,
+                                'discount': data.discount,
+                                'prod_total_discount': data.prod_total_discount,
+                                'pro_available': data.pro_available,
+                            }))
+                        elif data.display_type == 'line_note':
+                            value.append((0, 0, {
+                                'display_type': 'line_note',
+                                'brand_id': data.brand_id.id,
+                                'product_id': data.product_id.id,
+                                'product_uom': data.product_uom.id,
+                                'order_id': data.order_id.id,
+                                'name': data.name,
+                                'product_uom_qty': data.product_uom_qty,
+                                'bonus_quantity': data.bonus_quantity,
+                                'price_unit': data.price_unit,
+                                'price_subtotal': data.price_subtotal,
+                                'qty_delivered': data.qty_delivered,
+                                'qty_invoiced': data.qty_invoiced,
+                                'remarks': data.remarks,
+                                'tax_id': data.tax_id.ids,
+                                'discount': data.discount,
+                                'prod_total_discount': data.prod_total_discount,
+                                'pro_available': data.pro_available,
+                            }))
+            quotation_order = {
+                'order_line': value,
+            }
+            qo_main = self.write(quotation_order)
+        # return True
+        # return {
+        #     "res_id": qo_main
+        # }
+
 
 class SaleOrderLineExt(models.Model):
     _inherit = "sale.order.line"
@@ -366,6 +445,85 @@ class CybQuotation(models.Model):
         ctx['active_model'] = 'getsale.quotation'
         action['context'] = ctx
         return action
+
+    @api.onchange('inquirymany_id')
+    def quotation_lines_append(self):
+        self.ensure_one()
+        value = []
+        for data in self.inquirymany_id.order_line:
+            for merger in self.order_line:
+                if data.product_id.id == merger.product_id.id:
+                    merger.product_uom_qty += data.product_uom_qty
+                else:
+                    if data.product_id:
+                        value.append([0, 0, {
+                            'display_type': False,
+                            'brand_id': data.brand_id.id,
+                            'product_id': data.product_id.id,
+                            'product_uom': data.product_uom.id,
+                            'order_id': data.order_id.id,
+                            'name': data.name,
+                            'product_uom_qty': data.product_uom_qty,
+                            'bonus_quantity': data.bonus_quantity,
+                            'price_unit': data.price_unit,
+                            'price_subtotal': data.price_subtotal,
+                            'qty_delivered': data.qty_delivered,
+                            'qty_invoiced': data.qty_invoiced,
+                            'remarks': data.remarks,
+                            'tax_id': data.tax_id.ids,
+                            'discount': data.discount,
+                            'prod_total_discount': data.prod_total_discount,
+                            'pro_available': data.pro_available,
+                        }])
+                    if not data.product_id:
+                        if data.display_type == 'line_section':
+                            value.append((0, 0, {
+                                'display_type': 'line_section',
+                                'brand_id': data.brand_id.id,
+                                'product_id': data.product_id.id,
+                                'product_uom': data.product_uom.id,
+                                'order_id': data.order_id.id,
+                                'name': data.name,
+                                'product_uom_qty': data.product_uom_qty,
+                                'bonus_quantity': data.bonus_quantity,
+                                'price_unit': data.price_unit,
+                                'price_subtotal': data.price_subtotal,
+                                'qty_delivered': data.qty_delivered,
+                                'qty_invoiced': data.qty_invoiced,
+                                'remarks': data.remarks,
+                                'tax_id': data.tax_id.ids,
+                                'discount': data.discount,
+                                'prod_total_discount': data.prod_total_discount,
+                                'pro_available': data.pro_available,
+                            }))
+                        elif data.display_type == 'line_note':
+                            value.append((0, 0, {
+                                'display_type': 'line_note',
+                                'brand_id': data.brand_id.id,
+                                'product_id': data.product_id.id,
+                                'product_uom': data.product_uom.id,
+                                'order_id': data.order_id.id,
+                                'name': data.name,
+                                'product_uom_qty': data.product_uom_qty,
+                                'bonus_quantity': data.bonus_quantity,
+                                'price_unit': data.price_unit,
+                                'price_subtotal': data.price_subtotal,
+                                'qty_delivered': data.qty_delivered,
+                                'qty_invoiced': data.qty_invoiced,
+                                'remarks': data.remarks,
+                                'tax_id': data.tax_id.ids,
+                                'discount': data.discount,
+                                'prod_total_discount': data.prod_total_discount,
+                                'pro_available': data.pro_available,
+                            }))
+            quotation_order = {
+                'order_line': value,
+            }
+            qo_main = self.write(quotation_order)
+        # return True
+        # return {
+        #     "res_id": qo_main
+        # }
 
 
 class QuotationFriends(models.Model):

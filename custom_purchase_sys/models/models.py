@@ -25,6 +25,9 @@ class CybPurchase(models.Model):
         states={'draft': [('readonly', False)]},
         required=True, change_default=True, index=True)
     supplier_name = fields.Many2one('res.partner', string="Supplier Name")
+
+
+
     ref_id = fields.Char(string="Document no", )
     # cyb_quotation_id = fields.Many2one('sale.order.template', string='Quotation')
     cyb_payment_id = fields.Many2one('account.payment.term', string='Payment term')
@@ -201,6 +204,7 @@ class CybSpecialist(models.Model):
     qty_invoiced = fields.Float(string='Invoiced')
     taxes_id = fields.Many2many('account.tax', string='Taxes %', domain=['|', ('active', '=', False), ('active', '=', True)])
     brand_id = fields.Many2one(string="Brand", related='product_id.brand_id')
+
 
     remarks = fields.Text(string="Remarks")
     hs_code = fields.Char(string="HS code")

@@ -87,7 +87,7 @@
                             <field name="ref_id"/>
                             <!--                            <field name="supplier_name"/>-->
                             <field name="currency_id"/>
-                            <field name="notes"/>
+<!--                            <field name="notes"/>-->
                             <field name="taxes_check"/>
                             <!--                            <field name="cancel"/>-->
                             <!--                            <field name="cyb_quotation_id"/>-->
