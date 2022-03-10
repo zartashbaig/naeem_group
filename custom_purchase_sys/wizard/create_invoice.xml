@@ -41,11 +41,12 @@
                                         context="{'default_display_type': 'line_note'}"/>
                             </control>
                                                         <field name="product_id" force_save="1"/>
+                                                        <field name="name" widget="section_and_note_text" force_save="1"/>
+
                             <field name="display_type" force_save="1" invisible="1"/>
 
                             <field name="brand_id" force_save="1"/>
                             <field name="pro_available" force_save="1"/>
-                            <field name="name" widget="section_and_note_text" force_save="1"/>
                             <field name="product_qty"/>
                             <field name="product_uom" groups="uom.group_uom" class="oe_inline"/>
                             <field name="qty_received" invisible="1"/>

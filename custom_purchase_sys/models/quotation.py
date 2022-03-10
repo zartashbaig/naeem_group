@@ -223,7 +223,7 @@ class CybQuotationPurchase(models.Model):
     def quotation_lines_append(self):
         self.ensure_one()
         value = []
-        for data in self.purchase_inquirymany_id[-1].order_line:
+        for data in self.purchase_inquirymany_id.order_line:
             for merger in self.order_line:
                 if data.product_id.id == merger.product_id.id:
                     merger.product_qty += data.product_qty
